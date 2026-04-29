@@ -51,7 +51,7 @@ async function submit() {
 
       <form class="mt-8 space-y-5" @submit.prevent="submit">
         <label class="block">
-          <span class="font-mono text-xs uppercase text-cyber-muted">Username</span>
+          <span class="font-mono text-xs uppercase text-cyber-muted">账号</span>
           <input
             v-model="username"
             class="mt-2 w-full rounded-lg border border-cyber-border bg-cyber-base/70 px-4 py-3 text-cyber-text outline-none transition focus:border-cyber-cyan"
@@ -61,7 +61,7 @@ async function submit() {
         </label>
 
         <label class="block">
-          <span class="font-mono text-xs uppercase text-cyber-muted">Password</span>
+          <span class="font-mono text-xs uppercase text-cyber-muted">密码</span>
           <input
             v-model="password"
             class="mt-2 w-full rounded-lg border border-cyber-border bg-cyber-base/70 px-4 py-3 text-cyber-text outline-none transition focus:border-cyber-cyan"
@@ -79,7 +79,7 @@ async function submit() {
           :disabled="!canSubmit"
           type="submit"
         >
-          {{ loading ? 'VERIFYING...' : 'LOGIN' }}
+          {{ loading ? '验证中...' : '登录' }}
         </button>
       </form>
     </section>

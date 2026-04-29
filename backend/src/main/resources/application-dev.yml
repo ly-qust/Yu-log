@@ -16,7 +16,9 @@ spring:
     init:
       mode: always
       encoding: UTF-8
-      schema-locations: classpath:db/V1__init_schema.sql
+      schema-locations:
+        - classpath:db/V1__init_schema.sql
+        - classpath:db/V3__add_article_reading_time.sql
       data-locations: classpath:db/V2__seed_data.sql
 
 logging:

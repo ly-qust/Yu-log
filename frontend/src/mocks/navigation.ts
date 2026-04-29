@@ -1,9 +1,9 @@
 export const publicNavigation = [
-  { label: 'Home', to: '/' },
-  { label: 'Articles', to: '/articles' },
-  { label: 'Projects', to: '/projects' },
-  { label: 'Notes', to: '/notes' },
-  { label: 'Timeline', to: '/timeline' },
-  { label: 'Messages', to: '/messages' },
-  { label: 'About', to: '/about' },
+  { label: '首页', to: '/' },
+  { label: '文章', to: '/articles' },
+  { label: '项目', to: '/projects' },
+  { label: '笔记', to: '/notes' },
+  { label: '时间线', to: '/timeline' },
+  { label: '留言板', to: '/messages' },
+  { label: '关于我', to: '/about' },
 ];

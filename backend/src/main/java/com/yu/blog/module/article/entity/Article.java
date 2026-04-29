@@ -30,6 +30,7 @@ public class Article {
     private Long viewCount;
     private Long likeCount;
     private Long commentCount;
+    private Integer readingTime;
     private LocalDateTime publishedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
