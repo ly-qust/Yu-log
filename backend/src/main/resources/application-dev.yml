@@ -1,0 +1,29 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${YU_LOG_DB_URL:jdbc:mysql://localhost:3308/yu_log?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${YU_LOG_DB_USERNAME:yu_log}
+    password: ${YU_LOG_DB_PASSWORD:yu_log_dev_pwd}
+  data:
+    redis:
+      host: ${YU_LOG_REDIS_HOST:localhost}
+      port: ${YU_LOG_REDIS_PORT:6380}
+      database: ${YU_LOG_REDIS_DATABASE:0}
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
+      schema-locations: classpath:db/V1__init_schema.sql
+      data-locations: classpath:db/V2__seed_data.sql
+
+logging:
+  level:
+    com.yu.blog: debug
+
+jwt:
+  secret: ${YU_LOG_JWT_SECRET:yu-log-dev-secret-key-for-jwt-hs256-at-least-32-bytes}
+  access-token-expire-seconds: ${YU_LOG_JWT_ACCESS_EXPIRE:7200}
+  refresh-token-expire-seconds: ${YU_LOG_JWT_REFRESH_EXPIRE:604800}

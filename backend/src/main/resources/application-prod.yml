@@ -1,0 +1,26 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${YU_LOG_DB_URL}
+    username: ${YU_LOG_DB_USERNAME}
+    password: ${YU_LOG_DB_PASSWORD}
+  data:
+    redis:
+      host: ${YU_LOG_REDIS_HOST}
+      port: ${YU_LOG_REDIS_PORT:6379}
+      database: ${YU_LOG_REDIS_DATABASE:0}
+  sql:
+    init:
+      mode: never
+
+logging:
+  level:
+    com.yu.blog: info
+
+jwt:
+  secret: ${YU_LOG_JWT_SECRET}
+  access-token-expire-seconds: ${YU_LOG_JWT_ACCESS_EXPIRE:7200}
+  refresh-token-expire-seconds: ${YU_LOG_JWT_REFRESH_EXPIRE:604800}

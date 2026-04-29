@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>留言板 - YU.LOG</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#2b322f",
+                        "outline": "#85948e",
+                        "primary-fixed-dim": "#38debb",
+                        "tertiary-fixed-dim": "#31e368",
+                        "on-tertiary": "#003912",
+                        "surface-container-lowest": "#09100d",
+                        "error-container": "#93000a",
+                        "on-primary": "#00382d",
+                        "surface-container-low": "#161d1b",
+                        "on-surface-variant": "#bacac3",
+                        "surface-container": "#1a211f",
+                        "on-secondary-fixed": "#290055",
+                        "surface": "#0e1512",
+                        "on-error": "#690005",
+                        "on-primary-fixed": "#002019",
+                        "primary-fixed": "#5ffbd6",
+                        "on-tertiary-container": "#00752e",
+                        "primary": "#ffffff",
+                        "background": "#0e1512",
+                        "on-secondary-container": "#caa4ff",
+                        "error": "#ffb4ab",
+                        "inverse-surface": "#dde4e0",
+                        "surface-variant": "#2f3633",
+                        "outline-variant": "#3c4a45",
+                        "surface-container-highest": "#2f3633",
+                        "surface-bright": "#333b38",
+                        "on-primary-fixed-variant": "#005142",
+                        "on-tertiary-fixed-variant": "#00531e",
+                        "on-error-container": "#ffdad6",
+                        "on-background": "#dde4e0",
+                        "inverse-primary": "#006b58",
+                        "surface-container-high": "#242c29",
+                        "primary-container": "#5ffbd6",
+                        "tertiary-container": "#69ff88",
+                        "on-surface": "#dde4e0",
+                        "on-primary-container": "#00725e",
+                        "on-secondary-fixed-variant": "#593090",
+                        "on-tertiary-fixed": "#002108",
+                        "secondary": "#d7baff",
+                        "surface-dim": "#0e1512",
+                        "tertiary-fixed": "#69ff88",
+                        "tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#d7baff",
+                        "surface-tint": "#38debb",
+                        "secondary-container": "#593090",
+                        "on-secondary": "#411478",
+                        "secondary-fixed": "#eddcff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "gutter": "24px",
+                        "md": "16px",
+                        "max_width": "1200px",
+                        "sm": "8px",
+                        "margin": "32px",
+                        "xl": "48px",
+                        "lg": "24px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "h2": ["Space Grotesk"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "h3": ["Space Grotesk"],
+                        "h1": ["Space Grotesk"],
+                        "label": ["Space Grotesk"],
+                        "code": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "h2": ["32px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "h3": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "h1": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label": ["12px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "code": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md text-body-md selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopNavBar (Shared Component) -->
+<nav class="fixed top-0 w-full z-50 border-b border-white/15 bg-slate-900/60 backdrop-blur-[12px] shadow-[0_20px_40px_rgba(100,255,218,0.05)]">
+<div class="flex justify-between items-center px-8 h-16 max-w-full mx-auto">
+<!-- Brand Logo -->
+<div class="text-xl font-bold text-[#64FFDA] tracking-tighter">
+                YU.LOG
+            </div>
+<!-- Navigation Links -->
+<ul class="hidden md:flex items-center gap-6">
+<!-- Using "Notes" as the closest semantic match for a Message Board -->
+<li><a class="font-['Space_Grotesk'] text-sm tracking-tight text-slate-400 hover:text-white transition-colors hover:bg-white/5 duration-300 px-2 py-1 rounded" href="#">Home</a></li>
+<li><a class="font-['Space_Grotesk'] text-sm tracking-tight text-slate-400 hover:text-white transition-colors hover:bg-white/5 duration-300 px-2 py-1 rounded" href="#">Articles</a></li>
+<li><a class="font-['Space_Grotesk'] text-sm tracking-tight text-slate-400 hover:text-white transition-colors hover:bg-white/5 duration-300 px-2 py-1 rounded" href="#">Projects</a></li>
+<li><a class="font-['Space_Grotesk'] text-sm tracking-tight text-[#64FFDA] border-b-2 border-[#64FFDA] pb-1 px-2" href="#">Notes</a></li>
+<li><a class="font-['Space_Grotesk'] text-sm tracking-tight text-slate-400 hover:text-white transition-colors hover:bg-white/5 duration-300 px-2 py-1 rounded" href="#">Timeline</a></li>
+<li><a class="font-['Space_Grotesk'] text-sm tracking-tight text-slate-400 hover:text-white transition-colors hover:bg-white/5 duration-300 px-2 py-1 rounded" href="#">About</a></li>
+</ul>
+<!-- Trailing Icons -->
+<div class="flex items-center gap-4">
+<button aria-label="Toggle Light Mode" class="text-[#64FFDA] hover:bg-white/5 transition-all duration-300 p-2 rounded-full flex items-center justify-center scale-95 transition-transform">
+<span class="material-symbols-outlined">light_mode</span>
+</button>
+<button aria-label="Search" class="text-[#64FFDA] hover:bg-white/5 transition-all duration-300 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">search</span>
+</button>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-[104px] pb-xl px-gutter w-full max-w-max_width mx-auto">
+<!-- Header Section -->
+<header class="mb-xl text-center md:text-left">
+<h1 class="font-h1 text-h1 text-on-surface mb-sm">访客终端 // <span class="text-primary-fixed">留言板</span></h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+                System initialized. 欢迎留下你的数字足迹，分享想法、建议或单纯打个招呼。所有数据将被记录并同步至主控节点。
+            </p>
+</header>
+<!-- Layout Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- Left Column: Input Form (Terminal Style) -->
+<div class="lg:col-span-5 sticky top-[104px]">
+<div class="bg-surface-container/60 backdrop-blur-[12px] border border-outline-variant rounded-xl overflow-hidden shadow-2xl relative">
+<!-- Terminal Header -->
+<div class="bg-surface-container-highest/80 border-b border-outline-variant px-md py-sm flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-error"></div>
+<div class="w-3 h-3 rounded-full bg-tertiary-fixed-dim"></div>
+<div class="w-3 h-3 rounded-full bg-primary-fixed"></div>
+</div>
+<span class="font-code text-code text-outline-variant text-[10px] uppercase tracking-widest">input_stream.sh</span>
+</div>
+<!-- Form Content -->
+<div class="p-lg">
+<form class="flex flex-col gap-md">
+<!-- Identity Group -->
+<div class="grid grid-cols-2 gap-sm">
+<div class="flex flex-col gap-xs">
+<label class="font-label text-label text-on-surface-variant uppercase" for="nickname">ID / 昵称 <span class="text-primary-fixed">*</span></label>
+<input class="bg-surface border border-outline-variant rounded-lg px-md py-sm font-code text-code text-on-surface focus:border-primary-fixed focus:ring-1 focus:ring-primary-fixed outline-none transition-colors placeholder:text-outline-variant/50" id="nickname" placeholder="Guest_404" type="text"/>
+</div>
+<div class="flex flex-col gap-xs">
+<label class="font-label text-label text-on-surface-variant uppercase" for="email">Ping / 邮箱 (可选)</label>
+<input class="bg-surface border border-outline-variant rounded-lg px-md py-sm font-code text-code text-on-surface focus:border-primary-fixed focus:ring-1 focus:ring-primary-fixed outline-none transition-colors placeholder:text-outline-variant/50" id="email" placeholder="name@node.net" type="email"/>
+</div>
+</div>
+<!-- Content Area -->
+<div class="flex flex-col gap-xs mt-sm">
+<label class="font-label text-label text-on-surface-variant uppercase" for="message">Payload / 内容 <span class="text-primary-fixed">*</span></label>
+<textarea class="bg-surface border border-outline-variant rounded-lg px-md py-sm font-body-md text-body-md text-on-surface focus:border-primary-fixed focus:ring-1 focus:ring-primary-fixed outline-none transition-colors resize-none placeholder:text-outline-variant/50" id="message" placeholder="&gt; 正在等待输入..." rows="5"></textarea>
+</div>
+<!-- Submit Action -->
+<div class="mt-sm flex justify-end">
+<button class="bg-primary-fixed text-on-primary-fixed font-label text-label uppercase px-lg py-sm rounded-lg hover:bg-primary-fixed-dim transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(95,251,214,0.3)]" type="button">
+<span class="material-symbols-outlined text-[18px]">send</span>
+                                    执行提交
+                                </button>
+</div>
+</form>
+</div>
+</div>
+<!-- Decorative System Status -->
+<div class="mt-lg flex items-center gap-md font-code text-[10px] text-outline uppercase tracking-widest">
+<span class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed animate-pulse"></span>
+                        Node Active
+                    </span>
+<span class="text-outline-variant">|</span>
+<span>Lat: 24ms</span>
+<span class="text-outline-variant">|</span>
+<span>Encrypted</span>
+</div>
+</div>
+<!-- Right Column: Messages Feed (Bento/Card Layout) -->
+<div class="lg:col-span-7 flex flex-col gap-md">
+<!-- Filter/Sort Utility Bar -->
+<div class="flex justify-between items-center mb-sm border-b border-outline-variant/30 pb-sm">
+<div class="font-label text-label text-on-surface-variant uppercase tracking-widest">
+                        Total Records: <span class="text-primary-fixed font-code">04</span>
+</div>
+<div class="flex gap-2">
+<button class="text-primary-fixed font-label text-label bg-primary-fixed/10 px-sm py-xs rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 最新
+                        </button>
+<button class="text-outline hover:text-on-surface font-label text-label px-sm py-xs rounded transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">local_fire_department</span> 最热
+                        </button>
+</div>
+</div>
+<!-- Message Card 1 -->
+<article class="bg-surface-container-low/40 backdrop-blur-[8px] border border-outline-variant/50 rounded-xl p-lg hover:bg-surface-container/60 hover:border-outline transition-all duration-300 group">
+<div class="flex justify-between items-start mb-md">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant bg-surface-container flex-shrink-0">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="close up of young woman face with cyberpunk neon cyan and purple rim lighting against dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtFyBLQPuEh2nY150o4sqm7ujeJ8hh9hha0ZuyAqwm88njdD9ej6-Zzua6q3a_EcC07PhJD2vM7P9nzya9lsePyt_YSNX80-y3m-y4GG97iodZPy9Vi60pHjSCy56f_GzOBwVCecWS5kmJ2jEhyLVeG_Ol8WbRdTGlD0hR5f8wzrSayTyJpTKEBXTk7a5waXajx6p4Mxc30juPDM2Kt7AVcxZoIpB5q3JnzRlNL_nnNTeMPCGhEJb05Y1yx4W7ggg2MmVpuzmrvAg"/>
+</div>
+<div>
+<h3 class="font-h3 text-[16px] text-on-surface">Nova_Explorer</h3>
+<div class="font-code text-[11px] text-outline flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[12px]">terminal</span>
+                                    Web Client
+                                </div>
+</div>
+</div>
+<time class="font-code text-[12px] text-outline-variant">2024.10.24 14:32</time>
+</div>
+<div class="font-body-md text-body-md text-on-surface-variant leading-relaxed pl-13">
+<p>博客的设计非常有赛博朋克和终端的质感！特别是代码块的高亮和玻璃拟态效果，完美契合了CS学生的主题。期待更多关于算法和系统架构的文章分享。</p>
+</div>
+</article>
+<!-- Message Card 2 (Reply pattern) -->
+<article class="bg-surface-container-low/40 backdrop-blur-[8px] border border-outline-variant/50 rounded-xl p-lg hover:bg-surface-container/60 hover:border-outline transition-all duration-300 group">
+<div class="flex justify-between items-start mb-md">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant bg-surface-container flex-shrink-0 flex items-center justify-center">
+<span class="font-h2 text-h2 text-primary-fixed-dim text-[16px]">0x</span>
+</div>
+<div>
+<h3 class="font-h3 text-[16px] text-on-surface">0xDev</h3>
+<div class="font-code text-[11px] text-outline flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[12px]">terminal</span>
+                                    macOS / Safari
+                                </div>
+</div>
+</div>
+<time class="font-code text-[12px] text-outline-variant">2024.10.23 09:15</time>
+</div>
+<div class="font-body-md text-body-md text-on-surface-variant leading-relaxed pl-13 mb-md">
+<p>请问右侧的导航栏组件是开源的吗？看起来非常流畅，想在自己的个人主页里参考一下实现逻辑。</p>
+</div>
+<!-- Admin Reply Box -->
+<div class="ml-13 mt-sm pl-md border-l-2 border-primary-fixed/30 bg-primary-fixed/5 rounded-r-lg p-sm">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label text-label text-primary-fixed flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">admin_panel_settings</span> YU. (Admin)
+                            </span>
+</div>
+<p class="font-body-md text-[14px] text-on-surface-variant">感谢喜欢！核心逻辑写在 `Nav.tsx` 里了，稍后会整理到 GitHub 仓库，敬请关注。</p>
+</div>
+</article>
+<!-- Empty State Demonstration (Hidden by default in a real app, shown here for visual reference, normally would use conditional logic) -->
+<!-- 
+                <div class="flex flex-col items-center justify-center py-xl px-lg bg-surface-container-low/20 border border-dashed border-outline-variant/50 rounded-xl">
+                    <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mb-md border border-outline-variant/30">
+                        <span class="material-symbols-outlined text-[32px] text-outline-variant">inbox</span>
+                    </div>
+                    <p class="font-label text-label text-on-surface-variant uppercase tracking-widest text-center">Data Buffer Empty</p>
+                    <p class="font-body-md text-[14px] text-outline mt-xs text-center max-w-xs">当前没有访客留言。成为第一个留下印记的人吧。</p>
+                </div> 
+                -->
+</div>
+</div>
+</main>
+<!-- Footer (Shared Component) -->
+<footer class="w-full py-8 border-t border-white/10 bg-slate-950 mt-auto">
+<div class="flex flex-col items-center gap-4 px-8">
+<div class="hidden text-[#64FFDA] font-bold">YU.LOG</div>
+<ul class="flex gap-6 font-mono text-[10px] uppercase">
+<li><a class="text-slate-600 hover:text-[#64FFDA] transition-opacity duration-200" href="#">GitHub</a></li>
+<li><a class="text-slate-600 hover:text-[#64FFDA] transition-opacity duration-200" href="#">StackOverflow</a></li>
+<li><a class="text-slate-600 hover:text-[#64FFDA] transition-opacity duration-200" href="#">Status</a></li>
+<li><a class="text-slate-600 hover:text-[#64FFDA] transition-opacity duration-200" href="#">RSS</a></li>
+</ul>
+<div class="font-mono text-[10px] uppercase text-slate-600">
+                © 2024 YU. CS_STUDENT_MODE
+            </div>
+</div>
+</footer>
+</body></html>

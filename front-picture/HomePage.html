@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Yu's Digital Garden</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-on-surface": "#2b322f",
+                      "outline": "#85948e",
+                      "primary-fixed-dim": "#38debb",
+                      "tertiary-fixed-dim": "#31e368",
+                      "on-tertiary": "#003912",
+                      "surface-container-lowest": "#09100d",
+                      "error-container": "#93000a",
+                      "on-primary": "#00382d",
+                      "surface-container-low": "#161d1b",
+                      "on-surface-variant": "#bacac3",
+                      "surface-container": "#1a211f",
+                      "on-secondary-fixed": "#290055",
+                      "surface": "#0e1512",
+                      "on-error": "#690005",
+                      "on-primary-fixed": "#002019",
+                      "primary-fixed": "#5ffbd6",
+                      "on-tertiary-container": "#00752e",
+                      "primary": "#ffffff",
+                      "background": "#0e1512",
+                      "on-secondary-container": "#caa4ff",
+                      "error": "#ffb4ab",
+                      "inverse-surface": "#dde4e0",
+                      "surface-variant": "#2f3633",
+                      "outline-variant": "#3c4a45",
+                      "surface-container-highest": "#2f3633",
+                      "surface-bright": "#333b38",
+                      "on-primary-fixed-variant": "#005142",
+                      "on-tertiary-fixed-variant": "#00531e",
+                      "on-error-container": "#ffdad6",
+                      "on-background": "#dde4e0",
+                      "inverse-primary": "#006b58",
+                      "surface-container-high": "#242c29",
+                      "primary-container": "#5ffbd6",
+                      "tertiary-container": "#69ff88",
+                      "on-surface": "#dde4e0",
+                      "on-primary-container": "#00725e",
+                      "on-secondary-fixed-variant": "#593090",
+                      "on-tertiary-fixed": "#002108",
+                      "secondary": "#d7baff",
+                      "surface-dim": "#0e1512",
+                      "tertiary-fixed": "#69ff88",
+                      "tertiary": "#ffffff",
+                      "secondary-fixed-dim": "#d7baff",
+                      "surface-tint": "#38debb",
+                      "secondary-container": "#593090",
+                      "on-secondary": "#411478",
+                      "secondary-fixed": "#eddcff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "4px",
+                      "gutter": "24px",
+                      "md": "16px",
+                      "max_width": "1200px",
+                      "sm": "8px",
+                      "margin": "32px",
+                      "xl": "48px",
+                      "lg": "24px",
+                      "unit": "4px"
+              },
+              "fontFamily": {
+                      "h2": [
+                              "Space Grotesk"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "h3": [
+                              "Space Grotesk"
+                      ],
+                      "h1": [
+                              "Space Grotesk"
+                      ],
+                      "label": [
+                              "Space Grotesk"
+                      ],
+                      "code": [
+                              "JetBrains Mono"
+                      ]
+              },
+              "fontSize": {
+                      "h2": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "h3": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "h1": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.1",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label": [
+                              "12px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "code": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Subtle living ambient background */
+        body {
+            background-image: radial-gradient(circle at 15% 50%, rgba(95, 251, 214, 0.03), transparent 25%),
+                              radial-gradient(circle at 85% 30%, rgba(215, 186, 255, 0.03), transparent 25%);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md min-h-screen flex flex-col antialiased selection:bg-primary-fixed/30 selection:text-primary-fixed">
+<!-- TopNavBar (Shared Component) -->
+<nav class="fixed top-0 w-full z-50 border-b border-white/15 bg-slate-900/60 backdrop-blur-[12px] shadow-[0_20px_40px_rgba(100,255,218,0.05)]">
+<div class="flex justify-between items-center px-8 h-16 max-w-full mx-auto">
+<div class="text-xl font-bold text-[#64FFDA] tracking-tighter">
+                YU.LOG
+            </div>
+<div class="hidden md:flex items-center gap-6 font-['Space_Grotesk'] text-sm tracking-tight">
+<a class="text-[#64FFDA] border-b-2 border-[#64FFDA] pb-1 hover:bg-white/5 transition-all duration-300" href="#">Home</a>
+<a class="text-slate-400 hover:text-white transition-colors hover:bg-white/5 duration-300" href="#">Articles</a>
+<a class="text-slate-400 hover:text-white transition-colors hover:bg-white/5 duration-300" href="#">Projects</a>
+<a class="text-slate-400 hover:text-white transition-colors hover:bg-white/5 duration-300" href="#">Notes</a>
+<a class="text-slate-400 hover:text-white transition-colors hover:bg-white/5 duration-300" href="#">Timeline</a>
+<a class="text-slate-400 hover:text-white transition-colors hover:bg-white/5 duration-300" href="#">About</a>
+</div>
+<div class="flex items-center gap-4 text-[#64FFDA]">
+<button class="hover:bg-white/5 transition-all duration-300 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">light_mode</span>
+</button>
+<div class="h-4 w-px bg-white/15"></div>
+<button class="hover:bg-white/5 transition-all duration-300 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">search</span>
+</button>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-32 pb-xl px-gutter md:px-margin max-w-[1200px] w-full mx-auto flex flex-col gap-xl">
+<!-- Hero: Living Terminal -->
+<section class="w-full flex justify-center">
+<div class="w-full max-w-3xl bg-surface-container/60 backdrop-blur-[12px] border border-white/15 rounded-[16px] shadow-[0_20px_40px_rgba(100,255,218,0.05)] overflow-hidden">
+<!-- Terminal Header -->
+<div class="bg-surface-container-high/80 px-4 py-3 flex items-center justify-between border-b border-white/10">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-error/80"></div>
+<div class="w-3 h-3 rounded-full bg-tertiary-fixed-dim/80"></div>
+<div class="w-3 h-3 rounded-full bg-primary-fixed-dim/80"></div>
+</div>
+<div class="font-code text-[10px] text-outline-variant uppercase tracking-widest">
+                        ~ / yulog / init.sh
+                    </div>
+</div>
+<!-- Terminal Body -->
+<div class="p-lg font-code text-code leading-relaxed text-on-surface-variant flex flex-col gap-4">
+<p><span class="text-primary-fixed">yu@admin</span>:<span class="text-secondary-fixed-dim">~</span>$ ./hello.sh</p>
+<div class="pl-4 border-l-2 border-outline-variant/30 flex flex-col gap-2">
+<h1 class="font-h2 text-h2 text-on-surface mb-2">你好，我是 Yu。</h1>
+<p>一名计算机科学专业的学生，热爱在代码世界中构建秩序。</p>
+<p>这里是我的<span class="text-primary-fixed">数字花园</span>，记录技术探索、项目实践与思维沉淀。</p>
+<p class="text-outline mt-2">&gt; System status: Online &amp; Learning...</p>
+</div>
+<p class="mt-4 flex items-center gap-2">
+<span class="text-primary-fixed">yu@admin</span>:<span class="text-secondary-fixed-dim">~</span>$ <span class="w-2 h-4 bg-primary-fixed animate-pulse inline-block"></span>
+</p>
+</div>
+</div>
+</section>
+<!-- Knowledge Galaxy (Node Map) -->
+<section class="flex flex-col gap-lg">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary-fixed">hub</span>
+<h2 class="font-h3 text-h3 text-on-surface">知识星系 / Knowledge Galaxy</h2>
+</div>
+<div class="relative w-full h-[300px] bg-surface-container-low/30 backdrop-blur-md border border-white/10 rounded-[16px] overflow-hidden flex items-center justify-center p-8">
+<!-- SVG connecting lines -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none stroke-outline-variant/40" style="stroke-width: 1px;">
+<line x1="50%" x2="20%" y1="50%" y2="30%"></line>
+<line x1="50%" x2="80%" y1="50%" y2="30%"></line>
+<line x1="50%" x2="25%" y1="50%" y2="75%"></line>
+<line x1="50%" x2="75%" y1="50%" y2="75%"></line>
+</svg>
+<!-- Center Node -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+<div class="w-16 h-16 rounded-full bg-primary-fixed/10 backdrop-blur-md border-2 border-primary-fixed flex items-center justify-center shadow-[0_0_30px_rgba(95,251,214,0.2)]">
+<span class="material-symbols-outlined text-primary-fixed">memory</span>
+</div>
+</div>
+<!-- Orbital Nodes -->
+<div class="absolute top-[30%] left-[20%] -translate-x-1/2 -translate-y-1/2">
+<div class="px-4 py-2 rounded-full bg-surface-container-high/80 backdrop-blur-[12px] border border-white/15 text-on-surface font-label text-label uppercase hover:border-primary-fixed transition-colors cursor-pointer flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-secondary-fixed-dim">dns</span> 后端开发
+                    </div>
+</div>
+<div class="absolute top-[30%] left-[80%] -translate-x-1/2 -translate-y-1/2">
+<div class="px-4 py-2 rounded-full bg-surface-container-high/80 backdrop-blur-[12px] border border-white/15 text-on-surface font-label text-label uppercase hover:border-primary-fixed transition-colors cursor-pointer flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-tertiary-fixed-dim">smart_toy</span> 人工智能
+                    </div>
+</div>
+<div class="absolute top-[75%] left-[25%] -translate-x-1/2 -translate-y-1/2">
+<div class="px-4 py-2 rounded-full bg-surface-container-high/80 backdrop-blur-[12px] border border-white/15 text-on-surface font-label text-label uppercase hover:border-primary-fixed transition-colors cursor-pointer flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-error">terminal</span> Linux生态
+                    </div>
+</div>
+<div class="absolute top-[75%] left-[75%] -translate-x-1/2 -translate-y-1/2">
+<div class="px-4 py-2 rounded-full bg-surface-container-high/80 backdrop-blur-[12px] border border-white/15 text-on-surface font-label text-label uppercase hover:border-primary-fixed transition-colors cursor-pointer flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-[#ffb4ab]">web</span> 前端工程
+                    </div>
+</div>
+</div>
+</section>
+<!-- Currently Learning (Progress Bars) -->
+<section class="flex flex-col gap-lg">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary-fixed">model_training</span>
+<h2 class="font-h3 text-h3 text-on-surface">当前探索 / Currently Learning</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Card 1 -->
+<div class="bg-surface-container-low/40 backdrop-blur-[12px] border border-white/15 rounded-[16px] p-lg flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors">
+<div class="flex justify-between items-center">
+<span class="font-label text-label text-on-surface uppercase tracking-widest">Java Spring Boot</span>
+<span class="font-code text-code text-outline">75%</span>
+</div>
+<div class="w-full h-[4px] bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary-fixed to-secondary-fixed rounded-full w-[75%] relative">
+<div class="absolute right-0 top-0 bottom-0 w-2 bg-white/50 blur-[2px]"></div>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-low/40 backdrop-blur-[12px] border border-white/15 rounded-[16px] p-lg flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors">
+<div class="flex justify-between items-center">
+<span class="font-label text-label text-on-surface uppercase tracking-widest">MySQL &amp; Redis</span>
+<span class="font-code text-code text-outline">60%</span>
+</div>
+<div class="w-full h-[4px] bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary-fixed to-secondary-fixed rounded-full w-[60%] relative">
+<div class="absolute right-0 top-0 bottom-0 w-2 bg-white/50 blur-[2px]"></div>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-low/40 backdrop-blur-[12px] border border-white/15 rounded-[16px] p-lg flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors">
+<div class="flex justify-between items-center">
+<span class="font-label text-label text-on-surface uppercase tracking-widest">Linux Kernel</span>
+<span class="font-code text-code text-outline">40%</span>
+</div>
+<div class="w-full h-[4px] bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary-fixed to-secondary-fixed rounded-full w-[40%] relative">
+<div class="absolute right-0 top-0 bottom-0 w-2 bg-white/50 blur-[2px]"></div>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-low/40 backdrop-blur-[12px] border border-white/15 rounded-[16px] p-lg flex flex-col gap-4 hover:bg-surface-container-low/60 transition-colors">
+<div class="flex justify-between items-center">
+<span class="font-label text-label text-on-surface uppercase tracking-widest">Vue 3 Ecosystem</span>
+<span class="font-code text-code text-outline">85%</span>
+</div>
+<div class="w-full h-[4px] bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary-fixed to-secondary-fixed rounded-full w-[85%] relative">
+<div class="absolute right-0 top-0 bottom-0 w-2 bg-white/50 blur-[2px]"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bento Grid: Articles & Projects -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Featured Project (Spans 8 cols) -->
+<div class="col-span-1 md:col-span-8 bg-surface-container-low/40 backdrop-blur-[12px] border border-white/15 rounded-[16px] p-xl flex flex-col justify-between group hover:border-primary-fixed/50 transition-all relative overflow-hidden min-h-[300px]">
+<div class="absolute top-0 right-0 p-lg opacity-20 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[64px] text-primary-fixed">code_blocks</span>
+</div>
+<div class="relative z-10 flex flex-col gap-4">
+<div class="flex items-center gap-2">
+<span class="px-2 py-1 rounded-sm bg-primary-fixed/20 text-primary-fixed font-code text-[10px] uppercase">精选项目</span>
+</div>
+<h3 class="font-h2 text-h2 text-on-surface">Distributed Task Scheduler</h3>
+<p class="text-on-surface-variant max-w-lg">
+                        基于 Go 和 gRPC 构建的轻量级分布式任务调度系统，支持动态节点注册、任务分发与容错处理。深度探索分布式系统的一致性与高可用设计。
+                    </p>
+</div>
+<div class="relative z-10 mt-8 flex items-center gap-4 font-code text-code text-outline-variant">
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span> Go</span>
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-secondary-fixed-dim"></span> gRPC</span>
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-error"></span> Redis</span>
+</div>
+</div>
+<!-- Latest Article 1 (Spans 4 cols) -->
+<div class="col-span-1 md:col-span-4 bg-surface-container-low/40 backdrop-blur-[12px] border border-white/15 rounded-[16px] p-lg flex flex-col justify-between group hover:bg-surface-container-high/40 transition-all">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between text-outline-variant font-code text-[10px]">
+<span>最新文章</span>
+<span>2024-05-12</span>
+</div>
+<h4 class="font-h3 text-[20px] text-on-surface leading-snug group-hover:text-primary-fixed transition-colors">深入理解 JVM 内存模型与垃圾回收机制</h4>
+<p class="text-on-surface-variant text-sm line-clamp-3">
+                        从底层的角度拆解 Java 虚拟机的内存划分，结合实际调优案例，探讨不同垃圾收集器（如 G1, ZGC）的适用场景与设计哲学。
+                    </p>
+</div>
+<div class="mt-6 flex items-center gap-2">
+<span class="px-2 py-1 rounded-sm border border-outline-variant text-outline font-label text-[10px]">Java</span>
+<span class="px-2 py-1 rounded-sm border border-outline-variant text-outline font-label text-[10px]">底层原理</span>
+</div>
+</div>
+<!-- Latest Article 2 (Spans 4 cols) -->
+<div class="col-span-1 md:col-span-4 bg-surface-container-low/40 backdrop-blur-[12px] border border-white/15 rounded-[16px] p-lg flex flex-col justify-between group hover:bg-surface-container-high/40 transition-all">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between text-outline-variant font-code text-[10px]">
+<span>笔记流</span>
+<span>2024-05-08</span>
+</div>
+<h4 class="font-h3 text-[20px] text-on-surface leading-snug group-hover:text-primary-fixed transition-colors">Docker 容器化部署实战指南</h4>
+<p class="text-on-surface-variant text-sm line-clamp-3">
+                        记录在个人服务器上使用 Docker Compose 编排微服务架构的过程，包含网络隔离、数据卷持久化及性能监控的配置细节。
+                    </p>
+</div>
+<div class="mt-6 flex items-center gap-2">
+<span class="px-2 py-1 rounded-sm border border-outline-variant text-outline font-label text-[10px]">DevOps</span>
+<span class="px-2 py-1 rounded-sm border border-outline-variant text-outline font-label text-[10px]">Docker</span>
+</div>
+</div>
+<!-- Small Utility Box (Spans 8 cols) -->
+<div class="col-span-1 md:col-span-8 bg-surface-container-low/20 backdrop-blur-[12px] border border-white/10 rounded-[16px] p-lg flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary-fixed">rss_feed</span>
+</div>
+<div>
+<h4 class="font-label text-label text-on-surface uppercase tracking-widest">订阅更新 / RSS Feed</h4>
+<p class="text-outline-variant font-code text-[12px]">保持同步，获取最新的技术笔记与项目动态。</p>
+</div>
+</div>
+<button class="px-6 py-2 rounded-[8px] border border-primary-fixed text-primary-fixed font-label text-label uppercase hover:bg-primary-fixed hover:text-on-primary transition-colors">
+                    Subscribe
+                </button>
+</div>
+</section>
+</main>
+<!-- Footer (Shared Component) -->
+<footer class="w-full py-8 border-t border-white/10 bg-slate-950 mt-xl">
+<div class="flex flex-col items-center gap-4 px-8 max-w-[1200px] mx-auto">
+<div class="font-mono text-[10px] uppercase text-[#64FFDA]">
+                © 2024 YU. CS_STUDENT_MODE
+            </div>
+<div class="flex gap-6 font-mono text-[10px] uppercase">
+<a class="text-slate-600 hover:text-[#64FFDA] transition-opacity duration-200" href="#">GitHub</a>
+<a class="text-slate-600 hover:text-[#64FFDA] transition-opacity duration-200" href="#">StackOverflow</a>
+<a class="text-slate-600 hover:text-[#64FFDA] transition-opacity duration-200" href="#">Status</a>
+<a class="text-slate-600 hover:text-[#64FFDA] transition-opacity duration-200" href="#">RSS</a>
+</div>
+</div>
+</footer>
+</body></html>

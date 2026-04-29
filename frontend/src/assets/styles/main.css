@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  font-family: Inter, system-ui, sans-serif;
+  background: #0e1512;
+  color: #dde4e0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(56, 222, 187, 0.12), transparent 28rem),
+    radial-gradient(circle at 78% 0%, rgba(215, 186, 255, 0.09), transparent 24rem),
+    linear-gradient(180deg, #09100d 0%, #0e1512 45%, #09100d 100%);
+  color: #dde4e0;
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(95, 251, 214, 0.28);
+}
+
+@layer components {
+  .glass-panel {
+    border: 1px solid rgba(133, 148, 142, 0.28);
+    background: rgba(26, 33, 31, 0.72);
+    box-shadow: 0 20px 40px rgba(56, 222, 187, 0.08);
+    backdrop-filter: blur(12px);
+  }
+
+  .terminal-label {
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    color: #38debb;
+  }
+}

@@ -1,0 +1,13 @@
+node_modules/
+dist/
+target/
+*.log
+*.err.log
+.phase3-*.tmp
+
+.idea/
+.vscode/
+
+.env
+.env.*
+!.env.example

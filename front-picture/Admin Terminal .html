@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Admin Dashboard UI</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "inverse-on-surface": "#2b322f",
+                        "outline": "#85948e",
+                        "primary-fixed-dim": "#38debb",
+                        "tertiary-fixed-dim": "#31e368",
+                        "on-tertiary": "#003912",
+                        "surface-container-lowest": "#09100d",
+                        "error-container": "#93000a",
+                        "on-primary": "#00382d",
+                        "surface-container-low": "#161d1b",
+                        "on-surface-variant": "#bacac3",
+                        "surface-container": "#1a211f",
+                        "on-secondary-fixed": "#290055",
+                        "surface": "#0e1512",
+                        "on-error": "#690005",
+                        "on-primary-fixed": "#002019",
+                        "primary-fixed": "#5ffbd6",
+                        "on-tertiary-container": "#00752e",
+                        "primary": "#ffffff",
+                        "background": "#0e1512",
+                        "on-secondary-container": "#caa4ff",
+                        "error": "#ffb4ab",
+                        "inverse-surface": "#dde4e0",
+                        "surface-variant": "#2f3633",
+                        "outline-variant": "#3c4a45",
+                        "surface-container-highest": "#2f3633",
+                        "surface-bright": "#333b38",
+                        "on-primary-fixed-variant": "#005142",
+                        "on-tertiary-fixed-variant": "#00531e",
+                        "on-error-container": "#ffdad6",
+                        "on-background": "#dde4e0",
+                        "inverse-primary": "#006b58",
+                        "surface-container-high": "#242c29",
+                        "primary-container": "#5ffbd6",
+                        "tertiary-container": "#69ff88",
+                        "on-surface": "#dde4e0",
+                        "on-primary-container": "#00725e",
+                        "on-secondary-fixed-variant": "#593090",
+                        "on-tertiary-fixed": "#002108",
+                        "secondary": "#d7baff",
+                        "surface-dim": "#0e1512",
+                        "tertiary-fixed": "#69ff88",
+                        "tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#d7baff",
+                        "surface-tint": "#38debb",
+                        "secondary-container": "#593090",
+                        "on-secondary": "#411478",
+                        "secondary-fixed": "#eddcff"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "xs": "4px",
+                        "gutter": "24px",
+                        "md": "16px",
+                        "max_width": "1200px",
+                        "sm": "8px",
+                        "margin": "32px",
+                        "xl": "48px",
+                        "lg": "24px",
+                        "unit": "4px"
+                    },
+                    fontFamily: {
+                        "h2": ["Space Grotesk"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "h3": ["Space Grotesk"],
+                        "h1": ["Space Grotesk"],
+                        "label": ["Space Grotesk"],
+                        "code": ["JetBrains Mono"]
+                    },
+                    fontSize: {
+                        "h2": ["32px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "h3": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "h1": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label": ["12px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "code": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md text-body-md antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen flex">
+<!-- Shared Component: SideNavBar -->
+<nav aria-label="Sidebar Navigation" class="fixed left-0 top-0 flex flex-col h-full h-screen w-64 border-r border-white/15 bg-slate-950/80 backdrop-blur-[24px] shadow-2xl z-40">
+<!-- Header -->
+<div class="px-6 py-8 flex flex-col gap-2 border-b border-white/10">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-[#64FFDA] text-[18px]">terminal</span>
+</div>
+<div>
+<h2 class="text-[#64FFDA] font-black italic text-sm tracking-tight">Admin Terminal</h2>
+<span class="font-mono text-xs uppercase tracking-widest text-slate-500">v2.0.4-stable</span>
+</div>
+</div>
+</div>
+<!-- CTA -->
+<div class="px-4 py-6">
+<button class="w-full flex items-center justify-center gap-2 bg-[#64FFDA] text-[#002019] font-label text-label py-2.5 px-4 rounded-lg hover:bg-white transition-colors duration-200 uppercase tracking-widest shadow-[0_0_15px_rgba(100,255,218,0.3)]">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">add</span>
+                New Post
+            </button>
+</div>
+<!-- Navigation Links -->
+<div class="flex-1 overflow-y-auto py-2 flex flex-col gap-1">
+<!-- Active: Dashboard -->
+<a class="bg-[#64FFDA]/10 text-[#64FFDA] border-l-4 border-[#64FFDA] flex items-center gap-3 px-4 py-3 font-mono text-xs uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+                Dashboard
+            </a>
+<a class="text-slate-500 flex items-center gap-3 px-4 py-3 hover:text-slate-200 hover:bg-white/5 hover:translate-x-1 transition-transform font-mono text-xs uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-[20px]">edit_note</span>
+                Content
+            </a>
+<a class="text-slate-500 flex items-center gap-3 px-4 py-3 hover:text-slate-200 hover:bg-white/5 hover:translate-x-1 transition-transform font-mono text-xs uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-[20px]">query_stats</span>
+                Analytics
+            </a>
+<a class="text-slate-500 flex items-center gap-3 px-4 py-3 hover:text-slate-200 hover:bg-white/5 hover:translate-x-1 transition-transform font-mono text-xs uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-[20px]">perm_media</span>
+                Media
+            </a>
+<a class="text-slate-500 flex items-center gap-3 px-4 py-3 hover:text-slate-200 hover:bg-white/5 hover:translate-x-1 transition-transform font-mono text-xs uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+                Settings
+            </a>
+</div>
+<!-- Footer Tab -->
+<div class="mt-auto border-t border-white/10 py-4">
+<a class="text-slate-500 flex items-center gap-3 px-4 py-3 hover:text-slate-200 hover:bg-white/5 hover:translate-x-1 transition-transform font-mono text-xs uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+                Logout
+            </a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 ml-64 p-margin md:p-xl min-h-screen">
+<!-- Page Header -->
+<header class="mb-margin flex justify-between items-end">
+<div>
+<h1 class="font-h1 text-h1 text-primary mb-2">系统控制台</h1>
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-2">
+<span class="inline-block w-2 h-2 rounded-full bg-tertiary-fixed-dim shadow-[0_0_8px_rgba(49,227,104,0.6)]"></span>
+                    系统运行正常 • 上次同步: 2分钟前
+                </p>
+</div>
+<div class="hidden md:flex gap-2">
+<button class="px-3 py-1.5 rounded-full border border-outline-variant bg-surface-container-low text-on-surface-variant font-code text-code hover:bg-surface-container-high transition-colors text-[12px]">ZH</button>
+<button class="px-3 py-1.5 rounded-full border border-transparent text-outline font-code text-code hover:text-on-surface transition-colors text-[12px]">EN</button>
+</div>
+</header>
+<!-- Stats Overview (Terminal Bento Grid) -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-gutter mb-xl">
+<!-- Stat Card 1: Views -->
+<div class="col-span-1 md:col-span-4 rounded-xl border border-outline-variant/30 bg-surface-container-lowest/50 backdrop-blur-md overflow-hidden relative group">
+<!-- Terminal Header -->
+<div class="h-8 bg-surface-container-high/50 border-b border-outline-variant/30 flex items-center px-4 gap-2">
+<div class="w-2.5 h-2.5 rounded-full bg-error-container"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-[#f59e0b]"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-tertiary-fixed-dim"></div>
+<span class="ml-2 font-code text-[10px] text-outline uppercase tracking-wider">metrics.views</span>
+</div>
+<!-- Content -->
+<div class="p-lg relative">
+<div class="absolute inset-0 bg-gradient-to-br from-primary-container/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">总页面浏览量</p>
+<div class="flex items-baseline gap-3">
+<span class="font-h1 text-[42px] text-primary-fixed-dim tracking-tighter">124,592</span>
+<span class="font-code text-code text-tertiary-fixed-dim flex items-center">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+                            +12.5%
+                        </span>
+</div>
+</div>
+</div>
+<!-- Stat Card 2: Engagement -->
+<div class="col-span-1 md:col-span-4 rounded-xl border border-outline-variant/30 bg-surface-container-lowest/50 backdrop-blur-md overflow-hidden relative group">
+<div class="h-8 bg-surface-container-high/50 border-b border-outline-variant/30 flex items-center px-4 gap-2">
+<div class="w-2.5 h-2.5 rounded-full bg-error-container border border-error-container/50"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-[#f59e0b] border border-[#f59e0b]/50"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-tertiary-fixed-dim border border-tertiary-fixed-dim/50"></div>
+<span class="ml-2 font-code text-[10px] text-outline uppercase tracking-wider">metrics.engage</span>
+</div>
+<div class="p-lg relative">
+<div class="absolute inset-0 bg-gradient-to-br from-secondary-container/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">互动总计</p>
+<div class="flex items-baseline gap-3">
+<span class="font-h1 text-[42px] text-secondary-fixed-dim tracking-tighter">8,304</span>
+<span class="font-code text-code text-tertiary-fixed-dim flex items-center">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+                            +5.2%
+                        </span>
+</div>
+</div>
+</div>
+<!-- Stat Card 3: System Status/Activity -->
+<div class="col-span-1 md:col-span-4 rounded-xl border border-outline-variant/30 bg-surface-container-lowest/50 backdrop-blur-md overflow-hidden relative">
+<div class="h-8 bg-surface-container-high/50 border-b border-outline-variant/30 flex items-center px-4 gap-2">
+<span class="font-code text-[10px] text-outline uppercase tracking-wider">sys.health</span>
+</div>
+<div class="p-lg flex flex-col justify-center h-[calc(100%-32px)]">
+<div class="flex items-center justify-between mb-2">
+<span class="font-code text-code text-on-surface-variant">CPU Load</span>
+<span class="font-code text-code text-primary-fixed">24%</span>
+</div>
+<div class="w-full h-1 bg-surface-variant rounded-full mb-4 overflow-hidden">
+<div class="h-full bg-primary-fixed w-[24%] shadow-[0_0_10px_rgba(95,251,214,0.5)]"></div>
+</div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-code text-code text-on-surface-variant">Memory</span>
+<span class="font-code text-code text-secondary-fixed-dim">68%</span>
+</div>
+<div class="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-secondary-fixed-dim w-[68%] shadow-[0_0_10px_rgba(215,186,255,0.5)]"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Articles Table Section -->
+<section class="rounded-xl border border-outline-variant/30 bg-surface-container-lowest/40 backdrop-blur-xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.5)] relative">
+<!-- Table Header/Controls -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center p-lg border-b border-outline-variant/20 bg-surface-container-low/50">
+<h3 class="font-h3 text-h3 text-on-surface mb-4 md:mb-0 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim">description</span>
+                    文章管理
+                </h3>
+<div class="flex items-center gap-3 w-full md:w-auto">
+<div class="relative flex-1 md:w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+<input class="w-full bg-surface-container border border-outline-variant/50 text-on-surface font-code text-code rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:border-primary-fixed-dim focus:ring-1 focus:ring-primary-fixed-dim/50 placeholder:text-outline/50 transition-all" placeholder="检索节点..." type="text"/>
+</div>
+<button class="p-2 border border-outline-variant/50 rounded-lg hover:bg-surface-container transition-colors text-outline hover:text-on-surface">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+</button>
+</div>
+</div>
+<!-- Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container/30 border-b border-outline-variant/20">
+<th class="py-3 px-6 font-code text-[11px] uppercase tracking-widest text-outline">文章标题</th>
+<th class="py-3 px-6 font-code text-[11px] uppercase tracking-widest text-outline w-32">状态</th>
+<th class="py-3 px-6 font-code text-[11px] uppercase tracking-widest text-outline w-32">浏览量</th>
+<th class="py-3 px-6 font-code text-[11px] uppercase tracking-widest text-outline w-40">最后更新</th>
+<th class="py-3 px-6 font-code text-[11px] uppercase tracking-widest text-outline w-24 text-right">操作</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-[14px]">
+<!-- Row 1 -->
+<tr class="border-b border-outline-variant/10 hover:bg-surface-container-low/30 transition-colors group">
+<td class="py-4 px-6">
+<p class="text-on-surface font-medium mb-1 group-hover:text-primary-fixed-dim transition-colors">构建高可用分布式系统架构</p>
+<div class="flex gap-2">
+<span class="font-code text-[10px] text-outline px-1.5 py-0.5 rounded bg-surface-container border border-outline-variant/30">架构</span>
+<span class="font-code text-[10px] text-outline px-1.5 py-0.5 rounded bg-surface-container border border-outline-variant/30">后端</span>
+</div>
+</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-tertiary-fixed/10 text-tertiary-fixed font-code text-[11px] border border-tertiary-fixed/20">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed animate-pulse"></span>
+                                    已发布
+                                </span>
+</td>
+<td class="py-4 px-6 font-code text-on-surface-variant">12,402</td>
+<td class="py-4 px-6 font-code text-outline text-[12px]">2023-10-24 14:30</td>
+<td class="py-4 px-6 text-right">
+<button class="text-outline hover:text-primary-fixed-dim transition-colors p-1">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-outline-variant/10 hover:bg-surface-container-low/30 transition-colors group">
+<td class="py-4 px-6">
+<p class="text-on-surface font-medium mb-1 group-hover:text-primary-fixed-dim transition-colors">Glassmorphism UI 设计指南</p>
+<div class="flex gap-2">
+<span class="font-code text-[10px] text-outline px-1.5 py-0.5 rounded bg-surface-container border border-outline-variant/30">设计</span>
+<span class="font-code text-[10px] text-outline px-1.5 py-0.5 rounded bg-surface-container border border-outline-variant/30">UI/UX</span>
+</div>
+</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-tertiary-fixed/10 text-tertiary-fixed font-code text-[11px] border border-tertiary-fixed/20">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed"></span>
+                                    已发布
+                                </span>
+</td>
+<td class="py-4 px-6 font-code text-on-surface-variant">8,193</td>
+<td class="py-4 px-6 font-code text-outline text-[12px]">2023-10-22 09:15</td>
+<td class="py-4 px-6 text-right">
+<button class="text-outline hover:text-primary-fixed-dim transition-colors p-1">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-outline-variant/10 hover:bg-surface-container-low/30 transition-colors group">
+<td class="py-4 px-6">
+<p class="text-on-surface font-medium mb-1 group-hover:text-primary-fixed-dim transition-colors">Rust 语言内存安全性深度解析</p>
+<div class="flex gap-2">
+<span class="font-code text-[10px] text-outline px-1.5 py-0.5 rounded bg-surface-container border border-outline-variant/30">Rust</span>
+<span class="font-code text-[10px] text-outline px-1.5 py-0.5 rounded bg-surface-container border border-outline-variant/30">底层</span>
+</div>
+</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-on-surface-variant/10 text-on-surface-variant font-code text-[11px] border border-outline-variant/50">
+<span class="w-1.5 h-1.5 rounded-full bg-on-surface-variant"></span>
+                                    草稿
+                                </span>
+</td>
+<td class="py-4 px-6 font-code text-on-surface-variant">--</td>
+<td class="py-4 px-6 font-code text-outline text-[12px]">2023-10-25 10:05</td>
+<td class="py-4 px-6 text-right">
+<button class="text-outline hover:text-primary-fixed-dim transition-colors p-1">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="py-4 px-6">
+<p class="text-on-surface font-medium mb-1 group-hover:text-primary-fixed-dim transition-colors">Next.js 14 服务端渲染性能优化</p>
+<div class="flex gap-2">
+<span class="font-code text-[10px] text-outline px-1.5 py-0.5 rounded bg-surface-container border border-outline-variant/30">前端</span>
+<span class="font-code text-[10px] text-outline px-1.5 py-0.5 rounded bg-surface-container border border-outline-variant/30">React</span>
+</div>
+</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error-container/20 text-error font-code text-[11px] border border-error/20">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                                    审核中
+                                </span>
+</td>
+<td class="py-4 px-6 font-code text-on-surface-variant">42</td>
+<td class="py-4 px-6 font-code text-outline text-[12px]">2023-10-25 16:40</td>
+<td class="py-4 px-6 text-right">
+<button class="text-outline hover:text-primary-fixed-dim transition-colors p-1">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="px-6 py-4 border-t border-outline-variant/20 flex items-center justify-between bg-surface-container-lowest/50">
+<span class="font-code text-[12px] text-outline">Showing 1 to 4 of 128 entries</span>
+<div class="flex gap-1">
+<button class="w-8 h-8 rounded border border-outline-variant/30 flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container transition-colors disabled:opacity-50">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded bg-primary-fixed/10 text-primary-fixed border border-primary-fixed/30 flex items-center justify-center font-code text-[12px]">1</button>
+<button class="w-8 h-8 rounded border border-outline-variant/30 flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container transition-colors font-code text-[12px]">2</button>
+<button class="w-8 h-8 rounded border border-outline-variant/30 flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container transition-colors font-code text-[12px]">3</button>
+<button class="w-8 h-8 rounded border border-outline-variant/30 flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container transition-colors disabled:opacity-50">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+</body></html>

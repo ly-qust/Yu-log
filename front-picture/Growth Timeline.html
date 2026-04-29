@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Timeline - YU.LOG</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-on-surface": "#2b322f",
+                    "outline": "#85948e",
+                    "primary-fixed-dim": "#38debb",
+                    "tertiary-fixed-dim": "#31e368",
+                    "on-tertiary": "#003912",
+                    "surface-container-lowest": "#09100d",
+                    "error-container": "#93000a",
+                    "on-primary": "#00382d",
+                    "surface-container-low": "#161d1b",
+                    "on-surface-variant": "#bacac3",
+                    "surface-container": "#1a211f",
+                    "on-secondary-fixed": "#290055",
+                    "surface": "#0e1512",
+                    "on-error": "#690005",
+                    "on-primary-fixed": "#002019",
+                    "primary-fixed": "#5ffbd6",
+                    "on-tertiary-container": "#00752e",
+                    "primary": "#ffffff",
+                    "background": "#0e1512",
+                    "on-secondary-container": "#caa4ff",
+                    "error": "#ffb4ab",
+                    "inverse-surface": "#dde4e0",
+                    "surface-variant": "#2f3633",
+                    "outline-variant": "#3c4a45",
+                    "surface-container-highest": "#2f3633",
+                    "surface-bright": "#333b38",
+                    "on-primary-fixed-variant": "#005142",
+                    "on-tertiary-fixed-variant": "#00531e",
+                    "on-error-container": "#ffdad6",
+                    "on-background": "#dde4e0",
+                    "inverse-primary": "#006b58",
+                    "surface-container-high": "#242c29",
+                    "primary-container": "#5ffbd6",
+                    "tertiary-container": "#69ff88",
+                    "on-surface": "#dde4e0",
+                    "on-primary-container": "#00725e",
+                    "on-secondary-fixed-variant": "#593090",
+                    "on-tertiary-fixed": "#002108",
+                    "secondary": "#d7baff",
+                    "surface-dim": "#0e1512",
+                    "tertiary-fixed": "#69ff88",
+                    "tertiary": "#ffffff",
+                    "secondary-fixed-dim": "#d7baff",
+                    "surface-tint": "#38debb",
+                    "secondary-container": "#593090",
+                    "on-secondary": "#411478",
+                    "secondary-fixed": "#eddcff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "gutter": "24px",
+                    "md": "16px",
+                    "max_width": "1200px",
+                    "sm": "8px",
+                    "margin": "32px",
+                    "xl": "48px",
+                    "lg": "24px",
+                    "unit": "4px"
+            },
+            "fontFamily": {
+                    "h2": ["Space Grotesk"],
+                    "body-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "h3": ["Space Grotesk"],
+                    "h1": ["Space Grotesk"],
+                    "label": ["Space Grotesk"],
+                    "code": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "h2": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "h3": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "h1": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "code": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        /* Ambient Background Glow for Living Terminal Aesthetic */
+        body {
+            background-image: radial-gradient(circle at 50% 0%, rgba(95, 251, 214, 0.05) 0%, transparent 50%),
+                              radial-gradient(circle at 100% 100%, rgba(105, 255, 136, 0.03) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col antialiased">
+<!-- TopNavBar (Shared Component) -->
+<nav class="fixed top-0 w-full z-50 border-b border-white/15 bg-slate-900/60 backdrop-blur-[12px] flex justify-between items-center px-8 h-16 max-w-full mx-auto shadow-[0_20px_40px_rgba(100,255,218,0.05)]">
+<div class="text-xl font-bold text-[#64FFDA] tracking-tighter">YU.LOG</div>
+<ul class="hidden md:flex gap-8 items-center">
+<li><a class="font-['Space_Grotesk'] text-sm tracking-tight text-slate-400 hover:text-white transition-colors hover:bg-white/5 transition-all duration-300 px-2 py-1 rounded" href="#">Home</a></li>
+<li><a class="font-['Space_Grotesk'] text-sm tracking-tight text-slate-400 hover:text-white transition-colors hover:bg-white/5 transition-all duration-300 px-2 py-1 rounded" href="#">Articles</a></li>
+<li><a class="font-['Space_Grotesk'] text-sm tracking-tight text-slate-400 hover:text-white transition-colors hover:bg-white/5 transition-all duration-300 px-2 py-1 rounded" href="#">Projects</a></li>
+<li><a class="font-['Space_Grotesk'] text-sm tracking-tight text-slate-400 hover:text-white transition-colors hover:bg-white/5 transition-all duration-300 px-2 py-1 rounded" href="#">Notes</a></li>
+<li><a class="font-['Space_Grotesk'] text-sm tracking-tight text-[#64FFDA] border-b-2 border-[#64FFDA] pb-1 hover:bg-white/5 transition-all duration-300 Active: scale-95 transition-transform" href="#">Timeline</a></li>
+<li><a class="font-['Space_Grotesk'] text-sm tracking-tight text-slate-400 hover:text-white transition-colors hover:bg-white/5 transition-all duration-300 px-2 py-1 rounded" href="#">About</a></li>
+</ul>
+<div class="flex items-center gap-4 text-slate-400">
+<button class="hover:text-white transition-colors"><span class="material-symbols-outlined" data-icon="light_mode">light_mode</span></button>
+<button class="hover:text-white transition-colors"><span class="material-symbols-outlined" data-icon="search">search</span></button>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-32 pb-24 px-gutter max-w-[max_width] mx-auto w-full">
+<!-- Header Section -->
+<header class="mb-16">
+<h1 class="font-h1 text-h1 text-on-surface mb-4">学习轨迹 <span class="text-primary-container">_</span></h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+                个人知识库与赛博里程碑记录。在此追踪核心技能的演进、项目的迭代以及数字花园的自然生长。
+            </p>
+</header>
+<!-- Timeline Container -->
+<div class="relative">
+<!-- Central Glowing Line (Digital Garden Root) -->
+<div class="absolute left-[15px] top-4 bottom-4 w-[2px] bg-outline-variant/50 shadow-[0_0_8px_rgba(95,251,214,0.15)]"></div>
+<div class="space-y-16">
+<!-- Timeline Node 1: Latest/Active -->
+<div class="relative pl-16 group">
+<!-- Node Indicator (Active Pulse) -->
+<div class="absolute left-[9px] top-6 w-[14px] h-[14px] rounded-full border-2 border-primary-container bg-surface shadow-[0_0_12px_theme(colors.primary-container)] group-hover:scale-110 transition-transform duration-300 z-10"></div>
+<!-- Content Card (Glassmorphism Level 1) -->
+<div class="backdrop-blur-[12px] bg-surface-container-low/80 border border-white/15 rounded-xl p-md transition-all duration-300 hover:bg-surface-container/90 hover:shadow-[0_8px_32px_rgba(100,255,218,0.05)]">
+<div class="flex items-center gap-3 mb-sm">
+<span class="font-code text-code text-primary-container">2024.10</span>
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span class="font-label text-label text-on-surface-variant uppercase tracking-widest">核心研究室实习</span>
+</div>
+<h3 class="font-h3 text-h3 text-on-surface mb-xs">分布式缓存架构优化完成</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md">
+                            在为期三个月的实习中，主导重构了原有的Redis集群分片逻辑，将热点数据访问延迟降低了40%。引入了基于Rust的中间件处理高并发流量洪峰。
+                        </p>
+<div class="flex flex-wrap gap-2">
+<span class="font-code text-[11px] text-tertiary-container bg-tertiary-container/10 border border-tertiary-container/20 px-2 py-0.5 rounded">Rust</span>
+<span class="font-code text-[11px] text-tertiary-container bg-tertiary-container/10 border border-tertiary-container/20 px-2 py-0.5 rounded">Redis Cluster</span>
+<span class="font-code text-[11px] text-tertiary-container bg-tertiary-container/10 border border-tertiary-container/20 px-2 py-0.5 rounded">System Design</span>
+</div>
+</div>
+</div>
+<!-- Timeline Node 2 -->
+<div class="relative pl-16 group">
+<!-- Node Indicator (Inactive) -->
+<div class="absolute left-[9px] top-6 w-[14px] h-[14px] rounded-full border-2 border-outline-variant bg-surface group-hover:border-primary-fixed-dim transition-colors duration-300 z-10"></div>
+<!-- Content Card -->
+<div class="backdrop-blur-[12px] bg-surface-container-lowest/80 border border-white/10 rounded-xl p-md transition-all duration-300 hover:bg-surface-container-low/90">
+<div class="flex items-center gap-3 mb-sm">
+<span class="font-code text-code text-on-surface-variant">2024.06</span>
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span class="font-label text-label text-on-surface-variant uppercase tracking-widest">个人数字花园</span>
+</div>
+<h3 class="font-h3 text-h3 text-on-surface mb-xs">YU.LOG v2.0 协议发布</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md">
+                            全面迁移至现代前端技术栈。重写了渲染引擎以支持Markdown中的复杂交互组件，并应用了全新的深色终端UI设计语言。
+                        </p>
+<div class="flex flex-wrap gap-2">
+<span class="font-code text-[11px] text-secondary-container bg-secondary-container/10 border border-secondary-container/20 px-2 py-0.5 rounded">Next.js 14</span>
+<span class="font-code text-[11px] text-secondary-container bg-secondary-container/10 border border-secondary-container/20 px-2 py-0.5 rounded">Tailwind CSS</span>
+<span class="font-code text-[11px] text-secondary-container bg-secondary-container/10 border border-secondary-container/20 px-2 py-0.5 rounded">MDX</span>
+</div>
+</div>
+</div>
+<!-- Timeline Node 3 -->
+<div class="relative pl-16 group">
+<!-- Node Indicator (Inactive) -->
+<div class="absolute left-[9px] top-6 w-[14px] h-[14px] rounded-full border-2 border-outline-variant bg-surface group-hover:border-primary-fixed-dim transition-colors duration-300 z-10"></div>
+<!-- Content Card -->
+<div class="backdrop-blur-[12px] bg-surface-container-lowest/80 border border-white/10 rounded-xl p-md transition-all duration-300 hover:bg-surface-container-low/90">
+<div class="flex items-center gap-3 mb-sm">
+<span class="font-code text-code text-on-surface-variant">2023.12</span>
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span class="font-label text-label text-on-surface-variant uppercase tracking-widest">学术与认证</span>
+</div>
+<h3 class="font-h3 text-h3 text-on-surface mb-xs">云原生架构师高级认证</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md">
+                            完成了针对Kubernetes集群管理、微服务网格(Istio)以及云原生安全策略的系统性学习，并顺利通过官方高级认证考核。
+                        </p>
+<div class="flex flex-wrap gap-2">
+<span class="font-code text-[11px] text-primary-fixed-dim bg-primary-fixed-dim/10 border border-primary-fixed-dim/20 px-2 py-0.5 rounded">Kubernetes</span>
+<span class="font-code text-[11px] text-primary-fixed-dim bg-primary-fixed-dim/10 border border-primary-fixed-dim/20 px-2 py-0.5 rounded">Docker</span>
+<span class="font-code text-[11px] text-primary-fixed-dim bg-primary-fixed-dim/10 border border-primary-fixed-dim/20 px-2 py-0.5 rounded">Cloud Native</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer (Shared Component) -->
+<footer class="w-full py-8 border-t border-white/10 bg-slate-950 flex flex-col items-center gap-4 px-8 mt-auto">
+<div class="flex gap-6">
+<a class="font-['Space_Grotesk'] text-sm text-slate-600 hover:text-[#64FFDA] transition-colors" href="#">GitHub</a>
+<a class="font-['Space_Grotesk'] text-sm text-slate-600 hover:text-[#64FFDA] transition-colors" href="#">StackOverflow</a>
+<a class="font-['Space_Grotesk'] text-sm text-slate-600 hover:text-[#64FFDA] transition-colors" href="#">Status</a>
+<a class="font-['Space_Grotesk'] text-sm text-slate-600 hover:text-[#64FFDA] transition-colors" href="#">RSS</a>
+</div>
+<p class="font-mono text-[10px] uppercase text-slate-600 transition-opacity duration-200">
+            © 2024 YU. CS_STUDENT_MODE
+        </p>
+</footer>
+</body></html>
