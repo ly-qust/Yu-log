@@ -12,8 +12,10 @@ import TimelineView from '@/views/TimelineView.vue';
 import AdminArticleFormView from '@/views/admin/AdminArticleFormView.vue';
 import AdminArticlesView from '@/views/admin/AdminArticlesView.vue';
 import AdminCategoriesView from '@/views/admin/AdminCategoriesView.vue';
+import AdminCommentsView from '@/views/admin/AdminCommentsView.vue';
 import AdminDashboardView from '@/views/admin/AdminDashboardView.vue';
 import AdminLoginView from '@/views/admin/AdminLoginView.vue';
+import AdminMessagesView from '@/views/admin/AdminMessagesView.vue';
 import AdminShellView from '@/views/admin/AdminShellView.vue';
 import AdminTagsView from '@/views/admin/AdminTagsView.vue';
 import { useAuthStore } from '@/stores/auth';
@@ -41,6 +43,8 @@ const router = createRouter({
         { path: 'articles/:id/edit', name: 'admin-article-edit', component: AdminArticleFormView },
         { path: 'categories', name: 'admin-categories', component: AdminCategoriesView },
         { path: 'tags', name: 'admin-tags', component: AdminTagsView },
+        { path: 'comments', name: 'admin-comments', component: AdminCommentsView },
+        { path: 'messages', name: 'admin-messages', component: AdminMessagesView },
       ],
     },
     { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView },

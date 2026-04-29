@@ -19,6 +19,7 @@ spring:
       schema-locations:
         - classpath:db/V1__init_schema.sql
         - classpath:db/V3__add_article_reading_time.sql
+        - classpath:db/V4__add_comment_message_reply_fields.sql
       data-locations: classpath:db/V2__seed_data.sql
 
 logging:

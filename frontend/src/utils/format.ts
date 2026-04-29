@@ -51,3 +51,13 @@ export function formatArticleStatus(value?: string | null): string {
 
   return value ? statusMap[value] ?? value : '-';
 }
+
+export function formatInteractionStatus(value?: string | null): string {
+  const statusMap: Record<string, string> = {
+    PENDING: '待审核',
+    APPROVED: '已通过',
+    REJECTED: '已拒绝',
+  };
+
+  return value ? statusMap[value] ?? value : '-';
+}

@@ -12,6 +12,11 @@ const contentNavItems = [
   { label: '标签管理', to: '/admin/tags' },
 ];
 
+const interactionNavItems = [
+  { label: '评论审核', to: '/admin/comments' },
+  { label: '留言审核', to: '/admin/messages' },
+];
+
 async function logout() {
   await authStore.logout();
   await router.push('/admin/login');
@@ -48,6 +53,21 @@ async function logout() {
             <div class="mt-2 grid gap-2 border-l border-cyber-border/70 pl-3">
               <RouterLink
                 v-for="item in contentNavItems"
+                :key="item.to"
+                :to="item.to"
+                class="rounded-lg border border-transparent px-3 py-2 font-mono text-xs text-cyber-muted transition hover:border-cyber-cyan/50 hover:text-cyber-cyan"
+                active-class="border-cyber-cyan/70 bg-cyber-cyan/10 text-cyber-cyan"
+              >
+                {{ item.label }}
+              </RouterLink>
+            </div>
+          </div>
+
+          <div>
+            <p class="px-3 font-mono text-[11px] uppercase tracking-[0.18em] text-cyber-outline">互动管理</p>
+            <div class="mt-2 grid gap-2 border-l border-cyber-border/70 pl-3">
+              <RouterLink
+                v-for="item in interactionNavItems"
                 :key="item.to"
                 :to="item.to"
                 class="rounded-lg border border-transparent px-3 py-2 font-mono text-xs text-cyber-muted transition hover:border-cyber-cyan/50 hover:text-cyber-cyan"

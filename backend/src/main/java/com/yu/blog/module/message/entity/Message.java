@@ -20,6 +20,7 @@ public class Message {
     private String content;
     private String replyContent;
     private Long replyUserId;
+    private LocalDateTime repliedAt;
     private String status;
     private String ipHash;
     private String userAgent;

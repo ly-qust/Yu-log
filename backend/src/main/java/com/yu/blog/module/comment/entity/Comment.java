@@ -21,6 +21,8 @@ public class Comment {
     private String email;
     private String content;
     private String status;
+    private String adminReply;
+    private LocalDateTime repliedAt;
     private String ipHash;
     private String userAgent;
     private LocalDateTime createdAt;
