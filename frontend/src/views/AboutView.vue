@@ -1,135 +1,135 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 import { fetchAbout } from '@/api/about';
-import GlassPanel from '@/components/common/GlassPanel.vue';
+import AboutIdentity from '@/components/about/AboutIdentity.vue';
+import AboutSkillGroups from '@/components/about/AboutSkillGroups.vue';
+import EmptyState from '@/components/common/EmptyState.vue';
+import LoadingSkeleton from '@/components/common/LoadingSkeleton.vue';
 import PublicLayout from '@/components/layout/PublicLayout.vue';
 import type { AboutData } from '@/types/site';
-import { getErrorMessage } from '@/utils/errors';
+import { applySeo } from '@/utils/seo';
+import { safeExternalUrl } from '@/utils/links';
 
 const loading = ref(false);
 const errorMessage = ref('');
 const about = ref<AboutData | null>(null);
+let cleanupSeo = () => {};
 
-function toStringList(value: unknown): string[] {
-  if (Array.isArray(value)) {
-    return value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
-  }
-  return [];
+function stringList(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    : [];
 }
 
 const profile = computed(() => about.value?.profile || {});
-const careerDirection = computed(() => toStringList(profile.value.careerDirection));
+const careerDirection = computed(() => stringList(profile.value.careerDirection));
+const githubUrl = computed(() => safeExternalUrl(profile.value.githubUrl));
+const email = computed(() => {
+  const value = typeof profile.value.email === 'string' ? profile.value.email.trim() : '';
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? value : '';
+});
 
 async function loadAbout() {
   loading.value = true;
   errorMessage.value = '';
   try {
     about.value = await fetchAbout();
-  } catch (error) {
-    errorMessage.value = getErrorMessage(error, '关于我加载失败，请稍后重试');
+  } catch {
+    errorMessage.value = '个人资料暂时无法加载，请稍后再试。';
   } finally {
     loading.value = false;
   }
 }
 
-onMounted(loadAbout);
+onMounted(() => {
+  void loadAbout();
+  cleanupSeo = applySeo({
+    title: 'About — Personal Engineering Profile | YU.LOG',
+    description: 'Yu 的个人工程档案：当前方向、学习方式、公开技能与成长中的系统。',
+    canonicalPath: '/about',
+  });
+});
+
+onUnmounted(() => cleanupSeo());
 </script>
 
 <template>
   <PublicLayout>
-    <div class="space-y-6">
-      <GlassPanel>
-        <p class="terminal-label text-sm">profile // about_yu</p>
-        <p v-if="loading" class="mt-6 font-mono text-sm text-cyber-cyan">关于我加载中...</p>
-        <p v-else-if="errorMessage" class="mt-6 rounded-lg border border-cyber-danger/40 bg-cyber-danger/10 px-4 py-3 text-sm text-cyber-danger">
-          {{ errorMessage }}
-        </p>
+    <div class="about-page">
+      <header class="about-intro">
+        <p class="about-kicker">About / Profile</p>
+        <h1>Behind the systems,<br /><span>there is someone still learning.</span></h1>
+        <p class="about-intro__lede">这不是一份静态简历，而是一张持续更新的个人工程地图：我在什么方向上工作，又如何把学习留下来。</p>
+      </header>
 
-        <div v-else class="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
-          <div>
-            <div class="flex h-24 w-24 items-center justify-center rounded-2xl border border-cyber-cyan/40 bg-cyber-cyan/10 font-display text-3xl font-semibold text-cyber-cyanBright">
-              {{ String(profile.nickname || 'Yu').slice(0, 1).toUpperCase() }}
-            </div>
-            <h1 class="mt-5 font-display text-4xl font-semibold text-cyber-text">{{ profile.nickname || 'Yu' }}</h1>
-            <p class="mt-2 text-cyber-cyan">{{ profile.role || '计算机科学与技术学习者' }}</p>
-            <p class="mt-5 whitespace-pre-wrap break-words text-sm leading-7 text-cyber-muted">
-              {{ profile.description || '这里会展示后台配置的个人简介。' }}
-            </p>
-
-            <div class="mt-6 grid gap-3">
-              <p v-if="profile.location" class="text-sm text-cyber-muted">位置：{{ profile.location }}</p>
-              <p v-if="profile.email" class="text-sm text-cyber-muted">邮箱：{{ profile.email }}</p>
-              <a
-                v-if="profile.githubUrl"
-                class="w-fit rounded-lg border border-cyber-border px-3 py-2 font-mono text-xs text-cyber-cyan transition hover:border-cyber-cyan"
-                :href="String(profile.githubUrl)"
-                rel="noreferrer"
-                target="_blank"
-              >
-                GitHub
-              </a>
-            </div>
-          </div>
-
-          <div class="grid gap-4">
-            <div class="rounded-lg border border-cyber-border bg-cyber-base/45 p-5">
-              <p class="terminal-label text-sm">direction // career</p>
-              <h2 class="mt-3 font-display text-2xl font-semibold">职业方向</h2>
-              <div class="mt-4 flex flex-wrap gap-2">
-                <span
-                  v-for="item in careerDirection"
-                  :key="item"
-                  class="rounded-full border border-cyber-border bg-cyber-base/60 px-3 py-1 font-mono text-xs text-cyber-muted"
-                >
-                  {{ item }}
-                </span>
-                <span v-if="careerDirection.length === 0" class="text-sm text-cyber-muted">暂无职业方向配置。</span>
-              </div>
-            </div>
-
-            <div class="rounded-lg border border-cyber-border bg-cyber-base/45 p-5">
-              <p class="terminal-label text-sm">skills // stack</p>
-              <h2 class="mt-3 font-display text-2xl font-semibold">技能列表</h2>
-              <div class="mt-4 flex flex-wrap gap-2">
-                <span
-                  v-for="skill in about?.skills || []"
-                  :key="skill"
-                  class="rounded-full border border-cyber-border bg-cyber-base/60 px-3 py-1 font-mono text-xs text-cyber-muted"
-                >
-                  {{ skill }}
-                </span>
-                <span v-if="!about?.skills?.length" class="text-sm text-cyber-muted">暂无技能配置。</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </GlassPanel>
-
-      <div class="grid gap-6 lg:grid-cols-[1fr_1.1fr]">
-        <GlassPanel>
-          <p class="terminal-label text-sm">education // path</p>
-          <h2 class="mt-3 font-display text-2xl font-semibold">教育经历</h2>
-          <div class="mt-5 grid gap-3">
-            <div
-              v-for="item in about?.education || []"
-              :key="item"
-              class="rounded-lg border border-cyber-border bg-cyber-base/45 p-4 text-sm leading-7 text-cyber-muted"
-            >
-              {{ item }}
-            </div>
-            <p v-if="!about?.education?.length" class="text-sm text-cyber-muted">暂无教育经历配置。</p>
-          </div>
-        </GlassPanel>
-
-        <GlassPanel>
-          <p class="terminal-label text-sm">philosophy // learning</p>
-          <h2 class="mt-3 font-display text-2xl font-semibold">学习理念</h2>
-          <p class="mt-5 whitespace-pre-wrap break-words text-sm leading-7 text-cyber-muted">
-            {{ about?.learningPhilosophy || '暂无学习理念配置。' }}
-          </p>
-        </GlassPanel>
+      <div v-if="loading" class="about-loading" aria-label="个人资料加载中">
+        <LoadingSkeleton :lines="5" />
+        <div class="mt-10"><LoadingSkeleton :lines="7" /></div>
       </div>
+
+      <p v-else-if="errorMessage" class="about-error" role="alert">{{ errorMessage }}</p>
+
+      <EmptyState v-else-if="!about" title="个人档案正在生长" description="公开资料准备好后会出现在这里。" />
+
+      <article v-else class="about-content">
+        <div class="about-intro-grid">
+          <div>
+            <p class="about-section-label">01 / Who I am</p>
+            <p class="about-lead">{{ profile.description || '我正在通过课程、项目和问题排查积累可复用的工程经验。' }}</p>
+          </div>
+          <AboutIdentity :profile="profile" :career-direction="careerDirection" :github-url="githubUrl" :email="email" />
+        </div>
+
+        <AboutSkillGroups :skills="stringList(about.skills)" />
+
+        <div class="about-record-grid">
+          <section v-if="about.learningPhilosophy" class="about-record" aria-labelledby="about-learning-title">
+            <p class="about-section-label">03 / How I learn</p>
+            <h2 id="about-learning-title">Build it, explain it, keep it reusable.</h2>
+            <p>{{ about.learningPhilosophy }}</p>
+          </section>
+          <section v-if="about.education.length" class="about-record" aria-labelledby="about-education-title">
+            <p class="about-section-label">04 / The current chapter</p>
+            <h2 id="about-education-title">Education & preparation</h2>
+            <ul><li v-for="item in about.education" :key="item">{{ item }}</li></ul>
+          </section>
+        </div>
+
+        <section v-if="githubUrl || email" class="about-contact" aria-labelledby="about-contact-title">
+          <div><p class="about-section-label">05 / Open channels</p><h2 id="about-contact-title">Keep the loop open.</h2></div>
+          <div class="about-contact__links">
+            <a v-if="githubUrl" :href="githubUrl" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+            <a v-if="email" :href="`mailto:${email}`">{{ email }}</a>
+          </div>
+        </section>
+      </article>
     </div>
   </PublicLayout>
 </template>
+
+<style scoped>
+.about-page { width: min(100%, 76rem); margin: 0 auto; padding: clamp(2rem, 5vw, 5rem) 0 5rem; }
+.about-kicker, .about-section-label { font-family: 'JetBrains Mono', monospace; font-size: .64rem; text-transform: uppercase; letter-spacing: .15em; color: rgb(var(--color-brand-primary)); }
+.about-intro { border-bottom: 1px solid rgb(var(--color-border-subtle) / .68); padding-bottom: clamp(2.5rem, 6vw, 5rem); }
+.about-intro h1 { margin-top: 1.15rem; font-family: 'Space Grotesk', sans-serif; font-size: clamp(2.8rem, 8vw, 6.5rem); font-weight: 700; line-height: .96; letter-spacing: -.07em; color: rgb(var(--color-text-primary)); }
+.about-intro h1 span { color: rgb(var(--color-text-secondary)); }
+.about-intro__lede { max-width: 42rem; margin-top: 1.6rem; font-size: clamp(1rem, 2vw, 1.15rem); line-height: 1.9; color: rgb(var(--color-text-secondary)); }
+.about-loading { width: min(100%, 54rem); padding: 4rem 0; }
+.about-error { margin-top: 1.25rem; border-left: 2px solid rgb(var(--color-danger)); padding: .75rem 1rem; background: rgb(var(--color-danger) / .06); font-size: .82rem; color: rgb(var(--color-danger)); }
+.about-content { display: grid; gap: clamp(4rem, 9vw, 7rem); }
+.about-intro-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(18rem, .9fr); gap: clamp(2rem, 6vw, 6rem); align-items: start; padding-top: clamp(2.5rem, 6vw, 5rem); }
+.about-lead { max-width: 42rem; margin-top: 1.1rem; font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.65rem, 3.6vw, 2.75rem); font-weight: 500; line-height: 1.28; letter-spacing: -.035em; color: rgb(var(--color-text-primary)); }
+.about-record-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(2rem, 7vw, 6rem); }
+.about-record { border-top: 1px solid rgb(var(--color-border-subtle) / .68); padding-top: 1.35rem; }
+.about-record h2, .about-contact h2 { max-width: 28rem; margin-top: .7rem; font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.5rem, 3.5vw, 2.35rem); font-weight: 650; line-height: 1.15; letter-spacing: -.04em; }
+.about-record > p:last-child { max-width: 35rem; margin-top: 1.1rem; font-size: .95rem; line-height: 1.9; color: rgb(var(--color-text-secondary)); }
+.about-record ul { display: grid; gap: .8rem; margin-top: 1.2rem; }
+.about-record li { display: flex; gap: .75rem; font-size: .9rem; line-height: 1.7; color: rgb(var(--color-text-secondary)); }
+.about-record li::before { content: '↳'; color: rgb(var(--color-brand-primary)); }
+.about-contact { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2rem; border-top: 1px solid rgb(var(--color-border-subtle) / .68); padding-top: 1.35rem; }
+.about-contact__links { display: flex; flex-wrap: wrap; align-items: end; justify-content: end; gap: .7rem 1.2rem; padding-bottom: .25rem; }
+.about-contact__links a { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: rgb(var(--color-brand-primary)); transition: color 180ms; }
+.about-contact__links a:hover { color: rgb(var(--color-brand-strong)); }
+@media (max-width: 767px) { .about-intro-grid, .about-record-grid, .about-contact { grid-template-columns: 1fr; } .about-contact__links { justify-content: start; align-items: start; } }
+</style>

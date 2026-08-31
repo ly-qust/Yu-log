@@ -1,17 +1,23 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import { fetchNotes } from '@/api/notes';
-import GlassPanel from '@/components/common/GlassPanel.vue';
+import EmptyState from '@/components/common/EmptyState.vue';
+import LoadingSkeleton from '@/components/common/LoadingSkeleton.vue';
+import NoteNode from '@/components/notes/NoteNode.vue';
 import PublicLayout from '@/components/layout/PublicLayout.vue';
 import type { PageResult } from '@/types/api';
 import type { NoteItem } from '@/types/note';
-import { getErrorMessage } from '@/utils/errors';
-import { formatDate } from '@/utils/format';
+import { applySeo } from '@/utils/seo';
 
+const route = useRoute();
+const router = useRouter();
 const pageSize = 8;
 const loading = ref(false);
+const optionsLoading = ref(false);
 const errorMessage = ref('');
+const allNotes = ref<NoteItem[]>([]);
 const notePage = ref<PageResult<NoteItem>>({
   list: [],
   pageNum: 1,
@@ -21,159 +27,158 @@ const notePage = ref<PageResult<NoteItem>>({
   hasNext: false,
   hasPrevious: false,
 });
+const filters = reactive({ keyword: '', topic: '' });
+let requestSequence = 0;
+let cleanupSeo = () => {};
 
-const filters = reactive({
-  keyword: '',
-  topic: '',
-  page: 1,
-});
+const hasActiveFilters = computed(() => Boolean(filters.keyword || filters.topic));
+const topicOptions = computed(() => [...new Set(allNotes.value.map((note) => note.topic?.trim()).filter((topic): topic is string => Boolean(topic)))].sort((a, b) => a.localeCompare(b)));
+const resultDescription = computed(() => loading.value ? '正在读取知识节点…' : hasActiveFilters.value ? `找到 ${notePage.value.total} 条匹配笔记` : `数字花园中有 ${notePage.value.total} 条公开笔记`);
 
-async function loadNotes() {
-  loading.value = true;
-  errorMessage.value = '';
+function queryValue(value: unknown): string {
+  return Array.isArray(value) ? String(value[0] || '') : typeof value === 'string' ? value : '';
+}
+
+function normalizedPage(value: unknown): number {
+  const page = Number.parseInt(queryValue(value), 10);
+  return Number.isFinite(page) && page > 0 ? page : 1;
+}
+
+function buildQuery(page = 1) {
+  return {
+    ...(filters.keyword.trim() ? { q: filters.keyword.trim() } : {}),
+    ...(filters.topic ? { topic: filters.topic } : {}),
+    ...(page > 1 ? { page: String(page) } : {}),
+  };
+}
+
+async function loadAllNotes() {
+  optionsLoading.value = true;
   try {
-    notePage.value = await fetchNotes({
-      keyword: filters.keyword.trim() || undefined,
-      topic: filters.topic.trim() || undefined,
-      page: filters.page,
-      size: pageSize,
-    });
-  } catch (error) {
-    errorMessage.value = getErrorMessage(error, '笔记列表加载失败，请稍后重试');
+    const result = await fetchNotes({ page: 1, size: 100 });
+    allNotes.value = result.list;
+  } catch {
+    allNotes.value = [];
   } finally {
-    loading.value = false;
+    optionsLoading.value = false;
   }
 }
 
-async function submitFilters() {
-  filters.page = 1;
-  await loadNotes();
+async function loadNotes(page: number) {
+  const requestId = ++requestSequence;
+  loading.value = true;
+  errorMessage.value = '';
+  try {
+    const result = await fetchNotes({ keyword: filters.keyword.trim() || undefined, topic: filters.topic || undefined, page, size: pageSize });
+    if (requestId === requestSequence) notePage.value = result;
+  } catch {
+    if (requestId === requestSequence) errorMessage.value = '笔记暂时无法加载，请稍后再试。';
+  } finally {
+    if (requestId === requestSequence) loading.value = false;
+  }
+}
+
+function syncFromRoute() {
+  filters.keyword = queryValue(route.query.q);
+  filters.topic = queryValue(route.query.topic);
+  void loadNotes(normalizedPage(route.query.page));
+}
+
+async function updateRoute(page = 1) {
+  const target = { name: 'notes' as const, query: buildQuery(page) };
+  const targetPath = router.resolve(target).fullPath;
+  if (targetPath === route.fullPath) {
+    await loadNotes(page);
+    return;
+  }
+  await router.push(target);
 }
 
 async function clearFilters() {
   filters.keyword = '';
   filters.topic = '';
-  filters.page = 1;
-  await loadNotes();
+  await updateRoute(1);
 }
 
-async function changePage(page: number) {
-  if (page < 1 || (notePage.value.totalPages > 0 && page > notePage.value.totalPages)) {
-    return;
-  }
-  filters.page = page;
-  await loadNotes();
-}
+onMounted(() => {
+  void loadAllNotes();
+  cleanupSeo = applySeo({
+    title: 'Notes — Digital Garden | YU.LOG',
+    description: 'YU.LOG 的数字花园：记录仍在生长的学习碎片、工程命令和知识节点。',
+    canonicalPath: '/notes',
+  });
+});
 
-onMounted(loadNotes);
+watch(() => route.fullPath, syncFromRoute, { immediate: true });
+
+onUnmounted(() => cleanupSeo());
 </script>
 
 <template>
   <PublicLayout>
-    <div class="space-y-6">
-      <GlassPanel>
-        <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p class="terminal-label text-sm">digital_garden // live_notes</p>
-            <h1 class="mt-4 font-display text-3xl font-semibold text-cyber-text">数字花园笔记</h1>
-            <p class="mt-3 max-w-2xl text-cyber-muted">
-              这些笔记更像持续生长的节点，用来沉淀课程设计、实习准备、排障记录和工程化想法。
-            </p>
-          </div>
-
-          <form class="grid gap-3 lg:min-w-[560px] lg:grid-cols-[1.3fr_1fr_auto]" @submit.prevent="submitFilters">
-            <input
-              v-model="filters.keyword"
-              class="rounded-lg border border-cyber-border bg-cyber-base/70 px-4 py-3 text-sm text-cyber-text outline-none transition placeholder:text-cyber-outline focus:border-cyber-cyan"
-              placeholder="搜索标题或内容"
-              type="search"
-            />
-            <input
-              v-model="filters.topic"
-              class="rounded-lg border border-cyber-border bg-cyber-base/70 px-4 py-3 text-sm text-cyber-text outline-none transition placeholder:text-cyber-outline focus:border-cyber-cyan"
-              placeholder="主题，例如 Linux"
-              type="search"
-            />
-            <button
-              class="rounded-lg bg-cyber-cyanBright px-5 py-3 font-mono text-xs font-semibold text-cyber-base transition hover:bg-cyber-cyan disabled:opacity-50"
-              :disabled="loading"
-              type="submit"
-            >
-              查询
-            </button>
-          </form>
+    <div class="notes-page">
+      <header class="notes-intro">
+        <p class="notes-kicker">Notes / Digital garden</p>
+        <div class="notes-intro__row">
+          <div><h1>Small pieces of knowledge,<br /><span>still growing.</span></h1><p>文章保存阶段性结论，笔记保留知识仍在形成时的样子。</p></div>
+          <p class="notes-result" aria-live="polite">{{ resultDescription }}</p>
         </div>
+        <div class="notes-stats" aria-label="笔记统计"><span><strong>{{ allNotes.length }}</strong> public nodes</span><span><strong>{{ topicOptions.length }}</strong> topics</span><span>Updated by learning</span></div>
+      </header>
 
-        <button class="mt-4 font-mono text-xs text-cyber-cyan transition hover:text-cyber-cyanBright" type="button" @click="clearFilters">
-          清空筛选
-        </button>
-      </GlassPanel>
+      <section class="notes-controls" aria-label="笔记筛选">
+        <form class="grid gap-3 lg:grid-cols-[minmax(13rem,1.5fr)_minmax(11rem,1fr)_auto]" @submit.prevent="updateRoute(1)">
+          <label class="notes-field"><span>Search</span><input v-model="filters.keyword" type="search" placeholder="标题、摘要或内容" /></label>
+          <label class="notes-field"><span>Topic</span><select v-model="filters.topic" :disabled="optionsLoading" @change="updateRoute(1)"><option value="">All topics</option><option v-for="topic in topicOptions" :key="topic" :value="topic">{{ topic }}</option></select></label>
+          <button class="notes-submit" :disabled="loading" type="submit">Search</button>
+        </form>
+        <button v-if="hasActiveFilters" class="notes-clear" type="button" @click="clearFilters">Reset all filters</button>
+      </section>
 
-      <div v-if="errorMessage" class="rounded-lg border border-cyber-danger/40 bg-cyber-danger/10 px-4 py-3 text-sm text-cyber-danger">
-        {{ errorMessage }}
-      </div>
+      <p v-if="errorMessage" class="notes-error" role="alert">{{ errorMessage }}</p>
 
-      <GlassPanel v-if="loading">
-        <p class="font-mono text-sm text-cyber-cyan">笔记加载中...</p>
-      </GlassPanel>
+      <section class="notes-results" aria-label="数字花园笔记列表">
+        <div v-if="loading" class="notes-loading"><div v-for="index in 3" :key="index"><LoadingSkeleton :lines="4" /></div></div>
+        <EmptyState v-else-if="notePage.list.length === 0" :title="hasActiveFilters ? '没有匹配的笔记' : '数字花园正在生长'" :description="hasActiveFilters ? '试试减少筛选条件，或换一个关键词。' : '新的知识节点准备好公开后会出现在这里。'"><template v-if="hasActiveFilters" #action><button class="notes-empty-action" type="button" @click="clearFilters">清空筛选</button></template></EmptyState>
+        <div v-else class="notes-list"><NoteNode v-for="(note, index) in notePage.list" :key="note.id" :note="note" :index="(notePage.pageNum - 1) * pageSize + index" /></div>
+      </section>
 
-      <GlassPanel v-else-if="notePage.list.length === 0">
-        <p class="terminal-label text-sm">notes // empty</p>
-        <h2 class="mt-3 font-display text-2xl font-semibold">暂无公开笔记</h2>
-        <p class="mt-2 text-cyber-muted">换个关键词、主题或清空筛选试试。</p>
-      </GlassPanel>
-
-      <div v-else class="grid gap-4 md:grid-cols-2">
-        <article
-          v-for="note in notePage.list"
-          :key="note.id"
-          class="glass-panel rounded-glass p-5 transition hover:border-cyber-cyan/70 hover:shadow-glow"
-        >
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="rounded-full border border-cyber-cyan/40 px-2.5 py-1 font-mono text-[11px] text-cyber-cyan">
-              {{ note.topic || '未分类主题' }}
-            </span>
-            <span class="font-mono text-xs text-cyber-outline">{{ formatDate(note.createdAt) }}</span>
-          </div>
-
-          <RouterLink :to="`/notes/${note.id}`" class="mt-4 block font-display text-2xl font-semibold text-cyber-text transition hover:text-cyber-cyan">
-            {{ note.title }}
-          </RouterLink>
-          <p class="mt-2 min-h-14 text-sm leading-7 text-cyber-muted">{{ note.summary || '暂无摘要。' }}</p>
-
-          <div class="mt-4 flex flex-wrap gap-2">
-            <span
-              v-for="tag in note.tags"
-              :key="tag"
-              class="rounded-full border border-cyber-border bg-cyber-base/60 px-2.5 py-1 font-mono text-[11px] text-cyber-muted"
-            >
-              #{{ tag }}
-            </span>
-          </div>
-
-          <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p class="font-mono text-xs text-cyber-outline">
-              创建 {{ formatDate(note.createdAt) }} · 更新 {{ formatDate(note.updatedAt) }}
-            </p>
-            <RouterLink
-              class="w-fit rounded-lg border border-cyber-cyan/60 px-3 py-2 font-mono text-xs text-cyber-cyan transition hover:bg-cyber-cyan hover:text-cyber-base"
-              :to="`/notes/${note.id}`"
-            >
-              查看笔记
-            </RouterLink>
-          </div>
-        </article>
-      </div>
-
-      <div v-if="notePage.totalPages > 1" class="flex items-center justify-between rounded-lg border border-cyber-border bg-cyber-panel/60 px-4 py-3">
-        <button class="rounded-lg border border-cyber-border px-4 py-2 font-mono text-xs text-cyber-muted disabled:opacity-40" :disabled="!notePage.hasPrevious || loading" type="button" @click="changePage(notePage.pageNum - 1)">
-          上一页
-        </button>
-        <p class="font-mono text-xs text-cyber-muted">第 {{ notePage.pageNum }} / {{ notePage.totalPages }} 页 · 共 {{ notePage.total }} 条笔记</p>
-        <button class="rounded-lg border border-cyber-border px-4 py-2 font-mono text-xs text-cyber-muted disabled:opacity-40" :disabled="!notePage.hasNext || loading" type="button" @click="changePage(notePage.pageNum + 1)">
-          下一页
-        </button>
-      </div>
+      <nav v-if="!loading && notePage.totalPages > 1" class="notes-pagination" aria-label="笔记分页"><button :disabled="!notePage.hasPrevious" type="button" @click="updateRoute(notePage.pageNum - 1)">← Previous</button><span>Page {{ notePage.pageNum }} / {{ notePage.totalPages }}</span><button :disabled="!notePage.hasNext" type="button" @click="updateRoute(notePage.pageNum + 1)">Next →</button></nav>
     </div>
   </PublicLayout>
 </template>
+
+<style scoped>
+.notes-page { width: min(100%, 76rem); margin: 0 auto; padding: clamp(2rem, 5vw, 5rem) 0 5rem; }
+.notes-kicker, .notes-field > span { font-family: 'JetBrains Mono', monospace; font-size: .64rem; text-transform: uppercase; letter-spacing: .15em; color: rgb(var(--color-brand-primary)); }
+.notes-intro { border-bottom: 1px solid rgb(var(--color-border-subtle) / .68); padding-bottom: clamp(2.5rem, 6vw, 5rem); }
+.notes-intro__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2rem; align-items: end; margin-top: 1.15rem; }
+.notes-intro h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(2.8rem, 8vw, 6.5rem); font-weight: 700; line-height: .96; letter-spacing: -.07em; color: rgb(var(--color-text-primary)); }
+.notes-intro h1 span { color: rgb(var(--color-text-secondary)); }
+.notes-intro__row > div > p { max-width: 38rem; margin-top: 1.5rem; font-size: 1rem; line-height: 1.85; color: rgb(var(--color-text-secondary)); }
+.notes-result { padding-bottom: .3rem; font-family: 'JetBrains Mono', monospace; font-size: .66rem; color: rgb(var(--color-text-muted)); }
+.notes-stats { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; margin-top: 2.5rem; font-family: 'JetBrains Mono', monospace; font-size: .62rem; color: rgb(var(--color-text-muted)); }
+.notes-stats strong { font-size: 1.15rem; color: rgb(var(--color-brand-primary)); }
+.notes-controls { border-bottom: 1px solid rgb(var(--color-border-subtle) / .68); padding: 1.25rem 0; }
+.notes-field { display: grid; gap: .42rem; }
+.notes-field input, .notes-field select { width: 100%; min-height: 2.8rem; border: 1px solid rgb(var(--color-border-subtle) / .82); border-radius: .55rem; padding: 0 .75rem; background: rgb(var(--color-surface-elevated) / .58); font-size: .78rem; color: rgb(var(--color-text-primary)); outline: none; }
+.notes-field input:focus, .notes-field select:focus { border-color: rgb(var(--color-brand-primary)); box-shadow: 0 0 0 3px rgb(var(--color-brand-primary) / .1); }
+.notes-submit { align-self: end; min-height: 2.8rem; border-radius: .55rem; padding: 0 1.15rem; background: rgb(var(--color-brand-primary)); font-family: 'JetBrains Mono', monospace; font-size: .65rem; font-weight: 700; color: rgb(var(--color-brand-contrast)); }
+.notes-submit:hover:not(:disabled) { filter: brightness(1.08); }
+.notes-submit:disabled { cursor: wait; opacity: .55; }
+.notes-clear { margin-top: .85rem; font-family: 'JetBrains Mono', monospace; font-size: .62rem; color: rgb(var(--color-text-muted)); }
+.notes-clear:hover { color: rgb(var(--color-brand-primary)); }
+.notes-error { margin-top: 1rem; border-left: 2px solid rgb(var(--color-danger)); padding: .7rem 1rem; background: rgb(var(--color-danger) / .06); font-size: .8rem; color: rgb(var(--color-danger)); }
+.notes-results { min-height: 20rem; }
+.notes-loading { display: grid; gap: 1rem; max-width: 52rem; margin: 0 auto; padding-top: 2rem; }
+.notes-loading > div { border-bottom: 1px solid rgb(var(--color-border-subtle) / .58); padding: 1.5rem 0; }
+.notes-list { max-width: 58rem; margin: 1rem auto 0; }
+.notes-pagination { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; padding-top: 2rem; font-family: 'JetBrains Mono', monospace; font-size: .65rem; color: rgb(var(--color-text-muted)); }
+.notes-pagination button { justify-self: start; min-height: 2.5rem; border: 1px solid rgb(var(--color-border-subtle)); border-radius: .5rem; padding: 0 .8rem; color: rgb(var(--color-text-secondary)); }
+.notes-pagination button:last-child { justify-self: end; }
+.notes-pagination button:hover:not(:disabled) { border-color: rgb(var(--color-brand-primary) / .55); color: rgb(var(--color-brand-primary)); }
+.notes-pagination button:disabled { cursor: not-allowed; opacity: .35; }
+.notes-empty-action { border: 1px solid rgb(var(--color-border-subtle)); border-radius: .5rem; padding: .6rem .8rem; font-family: 'JetBrains Mono', monospace; font-size: .62rem; color: rgb(var(--color-text-secondary)); }
+@media (max-width: 767px) { .notes-intro__row { grid-template-columns: 1fr; gap: 1rem; } .notes-result { padding-bottom: 0; } }
+@media (max-width: 479px) { .notes-stats { gap: .6rem 1rem; } .notes-pagination span { text-align: center; } .notes-pagination button { padding: 0 .6rem; font-size: .58rem; } }
+</style>
