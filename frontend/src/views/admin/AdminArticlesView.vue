@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 import {
   deleteAdminArticle,
@@ -8,12 +9,15 @@ import {
   updateAdminArticleTop,
 } from '@/api/adminArticles';
 import { fetchAdminCategories } from '@/api/adminCategories';
+import { useAdminFeedbackStore } from '@/stores/adminFeedback';
 import type { PageResult } from '@/types/api';
 import type { AdminArticleListItem, AdminArticleQuery, AdminCategory, ArticleStatus } from '@/types/content';
 import { getErrorMessage } from '@/utils/errors';
 import { formatArticleStatus, formatCount, formatDateTime } from '@/utils/format';
 
 const pageSize = 10;
+const route = useRoute();
+const feedback = useAdminFeedbackStore();
 const loading = ref(false);
 const actionLoadingId = ref('');
 const errorMessage = ref('');
@@ -32,7 +36,7 @@ const articlePage = ref<PageResult<AdminArticleListItem>>({
 const filters = reactive<AdminArticleQuery>({
   keyword: '',
   categoryId: '',
-  status: '',
+  status: route.query.status === 'DRAFT' || route.query.status === 'PUBLISHED' || route.query.status === 'HIDDEN' ? route.query.status : '',
   page: 1,
   size: pageSize,
 });
@@ -79,9 +83,11 @@ async function runArticleAction(id: string, action: () => Promise<unknown>, mess
   try {
     await action();
     successMessage.value = message;
+    feedback.success(message);
     await loadArticles();
   } catch (error) {
     errorMessage.value = getErrorMessage(error, '操作失败，请稍后重试');
+    feedback.error(errorMessage.value);
   } finally {
     actionLoadingId.value = '';
   }
@@ -96,7 +102,13 @@ async function toggleTop(article: AdminArticleListItem) {
 }
 
 async function removeArticle(article: AdminArticleListItem) {
-  if (!window.confirm(`确认删除文章「${article.title}」吗？`)) {
+  const confirmed = await feedback.confirm({
+    title: '删除文章',
+    message: `确定要删除「${article.title}」吗？此操作不可恢复。`,
+    confirmLabel: '删除文章',
+    danger: true,
+  });
+  if (!confirmed) {
     return;
   }
 

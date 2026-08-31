@@ -2,12 +2,14 @@
 import { onMounted, reactive, ref } from 'vue';
 
 import { deleteAdminTimelineEvent, fetchAdminTimeline } from '@/api/adminTimeline';
+import { useAdminFeedbackStore } from '@/stores/adminFeedback';
 import type { PageResult } from '@/types/api';
 import type { AdminTimelineQuery, TimelineEventItem } from '@/types/timeline';
 import { getErrorMessage } from '@/utils/errors';
 import { formatBoolean, formatDate, formatDateTime } from '@/utils/format';
 
 const pageSize = 10;
+const feedback = useAdminFeedbackStore();
 const loading = ref(false);
 const actionLoadingId = ref('');
 const errorMessage = ref('');
@@ -60,7 +62,13 @@ async function changePage(page: number) {
 }
 
 async function removeEvent(event: TimelineEventItem) {
-  if (!window.confirm(`确认删除时间线「${event.title}」吗？`)) {
+  const confirmed = await feedback.confirm({
+    title: '删除 Timeline 节点',
+    message: `确定要删除「${event.title}」吗？此操作不可恢复。`,
+    confirmLabel: '删除节点',
+    danger: true,
+  });
+  if (!confirmed) {
     return;
   }
 
@@ -70,9 +78,11 @@ async function removeEvent(event: TimelineEventItem) {
   try {
     await deleteAdminTimelineEvent(event.id);
     successMessage.value = '时间线已删除';
+    feedback.success('时间线已删除');
     await loadTimeline();
   } catch (error) {
     errorMessage.value = getErrorMessage(error, '时间线删除失败，请稍后重试');
+    feedback.error(errorMessage.value);
   } finally {
     actionLoadingId.value = '';
   }

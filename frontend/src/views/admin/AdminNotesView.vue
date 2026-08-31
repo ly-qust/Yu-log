@@ -2,12 +2,14 @@
 import { onMounted, reactive, ref } from 'vue';
 
 import { deleteAdminNote, fetchAdminNotes } from '@/api/adminNotes';
+import { useAdminFeedbackStore } from '@/stores/adminFeedback';
 import type { PageResult } from '@/types/api';
 import type { AdminNoteQuery, NoteItem } from '@/types/note';
 import { getErrorMessage } from '@/utils/errors';
 import { formatBoolean, formatDateTime } from '@/utils/format';
 
 const pageSize = 10;
+const feedback = useAdminFeedbackStore();
 const loading = ref(false);
 const actionLoadingId = ref('');
 const errorMessage = ref('');
@@ -62,7 +64,13 @@ async function changePage(page: number) {
 }
 
 async function removeNote(note: NoteItem) {
-  if (!window.confirm(`确认删除笔记「${note.title}」吗？`)) {
+  const confirmed = await feedback.confirm({
+    title: '删除 Note',
+    message: `确定要删除「${note.title}」吗？此操作不可恢复。`,
+    confirmLabel: '删除 Note',
+    danger: true,
+  });
+  if (!confirmed) {
     return;
   }
 
@@ -72,9 +80,11 @@ async function removeNote(note: NoteItem) {
   try {
     await deleteAdminNote(note.id);
     successMessage.value = '笔记已删除';
+    feedback.success('笔记已删除');
     await loadNotes();
   } catch (error) {
     errorMessage.value = getErrorMessage(error, '笔记删除失败，请稍后重试');
+    feedback.error(errorMessage.value);
   } finally {
     actionLoadingId.value = '';
   }

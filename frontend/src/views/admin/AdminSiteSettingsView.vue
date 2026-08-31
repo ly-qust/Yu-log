@@ -1,65 +1,119 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 
-import {
-  fetchAdminSiteSettings,
-  updateAdminSiteSetting,
-  updateAdminSiteSettingsBatch,
-} from '@/api/adminSiteSettings';
+import { fetchAdminSiteSettings, updateAdminSiteSetting, updateAdminSiteSettingsBatch } from '@/api/adminSiteSettings';
+import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
+import BaseButton from '@/components/common/BaseButton.vue';
+import BaseInput from '@/components/common/BaseInput.vue';
+import BaseTextarea from '@/components/common/BaseTextarea.vue';
 import ImageUploader from '@/components/common/ImageUploader.vue';
+import { useUnsavedChangesGuard } from '@/composables/useUnsavedChangesGuard';
+import { useAdminFeedbackStore } from '@/stores/adminFeedback';
 import type { SiteSetting, SiteSettingBatchItem } from '@/types/site';
 import { getErrorMessage } from '@/utils/errors';
 import { formatDateTime } from '@/utils/format';
 
+interface ProfileFields {
+  nickname: string;
+  role: string;
+  avatar: string;
+  description: string;
+  location: string;
+  email: string;
+  githubUrl: string;
+  careerDirection: string[];
+}
+
+const feedback = useAdminFeedbackStore();
 const loading = ref(false);
 const savingKey = ref('');
 const savingAll = ref(false);
 const errorMessage = ref('');
-const successMessage = ref('');
-const uploadedImageUrl = ref('');
 const settings = ref<SiteSetting[]>([]);
-const editableValues = ref<Record<string, string>>({});
+const editableValues = reactive<Record<string, string>>({});
+const structuredLists = reactive<Record<string, string[]>>({});
+const profileExtras = ref<Record<string, unknown>>({});
+const profile = reactive<ProfileFields>({ nickname: '', role: '', avatar: '', description: '', location: '', email: '', githubUrl: '', careerDirection: [] });
 
-const groupLabels: Record<string, string> = {
-  home: '首页配置',
-  about: '关于我',
-  social: '社交链接',
-  site: '站点配置',
-};
-
+const groupLabels: Record<string, string> = { home: '首页配置', about: '关于我', social: '社交链接', site: '站点配置', general: '通用配置' };
 const keyLabels: Record<string, string> = {
-  'site.hero.title': '首页标题',
-  'site.hero.subtitle': '首页副标题',
-  'site.hero.description': '首页描述',
-  'site.hero.status_text': '首页状态文字',
-  'site.currently_learning': '当前学习内容',
-  'site.about.profile': '关于我简介',
-  'site.about.skills': '技能列表',
-  'site.about.education': '教育经历',
-  'site.about.philosophy': '学习理念',
-  'site.social.github': 'GitHub 链接',
+  'site.hero.title': '首页标题', 'site.hero.subtitle': '首页副标题', 'site.hero.description': '首页描述', 'site.hero.status_text': '首页状态文字',
+  'site.currently_learning': '当前学习内容', 'site.about.profile': '关于我简介', 'site.about.skills': '技能列表', 'site.about.education': '教育经历',
+  'site.about.philosophy': '学习理念', 'site.social.github': 'GitHub 链接',
 };
+const profileFields: Array<{ key: keyof Omit<ProfileFields, 'careerDirection'>; label: string }> = [
+  { key: 'nickname', label: '昵称' }, { key: 'role', label: '身份 / 角色' }, { key: 'location', label: '所在位置' },
+  { key: 'email', label: '邮箱' }, { key: 'githubUrl', label: 'GitHub 地址' },
+];
+const listSettingKeys = new Set(['site.about.skills', 'site.about.education', 'site.currently_learning']);
 
 const groupedSettings = computed(() => {
   const groups = new Map<string, SiteSetting[]>();
   for (const setting of settings.value) {
-    const groupName = setting.groupName || 'site';
+    const groupName = setting.groupName || 'general';
     groups.set(groupName, [...(groups.get(groupName) || []), setting]);
   }
-  return Array.from(groups.entries()).map(([groupName, items]) => ({
-    groupName,
-    label: groupLabels[groupName] || groupName,
-    items,
-  }));
+  return Array.from(groups.entries()).map(([groupName, items]) => ({ groupName, label: groupLabels[groupName] || groupName, items }));
 });
 
-function isJsonSetting(setting: SiteSetting): boolean {
+function isJsonSetting(setting: SiteSetting) {
   return setting.settingType === 'JSON' || setting.settingValue.trim().startsWith('{') || setting.settingValue.trim().startsWith('[');
+}
+function isProfileSetting(setting: SiteSetting) { return setting.settingKey === 'site.about.profile'; }
+function isListSetting(setting: SiteSetting) { return listSettingKeys.has(setting.settingKey); }
+
+function parseStructuredSetting(setting: SiteSetting) {
+  if (!isProfileSetting(setting) && !isListSetting(setting)) return;
+  try {
+    const value = JSON.parse(setting.settingValue || (isProfileSetting(setting) ? '{}' : '[]')) as unknown;
+    if (isProfileSetting(setting) && value && typeof value === 'object' && !Array.isArray(value)) {
+      const object = value as Record<string, unknown>;
+      profileExtras.value = { ...object };
+      for (const field of profileFields) profile[field.key] = typeof object[field.key] === 'string' ? object[field.key] as string : '';
+      profile.description = typeof object.description === 'string' ? object.description : '';
+      profile.avatar = typeof object.avatar === 'string' ? object.avatar : '';
+      profile.careerDirection = Array.isArray(object.careerDirection) ? object.careerDirection.filter((item): item is string => typeof item === 'string') : [];
+    } else if (isListSetting(setting)) {
+      structuredLists[setting.settingKey] = Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+    }
+  } catch {
+    errorMessage.value = `${keyLabels[setting.settingKey] || setting.settingKey} 的 JSON 数据无法解析，请使用 Advanced JSON 修复。`;
+  }
 }
 
 function initEditableValues(data: SiteSetting[]) {
-  editableValues.value = Object.fromEntries(data.map((setting) => [setting.settingKey, setting.settingValue || '']));
+  for (const key of Object.keys(editableValues)) delete editableValues[key];
+  for (const setting of data) {
+    editableValues[setting.settingKey] = setting.settingValue || '';
+    parseStructuredSetting(setting);
+  }
 }
+
+function listValue(key: string) { return structuredLists[key] || []; }
+function addListItem(key: string) { if (!structuredLists[key]) structuredLists[key] = []; structuredLists[key].push(''); }
+function removeListItem(key: string, index: number) { const items = listValue(key); items.splice(index, 1); if (!items.length) items.push(''); }
+function addCareerDirection() { profile.careerDirection.push(''); }
+function removeCareerDirection(index: number) { profile.careerDirection.splice(index, 1); }
+
+function settingValue(setting: SiteSetting) {
+  if (isProfileSetting(setting)) return JSON.stringify({ ...profileExtras.value, ...profile, careerDirection: profile.careerDirection.filter(Boolean) }, null, 2);
+  if (isListSetting(setting)) return JSON.stringify(listValue(setting.settingKey).map((item) => item.trim()).filter(Boolean));
+  return editableValues[setting.settingKey] || '';
+}
+
+function validateJson(setting: SiteSetting, value: string) {
+  if (!isJsonSetting(setting) || isProfileSetting(setting) || isListSetting(setting)) return true;
+  try { JSON.parse(value); return true; } catch { errorMessage.value = `${keyLabels[setting.settingKey] || setting.settingKey} 不是合法 JSON，已阻止保存。`; return false; }
+}
+
+function payloadFor(setting: SiteSetting): SiteSettingBatchItem | null {
+  const value = settingValue(setting);
+  if (!validateJson(setting, value)) return null;
+  return { settingKey: setting.settingKey, settingValue: value, settingType: setting.settingType || (isJsonSetting(setting) ? 'JSON' : 'TEXT'), groupName: setting.groupName || 'general', description: setting.description || '' };
+}
+
+function snapshot() { return JSON.stringify({ editableValues, structuredLists, profile }); }
+const guard = useUnsavedChangesGuard(snapshot, { label: '站点配置', isSaving: () => savingAll.value || Boolean(savingKey.value) });
 
 async function loadSettings() {
   loading.value = true;
@@ -68,53 +122,35 @@ async function loadSettings() {
     const data = await fetchAdminSiteSettings();
     settings.value = data;
     initEditableValues(data);
-  } catch (error) {
-    errorMessage.value = getErrorMessage(error, '站点配置加载失败，请稍后重试');
-  } finally {
-    loading.value = false;
-  }
+    guard.markClean();
+  } catch (error) { errorMessage.value = getErrorMessage(error, '站点配置加载失败，请稍后重试'); }
+  finally { loading.value = false; }
 }
 
 async function saveSetting(setting: SiteSetting) {
+  const payload = payloadFor(setting);
+  if (!payload) return;
   savingKey.value = setting.settingKey;
   errorMessage.value = '';
-  successMessage.value = '';
   try {
-    await updateAdminSiteSetting(setting.settingKey, {
-      settingValue: editableValues.value[setting.settingKey] || '',
-      settingType: setting.settingType || 'TEXT',
-      groupName: setting.groupName || 'site',
-      description: setting.description || '',
-    });
-    successMessage.value = `${keyLabels[setting.settingKey] || setting.settingKey} 已保存`;
+    await updateAdminSiteSetting(setting.settingKey, payload);
+    feedback.success(`${keyLabels[setting.settingKey] || setting.settingKey} 已保存。`);
     await loadSettings();
-  } catch (error) {
-    errorMessage.value = getErrorMessage(error, '配置保存失败，请稍后重试');
-  } finally {
-    savingKey.value = '';
-  }
+  } catch (error) { errorMessage.value = getErrorMessage(error, '配置保存失败，请稍后重试'); feedback.error(errorMessage.value); }
+  finally { savingKey.value = ''; }
 }
 
 async function saveAll() {
+  const payloads = settings.value.map(payloadFor);
+  if (payloads.some((item) => item === null)) return;
   savingAll.value = true;
   errorMessage.value = '';
-  successMessage.value = '';
   try {
-    const payload: SiteSettingBatchItem[] = settings.value.map((setting) => ({
-      settingKey: setting.settingKey,
-      settingValue: editableValues.value[setting.settingKey] || '',
-      settingType: setting.settingType || 'TEXT',
-      groupName: setting.groupName || 'site',
-      description: setting.description || '',
-    }));
-    await updateAdminSiteSettingsBatch(payload);
-    successMessage.value = '站点配置已批量保存';
+    await updateAdminSiteSettingsBatch(payloads as SiteSettingBatchItem[]);
+    feedback.success('站点配置已批量保存。');
     await loadSettings();
-  } catch (error) {
-    errorMessage.value = getErrorMessage(error, '批量保存失败，请稍后重试');
-  } finally {
-    savingAll.value = false;
-  }
+  } catch (error) { errorMessage.value = getErrorMessage(error, '批量保存失败，请稍后重试'); feedback.error(errorMessage.value); }
+  finally { savingAll.value = false; }
 }
 
 onMounted(loadSettings);
@@ -122,84 +158,38 @@ onMounted(loadSettings);
 
 <template>
   <section class="space-y-5">
-    <div class="glass-panel rounded-glass p-6">
-      <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-        <div>
-          <p class="terminal-label text-sm">admin_site // settings</p>
-          <h2 class="mt-3 font-display text-3xl font-semibold">站点配置</h2>
-          <p class="mt-2 text-sm text-cyber-muted">编辑首页、关于我、当前学习和社交链接配置；JSON 配置先使用原文编辑。</p>
-        </div>
-        <button
-          class="rounded-lg bg-cyber-cyanBright px-4 py-3 font-mono text-xs font-semibold text-cyber-base transition hover:bg-cyber-cyan disabled:opacity-50"
-          :disabled="savingAll || loading"
-          type="button"
-          @click="saveAll"
-        >
-          {{ savingAll ? '保存中...' : '批量保存' }}
-        </button>
-      </div>
-    </div>
+    <AdminPageHeader eyebrow="system // site settings" title="站点配置" description="常用配置使用结构化表单维护；只有真正开放的未知 JSON 才进入 Advanced JSON，保存前会校验格式。">
+      <template #actions><div class="flex flex-wrap gap-2"><span class="admin-editor-state" :class="guard.isDirty ? 'is-dirty' : 'is-clean'"><i aria-hidden="true"></i>{{ guard.isDirty ? 'Unsaved changes' : 'Saved' }}</span><BaseButton :loading="savingAll" :disabled="loading" size="sm" @click="saveAll">批量保存</BaseButton></div></template>
+    </AdminPageHeader>
 
-    <p v-if="successMessage" class="rounded-lg border border-cyber-cyan/40 bg-cyber-cyan/10 px-4 py-3 text-sm text-cyber-cyan">{{ successMessage }}</p>
-    <p v-if="errorMessage" class="rounded-lg border border-cyber-danger/40 bg-cyber-danger/10 px-4 py-3 text-sm text-cyber-danger">{{ errorMessage }}</p>
-
-    <div v-if="loading" class="glass-panel rounded-glass p-6">
-      <p class="font-mono text-sm text-cyber-cyan">配置加载中...</p>
-    </div>
+    <div v-if="errorMessage" class="admin-form-error" role="alert">{{ errorMessage }}</div>
+    <div v-if="loading" class="surface-muted rounded-panel p-8 font-mono text-sm text-brand" role="status">站点配置加载中...</div>
 
     <div v-else class="space-y-5">
-      <section class="glass-panel rounded-glass p-6">
-        <p class="terminal-label text-sm">asset_tool // upload</p>
-        <h3 class="mt-3 font-display text-2xl font-semibold">上传图片获取 URL</h3>
-        <p class="mt-2 text-sm text-cyber-muted">
-          可用于关于我头像、首页图片或站点配置中的图片字段。复杂 JSON 配置仍使用原文编辑，把上传后的 URL 填入对应 JSON 字段即可。
-        </p>
-        <div class="mt-5">
-          <ImageUploader v-model="uploadedImageUrl" biz-type="site" label="站点图片资源" />
-        </div>
+      <section v-if="profile.nickname || profile.role || settings.some(isProfileSetting)" class="surface-muted rounded-panel p-5 md:p-6">
+        <div class="flex flex-wrap items-start justify-between gap-4"><div><p class="admin-eyebrow">about // profile</p><h2 class="mt-1 text-xl font-semibold text-text-primary">关于我资料</h2><p class="mt-1 text-sm text-text-muted">字段直接映射现有 About 配置，未知字段会被保留。</p></div><BaseButton size="sm" :loading="savingKey === 'site.about.profile'" @click="saveSetting(settings.find(isProfileSetting)!)">保存资料</BaseButton></div>
+        <div class="mt-5 grid gap-4 md:grid-cols-2"><BaseInput v-for="field in profileFields" :key="field.key" v-model="profile[field.key]" :label="field.label" :type="field.key === 'email' ? 'email' : field.key === 'githubUrl' ? 'url' : 'text'" /><BaseTextarea v-model="profile.description" class="md:col-span-2" label="个人简介" :rows="3" /></div>
+        <div class="mt-4"><ImageUploader v-model="profile.avatar" biz-type="avatar" label="头像" /></div>
+        <div class="mt-5"><div class="flex items-center justify-between"><p class="text-sm font-medium text-text-secondary">职业方向</p><BaseButton size="sm" variant="ghost" @click="addCareerDirection">+ 添加</BaseButton></div><div class="mt-2 grid gap-2 sm:grid-cols-2"><div v-for="(_, index) in profile.careerDirection" :key="index" class="flex gap-2"><input v-model="profile.careerDirection[index]" class="admin-structured-input" type="text" placeholder="Java 后端开发" /><BaseButton size="sm" variant="ghost" aria-label="移除职业方向" @click="removeCareerDirection(index)">×</BaseButton></div></div></div>
       </section>
 
-      <section v-for="group in groupedSettings" :key="group.groupName" class="glass-panel rounded-glass p-6">
-        <p class="terminal-label text-sm">{{ group.groupName }} // config</p>
-        <h3 class="mt-3 font-display text-2xl font-semibold">{{ group.label }}</h3>
-
-        <div class="mt-6 grid gap-4">
-          <div
-            v-for="setting in group.items"
-            :key="setting.settingKey"
-            class="rounded-lg border border-cyber-border bg-cyber-base/45 p-4"
-          >
-            <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-              <div>
-                <p class="font-semibold text-cyber-text">{{ keyLabels[setting.settingKey] || setting.settingKey }}</p>
-                <p class="mt-1 font-mono text-[11px] text-cyber-outline">{{ setting.settingKey }} · {{ setting.settingType || 'TEXT' }}</p>
-                <p v-if="setting.description" class="mt-2 text-xs text-cyber-muted">{{ setting.description }}</p>
-                <p class="mt-2 text-xs text-cyber-outline">更新时间：{{ formatDateTime(setting.updatedAt) }}</p>
-              </div>
-              <button
-                class="w-fit rounded-lg border border-cyber-cyan/60 px-3 py-2 font-mono text-xs text-cyber-cyan transition hover:bg-cyber-cyan hover:text-cyber-base disabled:opacity-50"
-                :disabled="savingKey === setting.settingKey"
-                type="button"
-                @click="saveSetting(setting)"
-              >
-                {{ savingKey === setting.settingKey ? '保存中...' : '保存' }}
-              </button>
-            </div>
-
-            <textarea
-              v-if="isJsonSetting(setting)"
-              v-model="editableValues[setting.settingKey]"
-              class="mt-4 min-h-40 w-full rounded-lg border border-cyber-border bg-cyber-base/70 px-4 py-3 font-mono text-sm leading-7 text-cyber-text outline-none focus:border-cyber-cyan"
-            ></textarea>
-            <input
-              v-else
-              v-model="editableValues[setting.settingKey]"
-              class="mt-4 w-full rounded-lg border border-cyber-border bg-cyber-base/70 px-4 py-3 text-cyber-text outline-none focus:border-cyber-cyan"
-              type="text"
-            />
+      <section v-for="group in groupedSettings" :key="group.groupName" class="surface-muted rounded-panel p-5 md:p-6">
+        <p class="admin-eyebrow">{{ group.groupName }} // config</p><h2 class="mt-1 text-xl font-semibold text-text-primary">{{ group.label }}</h2>
+        <div class="mt-5 grid gap-4">
+          <template v-for="setting in group.items" :key="setting.settingKey">
+          <div v-if="!isProfileSetting(setting)" class="admin-setting-card">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between"><div><p class="font-medium text-text-primary">{{ keyLabels[setting.settingKey] || setting.settingKey }}</p><p class="mt-1 font-mono text-[11px] text-text-muted">{{ setting.settingKey }} · {{ setting.settingType || 'TEXT' }}</p><p v-if="setting.description" class="mt-2 text-xs text-text-muted">{{ setting.description }}</p><p class="mt-2 text-xs text-text-muted">更新时间：{{ formatDateTime(setting.updatedAt) }}</p></div><BaseButton size="sm" variant="secondary" :loading="savingKey === setting.settingKey" @click="saveSetting(setting)">保存</BaseButton></div>
+            <div v-if="isListSetting(setting)" class="mt-4 grid gap-2"><div v-for="(_, index) in listValue(setting.settingKey)" :key="index" class="flex gap-2"><input v-model="listValue(setting.settingKey)[index]" class="admin-structured-input" type="text" /><BaseButton size="sm" variant="ghost" aria-label="移除条目" @click="removeListItem(setting.settingKey, index)">×</BaseButton></div><BaseButton class="w-fit" size="sm" variant="ghost" @click="addListItem(setting.settingKey)">+ 添加条目</BaseButton></div>
+            <BaseTextarea v-else-if="isJsonSetting(setting)" v-model="editableValues[setting.settingKey]" class="mt-4" label="Advanced JSON" hint="仅开放 JSON 配置使用；保存前会校验语法。" :rows="6" />
+            <BaseInput v-else v-model="editableValues[setting.settingKey]" class="mt-4" label="配置值" />
           </div>
+          </template>
         </div>
       </section>
     </div>
   </section>
 </template>
+
+<style scoped>
+.admin-editor-state { display: inline-flex; align-items: center; gap: .45rem; border: 1px solid rgb(var(--color-border-subtle)); border-radius: 999px; padding: .45rem .7rem; color: rgb(var(--color-text-muted)); font-family: 'JetBrains Mono', monospace; font-size: .65rem; }.admin-editor-state i { width: .42rem; height: .42rem; border-radius: 50%; background: rgb(var(--color-success)); }.admin-editor-state.is-dirty { border-color: rgb(var(--color-warning) / .5); color: rgb(var(--color-warning)); }.admin-editor-state.is-dirty i { background: rgb(var(--color-warning)); }.admin-setting-card { border: 1px solid rgb(var(--color-border-subtle) / .7); border-radius: .75rem; background: rgb(var(--color-surface) / .38); padding: 1rem; }.admin-structured-input { min-width: 0; width: 100%; height: 2.7rem; border: 1px solid rgb(var(--color-border-subtle)); border-radius: .6rem; background: rgb(var(--color-surface) / .72); padding: 0 .75rem; color: rgb(var(--color-text-primary)); outline: none; }.admin-structured-input:focus { border-color: rgb(var(--color-brand-primary)); }.admin-form-error { border: 1px solid rgb(var(--color-danger) / .4); border-radius: .65rem; background: rgb(var(--color-danger) / .08); padding: .75rem 1rem; color: rgb(var(--color-danger)); font-size: .82rem; }
+</style>

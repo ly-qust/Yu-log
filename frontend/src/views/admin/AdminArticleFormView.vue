@@ -1,71 +1,110 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { createAdminArticle, fetchAdminArticle, updateAdminArticle } from '@/api/adminArticles';
 import { fetchAdminCategories } from '@/api/adminCategories';
 import { fetchAdminTags } from '@/api/adminTags';
+import AdminPageHeader from '@/components/admin/AdminPageHeader.vue';
+import MarkdownEditor from '@/components/admin/MarkdownEditor.vue';
+import BaseButton from '@/components/common/BaseButton.vue';
+import BaseInput from '@/components/common/BaseInput.vue';
+import BaseSelect from '@/components/common/BaseSelect.vue';
+import BaseTextarea from '@/components/common/BaseTextarea.vue';
 import ImageUploader from '@/components/common/ImageUploader.vue';
+import { useUnsavedChangesGuard } from '@/composables/useUnsavedChangesGuard';
 import type { AdminCategory, AdminTag, ArticleSavePayload, ArticleStatus } from '@/types/content';
+import { useAdminFeedbackStore } from '@/stores/adminFeedback';
+import { discardLocalDraft, formatLocalDraftTime, readLocalDraft, type LocalDraftRecord, writeLocalDraft } from '@/utils/localDraft';
 import { getErrorMessage } from '@/utils/errors';
+
+interface ArticleFormState {
+  title: string;
+  slug: string;
+  summary: string;
+  content: string;
+  coverImage: string;
+  categoryId: string;
+  tagIds: string[];
+  status: ArticleStatus;
+  isTop: boolean;
+  readingTime: number;
+}
 
 const route = useRoute();
 const router = useRouter();
+const feedback = useAdminFeedbackStore();
 const loading = ref(false);
 const saving = ref(false);
 const errorMessage = ref('');
-const successMessage = ref('');
 const categories = ref<AdminCategory[]>([]);
 const tags = ref<AdminTag[]>([]);
+const localDraftSavedAt = ref<number | null>(null);
+const recoveryDraft = ref<LocalDraftRecord<ArticleFormState> | null>(null);
+const ready = ref(false);
 
 const articleId = computed(() => {
   const value = route.params.id;
   return Array.isArray(value) ? value[0] : value;
 });
 const isEdit = computed(() => Boolean(articleId.value));
-const saveButtonLabel = computed(() => {
-  if (saving.value) {
-    return '保存中...';
-  }
-  if (form.status === 'PUBLISHED') {
-    return '发布';
-  }
-  if (form.status === 'DRAFT') {
-    return '保存草稿';
-  }
-  return '保存';
-});
+const draftKey = computed(() => `article-${articleId.value || 'new'}`);
 
-const form = reactive({
+const form = reactive<ArticleFormState>({
   title: '',
   slug: '',
   summary: '',
   content: '',
   coverImage: '',
   categoryId: '',
-  tagIds: [] as string[],
-  status: 'DRAFT' as ArticleStatus,
+  tagIds: [],
+  status: 'DRAFT',
   isTop: false,
   readingTime: 1,
 });
 
+function snapshot() {
+  return JSON.stringify(formData());
+}
+
+function formData(): ArticleFormState {
+  return { ...form, tagIds: [...form.tagIds] };
+}
+
+const guard = useUnsavedChangesGuard(snapshot, { label: '文章', isSaving: () => saving.value });
+
+watch(
+  form,
+  () => {
+    if (!ready.value) return;
+    const record = writeLocalDraft(draftKey.value, formData());
+    localDraftSavedAt.value = record.savedAt;
+  },
+  { deep: true },
+);
+
+function applyForm(data: ArticleFormState) {
+  form.title = data.title || '';
+  form.slug = data.slug || '';
+  form.summary = data.summary || '';
+  form.content = data.content || '';
+  form.coverImage = data.coverImage || '';
+  form.categoryId = data.categoryId || '';
+  form.tagIds = Array.isArray(data.tagIds) ? [...data.tagIds] : [];
+  form.status = data.status || 'DRAFT';
+  form.isTop = Boolean(data.isTop);
+  form.readingTime = Number(data.readingTime) > 0 ? Number(data.readingTime) : 1;
+}
+
 function validateForm(): string {
-  if (!form.title.trim()) {
-    return '请填写标题';
-  }
-  if (!form.slug.trim()) {
-    return '请填写访问标识 slug';
-  }
-  if (!form.content.trim()) {
-    return '请填写正文内容';
-  }
-  if (!form.categoryId) {
-    return '请选择所属分类';
-  }
+  if (!form.title.trim()) return '请填写文章标题';
+  if (!form.slug.trim()) return '请填写访问标识 slug';
+  if (!form.content.trim()) return '请填写正文内容';
+  if (!form.categoryId) return '请选择所属分类';
   return '';
 }
 
-function toPayload(): ArticleSavePayload {
+function toPayload(status: ArticleStatus): ArticleSavePayload {
   return {
     title: form.title.trim(),
     slug: form.slug.trim(),
@@ -73,177 +112,242 @@ function toPayload(): ArticleSavePayload {
     content: form.content,
     coverImage: form.coverImage.trim(),
     categoryId: form.categoryId,
-    tagIds: form.tagIds,
-    status: form.status,
+    tagIds: [...form.tagIds],
+    status,
     isTop: form.isTop,
     readingTime: form.readingTime > 0 ? form.readingTime : undefined,
   };
 }
 
-async function loadOptions() {
-  const [categoryData, tagData] = await Promise.all([fetchAdminCategories(), fetchAdminTags()]);
-  categories.value = categoryData;
-  tags.value = tagData;
-}
+async function loadEditor() {
+  loading.value = true;
+  errorMessage.value = '';
+  ready.value = false;
+  try {
+    const optionPromise = Promise.all([fetchAdminCategories(), fetchAdminTags()]);
+    const articlePromise = articleId.value ? fetchAdminArticle(articleId.value) : Promise.resolve(null);
+    const [options, article] = await Promise.all([optionPromise, articlePromise]);
+    categories.value = options[0];
+    tags.value = options[1];
 
-async function loadArticle() {
-  if (!articleId.value) {
-    return;
+    let serverUpdatedAt: number | undefined;
+    if (article) {
+      applyForm({
+        title: article.title,
+        slug: article.slug,
+        summary: article.summary || '',
+        content: article.content || '',
+        coverImage: article.coverImage || '',
+        categoryId: article.categoryId || '',
+        tagIds: article.tags.map((tag) => tag.id),
+        status: article.status,
+        isTop: Boolean(article.isTop),
+        readingTime: article.readingTime || 1,
+      });
+      serverUpdatedAt = article.updatedAt ? Date.parse(article.updatedAt) : undefined;
+    }
+
+    const stored = readLocalDraft<ArticleFormState>(draftKey.value);
+    if (stored && (isEdit.value ? stored.savedAt > (serverUpdatedAt || 0) : Boolean(stored.data.title || stored.data.content))) {
+      recoveryDraft.value = stored;
+      localDraftSavedAt.value = stored.savedAt;
+    } else if (stored && isEdit.value) {
+      discardLocalDraft(draftKey.value);
+    }
+    guard.markClean();
+    ready.value = true;
+  } catch (error) {
+    errorMessage.value = getErrorMessage(error, '文章编辑器加载失败，请稍后重试');
+  } finally {
+    loading.value = false;
   }
-
-  const article = await fetchAdminArticle(articleId.value);
-  form.title = article.title;
-  form.slug = article.slug;
-  form.summary = article.summary || '';
-  form.content = article.content || '';
-  form.coverImage = article.coverImage || '';
-  form.categoryId = article.categoryId || '';
-  form.tagIds = article.tags.map((tag) => tag.id);
-  form.status = article.status;
-  form.isTop = Boolean(article.isTop);
-  form.readingTime = article.readingTime || 1;
 }
 
-async function submit() {
+function restoreDraft() {
+  if (!recoveryDraft.value) return;
+  applyForm(recoveryDraft.value.data);
+  localDraftSavedAt.value = recoveryDraft.value.savedAt;
+  recoveryDraft.value = null;
+  feedback.info('本地草稿已恢复，保存后才会写入服务器。');
+}
+
+function discardDraft() {
+  clearDraft(true);
+}
+
+function clearDraft(showFeedback: boolean) {
+  discardLocalDraft(draftKey.value);
+  recoveryDraft.value = null;
+  localDraftSavedAt.value = null;
+  if (showFeedback) feedback.info('本地草稿已丢弃。');
+}
+
+async function saveArticle(nextStatus: ArticleStatus) {
   const validationMessage = validateForm();
   errorMessage.value = validationMessage;
-  successMessage.value = '';
-  if (validationMessage) {
-    return;
-  }
+  if (validationMessage) return;
 
   saving.value = true;
+  errorMessage.value = '';
   try {
+    form.status = nextStatus;
     if (isEdit.value && articleId.value) {
-      await updateAdminArticle(articleId.value, toPayload());
-      successMessage.value = '文章已保存';
+      await updateAdminArticle(articleId.value, toPayload(nextStatus));
+      feedback.success(nextStatus === 'PUBLISHED' ? '文章已发布。' : '文章草稿已保存。');
+      clearDraft(false);
+      guard.markClean();
     } else {
-      await createAdminArticle(toPayload());
+      await createAdminArticle(toPayload(nextStatus));
+      clearDraft(false);
+      guard.markClean();
       await router.push('/admin/articles');
     }
   } catch (error) {
     errorMessage.value = getErrorMessage(error, '文章保存失败，请稍后重试');
+    feedback.error(errorMessage.value);
   } finally {
     saving.value = false;
   }
 }
 
-onMounted(async () => {
-  loading.value = true;
-  errorMessage.value = '';
-  try {
-    await loadOptions();
-    await loadArticle();
-  } catch (error) {
-    errorMessage.value = getErrorMessage(error, '文章表单加载失败，请稍后重试');
-  } finally {
-    loading.value = false;
-  }
-});
+function saveShortcut() {
+  void saveArticle(form.status === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT');
+}
+
+onMounted(loadEditor);
 </script>
 
 <template>
-  <section class="glass-panel rounded-glass p-6">
-    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+  <section class="space-y-5">
+    <AdminPageHeader
+      :eyebrow="`content / articles // ${isEdit ? 'edit' : 'new'}`"
+      :title="isEdit ? '编辑文章' : '新建文章'"
+      description="用 Markdown 写作，随时预览；本地草稿会自动保存，服务器保存与发布始终分开。"
+    >
+      <template #actions>
+        <div class="flex flex-wrap gap-2">
+          <span class="admin-editor-state" :class="guard.isDirty ? 'is-dirty' : 'is-clean'">
+            <i aria-hidden="true"></i>{{ guard.isDirty ? 'Unsaved changes' : 'Saved' }}
+          </span>
+          <RouterLink to="/admin/articles"><BaseButton variant="secondary" size="sm">返回文章</BaseButton></RouterLink>
+        </div>
+      </template>
+    </AdminPageHeader>
+
+    <div v-if="recoveryDraft" class="admin-recovery" role="status">
       <div>
-        <p class="terminal-label text-sm">admin_articles // {{ isEdit ? 'edit' : 'new' }}</p>
-        <h2 class="mt-3 font-display text-3xl font-semibold">{{ isEdit ? '编辑文章' : '新建文章' }}</h2>
+        <strong>发现较新的本地草稿</strong>
+        <p>本地保存于 {{ formatLocalDraftTime(recoveryDraft.savedAt) }}，不会自动覆盖服务器文章。</p>
       </div>
-      <RouterLink class="font-mono text-xs text-cyber-cyan hover:text-cyber-cyanBright" to="/admin/articles">
-        返回文章管理
-      </RouterLink>
+      <div class="flex flex-wrap gap-2">
+        <BaseButton size="sm" @click="restoreDraft">恢复</BaseButton>
+        <BaseButton size="sm" variant="secondary" @click="discardDraft">丢弃</BaseButton>
+      </div>
     </div>
 
-    <p v-if="loading" class="mt-8 font-mono text-sm text-cyber-cyan">表单加载中...</p>
+    <div v-if="loading" class="surface-muted rounded-panel p-8 font-mono text-sm text-brand" role="status">编辑器加载中...</div>
+    <div v-else-if="errorMessage && !ready" class="rounded-control border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger" role="alert">{{ errorMessage }}</div>
 
-    <form v-else class="mt-8 grid gap-5" @submit.prevent="submit">
-      <div class="grid gap-5 lg:grid-cols-2">
-        <label class="block">
-          <span class="font-mono text-xs uppercase text-cyber-muted">标题 *</span>
-          <input v-model="form.title" class="mt-2 w-full rounded-lg border border-cyber-border bg-cyber-base/70 px-4 py-3 text-cyber-text outline-none focus:border-cyber-cyan" type="text" />
-        </label>
+    <form v-else class="admin-editor-form" @submit.prevent="saveArticle('DRAFT')">
+      <div class="admin-editor-form__main">
+        <section class="surface-muted rounded-panel p-5 md:p-6">
+          <div class="grid gap-4">
+            <BaseInput v-model="form.title" label="标题 *" placeholder="写一个清晰的标题" />
+            <BaseInput v-model="form.slug" label="访问标识 slug *" hint="用于公开文章地址，建议使用英文短横线。" />
+            <BaseTextarea v-model="form.summary" label="摘要" :rows="3" placeholder="用一两句话说明这篇文章解决什么问题。" />
+          </div>
+        </section>
 
-        <label class="block">
-          <span class="font-mono text-xs uppercase text-cyber-muted">访问标识 slug *</span>
-          <input v-model="form.slug" class="mt-2 w-full rounded-lg border border-cyber-border bg-cyber-base/70 px-4 py-3 text-cyber-text outline-none focus:border-cyber-cyan" type="text" />
-        </label>
+        <section class="surface-muted rounded-panel p-3 md:p-4">
+          <div class="mb-3 flex items-center justify-between gap-3 px-2">
+            <div>
+              <p class="admin-eyebrow">writing // markdown</p>
+              <h2 class="mt-1 text-lg font-semibold text-text-primary">正文</h2>
+            </div>
+            <span v-if="localDraftSavedAt" class="font-mono text-[11px] text-text-muted">Saved locally {{ formatLocalDraftTime(localDraftSavedAt) }}</span>
+          </div>
+          <MarkdownEditor v-model="form.content" upload-biz-type="other" @save="saveShortcut" />
+        </section>
       </div>
 
-      <label class="block">
-        <span class="font-mono text-xs uppercase text-cyber-muted">摘要</span>
-        <textarea v-model="form.summary" class="mt-2 min-h-24 w-full rounded-lg border border-cyber-border bg-cyber-base/70 px-4 py-3 text-cyber-text outline-none focus:border-cyber-cyan"></textarea>
-      </label>
+      <aside class="admin-editor-form__aside">
+        <section class="surface-muted rounded-panel p-5">
+          <p class="admin-eyebrow">settings // publish</p>
+          <h2 class="mt-1 text-lg font-semibold text-text-primary">发布设置</h2>
+          <div class="mt-5 grid gap-4">
+            <BaseSelect v-model="form.categoryId" label="分类 *">
+              <option value="">请选择分类</option>
+              <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
+            </BaseSelect>
+            <BaseSelect v-model="form.status" label="当前状态">
+              <option value="DRAFT">草稿</option>
+              <option value="PUBLISHED">已发布</option>
+              <option value="HIDDEN">隐藏</option>
+            </BaseSelect>
+            <label class="admin-native-field">
+              <span>阅读时间（分钟）</span>
+              <input v-model.number="form.readingTime" min="1" type="number" />
+            </label>
+            <label class="admin-check-field">
+              <input v-model="form.isTop" type="checkbox" />
+              <span>置顶这篇文章</span>
+            </label>
+          </div>
+        </section>
 
-      <div class="grid gap-5 lg:grid-cols-3">
-        <label class="block">
-          <span class="font-mono text-xs uppercase text-cyber-muted">所属分类 *</span>
-          <select v-model="form.categoryId" class="mt-2 w-full rounded-lg border border-cyber-border bg-cyber-base/70 px-4 py-3 text-cyber-text outline-none focus:border-cyber-cyan">
-            <option value="">请选择分类</option>
-            <option v-for="category in categories" :key="category.id" :value="category.id">
-              {{ category.name }}
-            </option>
-          </select>
-        </label>
+        <section class="surface-muted rounded-panel p-5">
+          <p class="admin-eyebrow">taxonomy // organize</p>
+          <h2 class="mt-1 text-lg font-semibold text-text-primary">标签</h2>
+          <div class="mt-4 grid gap-2">
+            <label v-for="tag in tags" :key="tag.id" class="admin-check-field admin-check-field--chip">
+              <input v-model="form.tagIds" :value="tag.id" type="checkbox" />
+              <span>{{ tag.name }}</span>
+            </label>
+            <p v-if="!tags.length" class="text-sm text-text-muted">暂无可用标签，请先在标签管理中创建。</p>
+          </div>
+        </section>
 
-        <label class="block">
-          <span class="font-mono text-xs uppercase text-cyber-muted">文章状态</span>
-          <select v-model="form.status" class="mt-2 w-full rounded-lg border border-cyber-border bg-cyber-base/70 px-4 py-3 text-cyber-text outline-none focus:border-cyber-cyan">
-            <option value="DRAFT">草稿</option>
-            <option value="PUBLISHED">已发布</option>
-            <option value="HIDDEN">已隐藏</option>
-          </select>
-        </label>
+        <section class="surface-muted rounded-panel p-5">
+          <p class="admin-eyebrow">media // cover</p>
+          <h2 class="mt-1 text-lg font-semibold text-text-primary">封面</h2>
+          <div class="mt-4">
+            <ImageUploader v-model="form.coverImage" biz-type="article-cover" label="文章封面图" />
+          </div>
+        </section>
+      </aside>
 
-        <label class="block">
-          <span class="font-mono text-xs uppercase text-cyber-muted">阅读时间</span>
-          <input v-model.number="form.readingTime" min="1" class="mt-2 w-full rounded-lg border border-cyber-border bg-cyber-base/70 px-4 py-3 text-cyber-text outline-none focus:border-cyber-cyan" type="number" />
-        </label>
-      </div>
-
-      <div class="grid gap-5 lg:grid-cols-[1fr_2fr]">
-        <label class="block">
-          <span class="font-mono text-xs uppercase text-cyber-muted">文章标签</span>
-          <select v-model="form.tagIds" multiple class="mt-2 h-44 w-full rounded-lg border border-cyber-border bg-cyber-base/70 px-4 py-3 text-cyber-text outline-none focus:border-cyber-cyan">
-            <option v-for="tag in tags" :key="tag.id" :value="tag.id">
-              {{ tag.name }}
-            </option>
-          </select>
-        </label>
-
-        <div>
-          <ImageUploader v-model="form.coverImage" biz-type="article-cover" label="文章封面图" />
-          <input v-model="form.coverImage" class="mt-3 w-full rounded-lg border border-cyber-border bg-cyber-base/70 px-4 py-3 text-cyber-text outline-none focus:border-cyber-cyan" placeholder="也可以手动填写封面 URL" type="text" />
-          <label class="mt-4 flex items-center gap-3 text-sm text-cyber-muted">
-            <input v-model="form.isTop" class="h-4 w-4 accent-cyber-cyan" type="checkbox" />
-            是否置顶
-          </label>
+      <div v-if="errorMessage" class="admin-form-error" role="alert">{{ errorMessage }}</div>
+      <div class="admin-editor-form__actions">
+        <div class="text-xs text-text-muted">{{ guard.isDirty ? '修改会先保存在本地，离开页面会提醒。' : '当前内容与服务器一致。' }}</div>
+        <div class="flex flex-wrap gap-2">
+          <BaseButton variant="secondary" :loading="saving" @click="saveArticle('DRAFT')">保存草稿</BaseButton>
+          <BaseButton :loading="saving" @click="saveArticle('PUBLISHED')">发布文章</BaseButton>
         </div>
-      </div>
-
-      <label class="block">
-        <span class="font-mono text-xs uppercase text-cyber-muted">正文内容 *</span>
-        <textarea v-model="form.content" class="mt-2 min-h-[360px] w-full rounded-lg border border-cyber-border bg-cyber-base/70 px-4 py-3 font-mono text-sm leading-7 text-cyber-text outline-none focus:border-cyber-cyan"></textarea>
-      </label>
-
-      <p v-if="successMessage" class="rounded-lg border border-cyber-cyan/40 bg-cyber-cyan/10 px-4 py-3 text-sm text-cyber-cyan">
-        {{ successMessage }}
-      </p>
-      <p v-if="errorMessage" class="rounded-lg border border-cyber-danger/40 bg-cyber-danger/10 px-4 py-3 text-sm text-cyber-danger">
-        {{ errorMessage }}
-      </p>
-
-      <div class="flex flex-wrap gap-3">
-        <button
-          class="rounded-lg bg-cyber-cyanBright px-5 py-3 font-mono text-xs font-semibold text-cyber-base transition hover:bg-cyber-cyan disabled:cursor-not-allowed disabled:opacity-50"
-          :disabled="saving"
-          type="submit"
-        >
-          {{ saveButtonLabel }}
-        </button>
-        <RouterLink class="rounded-lg border border-cyber-border px-5 py-3 font-mono text-xs text-cyber-muted hover:border-cyber-cyan hover:text-cyber-cyan" to="/admin/articles">
-          取消
-        </RouterLink>
       </div>
     </form>
   </section>
 </template>
+
+<style scoped>
+.admin-editor-state { display: inline-flex; align-items: center; gap: .45rem; border: 1px solid rgb(var(--color-border-subtle)); border-radius: 999px; padding: .45rem .7rem; color: rgb(var(--color-text-muted)); font-family: 'JetBrains Mono', monospace; font-size: .65rem; }
+.admin-editor-state i { width: .42rem; height: .42rem; border-radius: 50%; background: rgb(var(--color-success)); }
+.admin-editor-state.is-dirty { border-color: rgb(var(--color-warning) / .5); color: rgb(var(--color-warning)); }
+.admin-editor-state.is-dirty i { background: rgb(var(--color-warning)); }
+.admin-recovery { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border: 1px solid rgb(var(--color-warning) / .42); border-radius: .75rem; background: rgb(var(--color-warning) / .07); padding: .85rem 1rem; }
+.admin-recovery strong { color: rgb(var(--color-text-primary)); font-size: .85rem; }
+.admin-recovery p { margin-top: .2rem; color: rgb(var(--color-text-muted)); font-size: .75rem; }
+.admin-editor-form { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr) minmax(16rem, 21rem); }
+.admin-editor-form__main, .admin-editor-form__aside { display: grid; align-content: start; gap: 1.25rem; min-width: 0; }
+.admin-editor-form__actions, .admin-form-error { grid-column: 1 / -1; }
+.admin-editor-form__actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-top: 1px solid rgb(var(--color-border-subtle) / .72); padding-top: 1rem; }
+.admin-form-error { border: 1px solid rgb(var(--color-danger) / .4); border-radius: .65rem; background: rgb(var(--color-danger) / .08); padding: .75rem 1rem; color: rgb(var(--color-danger)); font-size: .82rem; }
+.admin-native-field { display: grid; gap: .45rem; color: rgb(var(--color-text-secondary)); font-size: .8rem; }
+.admin-native-field input { width: 100%; height: 2.75rem; border: 1px solid rgb(var(--color-border-subtle)); border-radius: .625rem; background: rgb(var(--color-surface) / .72); padding: 0 .85rem; color: rgb(var(--color-text-primary)); outline: none; }
+.admin-native-field input:focus { border-color: rgb(var(--color-brand-primary)); box-shadow: 0 0 0 3px rgb(var(--color-brand-primary) / .15); }
+.admin-check-field { display: flex; align-items: center; gap: .6rem; color: rgb(var(--color-text-secondary)); font-size: .8rem; }
+.admin-check-field input { width: 1rem; height: 1rem; accent-color: rgb(var(--color-brand-primary)); }
+.admin-check-field--chip { border: 1px solid rgb(var(--color-border-subtle) / .65); border-radius: .55rem; padding: .55rem .65rem; }
+.admin-check-field--chip:has(input:checked) { border-color: rgb(var(--color-brand-primary) / .55); background: rgb(var(--color-brand-primary) / .08); color: rgb(var(--color-brand-primary)); }
+@media (max-width: 900px) { .admin-editor-form { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { .admin-recovery, .admin-editor-form__actions { align-items: flex-start; flex-direction: column; } .admin-editor-form__actions > :last-child { width: 100%; } }
+</style>

@@ -7,10 +7,12 @@ import {
   fetchAdminCategories,
   updateAdminCategory,
 } from '@/api/adminCategories';
+import { useAdminFeedbackStore } from '@/stores/adminFeedback';
 import type { AdminCategory, CategorySavePayload } from '@/types/content';
 import { getErrorMessage } from '@/utils/errors';
 
 const categories = ref<AdminCategory[]>([]);
+const feedback = useAdminFeedbackStore();
 const loading = ref(false);
 const saving = ref(false);
 const errorMessage = ref('');
@@ -79,9 +81,11 @@ async function submit() {
     if (editingId.value) {
       await updateAdminCategory(editingId.value, payload());
       successMessage.value = '分类已更新';
+      feedback.success('分类已更新');
     } else {
       await createAdminCategory(payload());
       successMessage.value = '分类已创建';
+      feedback.success('分类已创建');
     }
     resetForm();
     await loadCategories();
@@ -93,7 +97,13 @@ async function submit() {
 }
 
 async function removeCategory(category: AdminCategory) {
-  if (!window.confirm(`确认删除分类「${category.name}」吗？`)) {
+  const confirmed = await feedback.confirm({
+    title: '删除分类',
+    message: `确定要删除「${category.name}」吗？此操作可能影响文章归类。`,
+    confirmLabel: '删除分类',
+    danger: true,
+  });
+  if (!confirmed) {
     return;
   }
 
@@ -102,9 +112,11 @@ async function removeCategory(category: AdminCategory) {
   try {
     await deleteAdminCategory(category.id);
     successMessage.value = '分类已删除';
+    feedback.success('分类已删除');
     await loadCategories();
   } catch (error) {
     errorMessage.value = getErrorMessage(error, '分类删除失败，请稍后重试');
+    feedback.error(errorMessage.value);
   }
 }
 

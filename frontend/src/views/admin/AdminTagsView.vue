@@ -2,10 +2,12 @@
 import { onMounted, reactive, ref } from 'vue';
 
 import { createAdminTag, deleteAdminTag, fetchAdminTags, updateAdminTag } from '@/api/adminTags';
+import { useAdminFeedbackStore } from '@/stores/adminFeedback';
 import type { AdminTag, TagSavePayload } from '@/types/content';
 import { getErrorMessage } from '@/utils/errors';
 
 const tags = ref<AdminTag[]>([]);
+const feedback = useAdminFeedbackStore();
 const loading = ref(false);
 const saving = ref(false);
 const errorMessage = ref('');
@@ -73,9 +75,11 @@ async function submit() {
     if (editingId.value) {
       await updateAdminTag(editingId.value, payload());
       successMessage.value = '标签已更新';
+      feedback.success('标签已更新');
     } else {
       await createAdminTag(payload());
       successMessage.value = '标签已创建';
+      feedback.success('标签已创建');
     }
     resetForm();
     await loadTags();
@@ -87,7 +91,13 @@ async function submit() {
 }
 
 async function removeTag(tag: AdminTag) {
-  if (!window.confirm(`确认删除标签「${tag.name}」吗？`)) {
+  const confirmed = await feedback.confirm({
+    title: '删除标签',
+    message: `确定要删除「${tag.name}」吗？此操作不可恢复。`,
+    confirmLabel: '删除标签',
+    danger: true,
+  });
+  if (!confirmed) {
     return;
   }
 
@@ -96,9 +106,11 @@ async function removeTag(tag: AdminTag) {
   try {
     await deleteAdminTag(tag.id);
     successMessage.value = '标签已删除';
+    feedback.success('标签已删除');
     await loadTags();
   } catch (error) {
     errorMessage.value = getErrorMessage(error, '标签删除失败，请稍后重试');
+    feedback.error(errorMessage.value);
   }
 }
 

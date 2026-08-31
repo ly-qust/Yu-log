@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 import {
   deleteAdminMessage,
@@ -7,12 +8,15 @@ import {
   replyAdminMessage,
   updateAdminMessageStatus,
 } from '@/api/adminMessages';
+import { useAdminFeedbackStore } from '@/stores/adminFeedback';
 import type { PageResult } from '@/types/api';
 import type { AdminMessage, AdminMessageQuery, InteractionStatus } from '@/types/interaction';
 import { getErrorMessage } from '@/utils/errors';
 import { formatDateTime, formatInteractionStatus } from '@/utils/format';
 
 const pageSize = 10;
+const route = useRoute();
+const feedback = useAdminFeedbackStore();
 const loading = ref(false);
 const actionLoadingId = ref('');
 const errorMessage = ref('');
@@ -28,7 +32,7 @@ const messagePage = ref<PageResult<AdminMessage>>({
 });
 
 const filters = reactive<AdminMessageQuery>({
-  status: '',
+  status: route.query.status === 'PENDING' || route.query.status === 'APPROVED' || route.query.status === 'REJECTED' ? route.query.status : '',
   keyword: '',
   page: 1,
   size: pageSize,
@@ -71,9 +75,11 @@ async function runMessageAction(id: string, action: () => Promise<unknown>, mess
   try {
     await action();
     successMessage.value = message;
+    feedback.success(message);
     await loadMessages();
   } catch (error) {
     errorMessage.value = getErrorMessage(error, '操作失败，请稍后重试');
+    feedback.error(errorMessage.value);
   } finally {
     actionLoadingId.value = '';
   }
@@ -88,7 +94,7 @@ async function changeStatus(message: AdminMessage, status: InteractionStatus) {
 }
 
 async function replyMessage(message: AdminMessage) {
-  const content = window.prompt('请输入管理员回复', message.adminReply || '');
+  const content = await feedback.prompt({ title: '回复留言', label: '管理员回复', initialValue: message.adminReply || '' });
   if (content === null) {
     return;
   }
@@ -101,7 +107,13 @@ async function replyMessage(message: AdminMessage) {
 }
 
 async function removeMessage(message: AdminMessage) {
-  if (!window.confirm(`确认删除「${message.nickname}」的留言吗？`)) {
+  const confirmed = await feedback.confirm({
+    title: '删除留言',
+    message: `确定要删除「${message.nickname}」的留言吗？此操作不可恢复。`,
+    confirmLabel: '删除留言',
+    danger: true,
+  });
+  if (!confirmed) {
     return;
   }
 

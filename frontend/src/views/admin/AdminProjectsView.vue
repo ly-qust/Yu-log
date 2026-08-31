@@ -2,12 +2,14 @@
 import { onMounted, reactive, ref } from 'vue';
 
 import { deleteAdminProject, fetchAdminProjects } from '@/api/adminProjects';
+import { useAdminFeedbackStore } from '@/stores/adminFeedback';
 import type { PageResult } from '@/types/api';
 import type { AdminProjectQuery, ProjectItem } from '@/types/project';
 import { getErrorMessage } from '@/utils/errors';
 import { formatBoolean, formatDateTime, formatProjectStatus } from '@/utils/format';
 
 const pageSize = 10;
+const feedback = useAdminFeedbackStore();
 const loading = ref(false);
 const actionLoadingId = ref('');
 const errorMessage = ref('');
@@ -60,7 +62,13 @@ async function changePage(page: number) {
 }
 
 async function removeProject(project: ProjectItem) {
-  if (!window.confirm(`确认删除项目「${project.name}」吗？`)) {
+  const confirmed = await feedback.confirm({
+    title: '删除项目',
+    message: `确定要删除「${project.name}」吗？此操作不可恢复。`,
+    confirmLabel: '删除项目',
+    danger: true,
+  });
+  if (!confirmed) {
     return;
   }
 
@@ -70,9 +78,11 @@ async function removeProject(project: ProjectItem) {
   try {
     await deleteAdminProject(project.id);
     successMessage.value = '项目已删除';
+    feedback.success('项目已删除');
     await loadProjects();
   } catch (error) {
     errorMessage.value = getErrorMessage(error, '项目删除失败，请稍后重试');
+    feedback.error(errorMessage.value);
   } finally {
     actionLoadingId.value = '';
   }
