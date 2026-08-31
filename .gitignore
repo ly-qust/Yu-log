@@ -3,7 +3,11 @@ dist/
 target/
 *.log
 *.err.log
-.phase3-*.tmp
+*.tmp
+uploads/
+backend/uploads/
+backups/
+logs/
 
 .idea/
 .vscode/
@@ -11,3 +15,6 @@ target/
 .env
 .env.*
 !.env.example
+!frontend/.env.development
+!frontend/.env.production
+!frontend/.env.example

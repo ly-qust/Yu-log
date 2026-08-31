@@ -1,6 +1,9 @@
 package com.yu.blog.module.category.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.yu.blog.common.cache.CacheKeys;
+import com.yu.blog.common.cache.CacheProperties;
+import com.yu.blog.common.cache.CacheService;
 import com.yu.blog.common.exception.BusinessException;
 import com.yu.blog.module.article.entity.Article;
 import com.yu.blog.module.article.mapper.ArticleMapper;
@@ -23,8 +26,19 @@ public class CategoryService {
 
     private final CategoryMapper categoryMapper;
     private final ArticleMapper articleMapper;
+    private final CacheService cacheService;
+    private final CacheProperties cacheProperties;
 
     public List<CategoryVO> listPublicCategories() {
+        return cacheService.getList(CacheKeys.categoryList(), CategoryVO.class)
+                .orElseGet(() -> {
+                    List<CategoryVO> categories = loadPublicCategories();
+                    cacheService.put(CacheKeys.categoryList(), categories, cacheProperties.categoryTtl());
+                    return categories;
+                });
+    }
+
+    private List<CategoryVO> loadPublicCategories() {
         return categoryMapper.selectList(Wrappers.lambdaQuery(Category.class)
                         .eq(Category::getBizType, ARTICLE_BIZ_TYPE)
                         .eq(Category::getStatus, ENABLED)
@@ -58,6 +72,7 @@ public class CategoryService {
         category.setSortOrder(request.sortOrder() == null ? 0 : request.sortOrder());
         category.setStatus(defaultStatus(request.status()));
         categoryMapper.insert(category);
+        invalidateCategoryCaches();
         return AdminCategoryVO.from(category, 0);
     }
 
@@ -75,6 +90,7 @@ public class CategoryService {
         category.setStatus(defaultStatus(request.status()));
         categoryMapper.updateById(category);
         Category updated = categoryMapper.selectById(id);
+        invalidateCategoryCaches();
         return AdminCategoryVO.from(updated, countArticles(id, false));
     }
 
@@ -85,6 +101,7 @@ public class CategoryService {
             throw new BusinessException(400, "分类下已有文章，不能删除");
         }
         categoryMapper.deleteById(id);
+        invalidateCategoryCaches();
     }
 
     public Category getEnabledArticleCategory(Long id) {
@@ -128,5 +145,11 @@ public class CategoryService {
 
     private String defaultStatus(String status) {
         return status == null || status.isBlank() ? ENABLED : status;
+    }
+
+    private void invalidateCategoryCaches() {
+        cacheService.evict(CacheKeys.categoryList());
+        cacheService.evict(CacheKeys.homeOverview());
+        cacheService.evictByPattern(CacheKeys.articleListPattern());
     }
 }

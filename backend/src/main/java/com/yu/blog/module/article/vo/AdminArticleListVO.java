@@ -42,4 +42,24 @@ public record AdminArticleListVO(
                 article.getUpdatedAt()
         );
     }
+
+    public AdminArticleListVO withCounts(long viewCount, long likeCount) {
+        return new AdminArticleListVO(
+                id,
+                title,
+                slug,
+                summary,
+                categoryId,
+                categoryName,
+                tags,
+                status,
+                isTop,
+                viewCount,
+                likeCount,
+                commentCount,
+                publishedAt,
+                createdAt,
+                updatedAt
+        );
+    }
 }

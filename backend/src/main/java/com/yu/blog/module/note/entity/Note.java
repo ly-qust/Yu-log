@@ -21,6 +21,10 @@ public class Note {
     private String slug;
     private String summary;
     private String contentMd;
+    private String topic;
+    private String tagsJson;
+    @TableField("is_public")
+    private Boolean isPublic;
     private String noteType;
     private String status;
     @TableField("is_pinned")

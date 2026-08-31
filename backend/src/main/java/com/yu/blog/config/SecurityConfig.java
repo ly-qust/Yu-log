@@ -6,6 +6,7 @@ import com.yu.blog.auth.SecurityAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -27,6 +28,7 @@ public class SecurityConfig {
             SecurityAccessDeniedHandler accessDeniedHandler
     ) throws Exception {
         return http
+                .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception
@@ -35,9 +37,22 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/categories", "/api/tags", "/api/articles", "/api/articles/**", "/api/messages").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/categories",
+                                "/api/tags",
+                                "/api/articles",
+                                "/api/articles/**",
+                                "/api/messages",
+                                "/api/home/overview",
+                                "/api/projects",
+                                "/api/projects/**",
+                                "/api/notes",
+                                "/api/notes/**",
+                                "/api/timeline",
+                                "/api/about"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/articles/*/like", "/api/articles/*/comments", "/api/messages").permitAll()
-                        .requestMatchers("/api/health", "/actuator/health", "/api/dev/**", "/api/public/**").permitAll()
+                        .requestMatchers("/api/health", "/actuator/health", "/api/dev/**", "/api/public/**", "/uploads/**").permitAll()
                         .requestMatchers("/api/users/me", "/api/auth/logout").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()

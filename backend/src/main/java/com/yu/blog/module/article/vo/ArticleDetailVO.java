@@ -44,4 +44,25 @@ public record ArticleDetailVO(
                 article.getUpdatedAt()
         );
     }
+
+    public ArticleDetailVO withCounts(long viewCount, long likeCount) {
+        return new ArticleDetailVO(
+                id,
+                title,
+                slug,
+                summary,
+                content,
+                coverImage,
+                categoryId,
+                categoryName,
+                tags,
+                viewCount,
+                likeCount,
+                commentCount,
+                readingTime,
+                isTop,
+                publishedAt,
+                updatedAt
+        );
+    }
 }

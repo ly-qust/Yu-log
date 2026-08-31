@@ -17,7 +17,9 @@ public class SiteSetting {
     private String configKey;
     private String configName;
     private String configType;
+    private String groupName;
     private String configValue;
+    private String description;
     private Long updatedBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

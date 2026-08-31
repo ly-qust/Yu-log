@@ -1,6 +1,9 @@
 package com.yu.blog.module.tag.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.yu.blog.common.cache.CacheKeys;
+import com.yu.blog.common.cache.CacheProperties;
+import com.yu.blog.common.cache.CacheService;
 import com.yu.blog.common.exception.BusinessException;
 import com.yu.blog.module.article.entity.Article;
 import com.yu.blog.module.article.entity.ArticleTag;
@@ -25,8 +28,19 @@ public class TagService {
     private final TagMapper tagMapper;
     private final ArticleTagMapper articleTagMapper;
     private final ArticleMapper articleMapper;
+    private final CacheService cacheService;
+    private final CacheProperties cacheProperties;
 
     public List<TagVO> listPublicTags() {
+        return cacheService.getList(CacheKeys.tagList(), TagVO.class)
+                .orElseGet(() -> {
+                    List<TagVO> tags = loadPublicTags();
+                    cacheService.put(CacheKeys.tagList(), tags, cacheProperties.tagTtl());
+                    return tags;
+                });
+    }
+
+    private List<TagVO> loadPublicTags() {
         return tagMapper.selectList(Wrappers.lambdaQuery(Tag.class)
                         .eq(Tag::getStatus, ENABLED)
                         .orderByAsc(Tag::getName)
@@ -56,6 +70,7 @@ public class TagService {
         tag.setDescription(request.description());
         tag.setStatus(defaultStatus(request.status()));
         tagMapper.insert(tag);
+        invalidateTagCaches();
         return AdminTagVO.from(tag, 0);
     }
 
@@ -72,6 +87,7 @@ public class TagService {
         tag.setStatus(defaultStatus(request.status()));
         tagMapper.updateById(tag);
         Tag updated = tagMapper.selectById(id);
+        invalidateTagCaches();
         return AdminTagVO.from(updated, countArticles(id, false));
     }
 
@@ -84,6 +100,7 @@ public class TagService {
             throw new BusinessException(400, "标签已被文章使用，不能删除");
         }
         tagMapper.deleteById(id);
+        invalidateTagCaches();
     }
 
     public List<Tag> getEnabledTags(List<Long> tagIds) {
@@ -143,5 +160,11 @@ public class TagService {
 
     private String defaultStatus(String status) {
         return status == null || status.isBlank() ? ENABLED : status;
+    }
+
+    private void invalidateTagCaches() {
+        cacheService.evict(CacheKeys.tagList());
+        cacheService.evict(CacheKeys.homeOverview());
+        cacheService.evictByPattern(CacheKeys.articleListPattern());
     }
 }

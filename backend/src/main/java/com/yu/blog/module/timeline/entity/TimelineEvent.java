@@ -20,9 +20,11 @@ public class TimelineEvent {
     private String eventType;
     private String summary;
     private String contentMd;
+    private String tagsJson;
     private Long relatedArticleId;
     private Long relatedProjectId;
     private String status;
+    private Boolean visible;
     private Integer sortOrder;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

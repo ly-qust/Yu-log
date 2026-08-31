@@ -6,6 +6,9 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yu.blog.auth.AuthenticatedUser;
 import com.yu.blog.common.api.PageResult;
+import com.yu.blog.common.cache.CacheKeys;
+import com.yu.blog.common.cache.CacheProperties;
+import com.yu.blog.common.cache.CacheService;
 import com.yu.blog.common.exception.BusinessException;
 import com.yu.blog.module.article.dto.ArticleSaveRequest;
 import com.yu.blog.module.article.entity.Article;
@@ -49,8 +52,29 @@ public class ArticleService {
     private final TagMapper tagMapper;
     private final CategoryService categoryService;
     private final TagService tagService;
+    private final CacheService cacheService;
+    private final CacheProperties cacheProperties;
+    private final ArticleCounterService articleCounterService;
 
     public PageResult<ArticleListVO> listPublicArticles(
+            String keyword,
+            Long categoryId,
+            Long tagId,
+            long page,
+            long size,
+            String sort
+    ) {
+        String cacheKey = CacheKeys.articleList(keyword, categoryId, tagId, page, size, sort);
+        return cacheService.getPage(cacheKey, ArticleListVO.class)
+                .map(articleCounterService::mergePublicCounts)
+                .orElseGet(() -> {
+                    PageResult<ArticleListVO> pageResult = loadPublicArticles(keyword, categoryId, tagId, page, size, sort);
+                    cacheService.put(cacheKey, pageResult, cacheProperties.articleTtl());
+                    return articleCounterService.mergePublicCounts(pageResult);
+                });
+    }
+
+    private PageResult<ArticleListVO> loadPublicArticles(
             String keyword,
             Long categoryId,
             Long tagId,
@@ -85,11 +109,10 @@ public class ArticleService {
         if (article == null) {
             throw new BusinessException(404, "文章不存在或未发布");
         }
-        articleMapper.update(null, Wrappers.lambdaUpdate(Article.class)
-                .eq(Article::getId, id)
-                .setSql("view_count = view_count + 1"));
-        Article updated = articleMapper.selectById(id);
-        return toPublicDetail(updated);
+        ArticleDetailVO detail = toPublicDetail(article);
+        long viewCount = articleCounterService.increaseViewCount(id, detail.viewCount());
+        long likeCount = articleCounterService.currentLikeCount(id, detail.likeCount());
+        return detail.withCounts(viewCount, likeCount);
     }
 
     @Transactional
@@ -100,11 +123,8 @@ public class ArticleService {
         if (article == null) {
             throw new BusinessException(404, "文章不存在或未发布");
         }
-        articleMapper.update(null, Wrappers.lambdaUpdate(Article.class)
-                .eq(Article::getId, id)
-                .setSql("like_count = like_count + 1"));
-        Article updated = articleMapper.selectById(id);
-        return new ArticleLikeVO(updated.getLikeCount() == null ? 0 : updated.getLikeCount());
+        long likeCount = articleCounterService.increaseLikeCount(id, article.getLikeCount() == null ? 0 : article.getLikeCount());
+        return new ArticleLikeVO(likeCount);
     }
 
     public PageResult<AdminArticleListVO> listAdminArticles(
@@ -124,7 +144,9 @@ public class ArticleService {
                 .orderByDesc(Article::getCreatedAt)
                 .orderByDesc(Article::getId);
         IPage<Article> result = articleMapper.selectPage(new Page<>(safePage(page), safeSize(size)), query);
-        return PageResult.of(toAdminList(result.getRecords()), result.getCurrent(), result.getSize(), result.getTotal());
+        PageResult<AdminArticleListVO> pageResult =
+                PageResult.of(toAdminList(result.getRecords()), result.getCurrent(), result.getSize(), result.getTotal());
+        return articleCounterService.mergeAdminCounts(pageResult);
     }
 
     public AdminArticleDetailVO getAdminDetail(Long id) {
@@ -149,7 +171,9 @@ public class ArticleService {
         article.setPublishedAt(PUBLISHED.equals(request.status()) ? LocalDateTime.now() : null);
         articleMapper.insert(article);
         syncTags(article.getId(), tags);
-        return toAdminDetail(articleMapper.selectById(article.getId()));
+        AdminArticleDetailVO result = toAdminDetail(articleMapper.selectById(article.getId()));
+        invalidateArticleCaches();
+        return result;
     }
 
     @Transactional
@@ -167,7 +191,9 @@ public class ArticleService {
         }
         articleMapper.updateById(article);
         syncTags(id, tags);
-        return toAdminDetail(articleMapper.selectById(id));
+        AdminArticleDetailVO result = toAdminDetail(articleMapper.selectById(id));
+        invalidateArticleCaches();
+        return result;
     }
 
     @Transactional
@@ -175,6 +201,7 @@ public class ArticleService {
         getExisting(id);
         articleMapper.deleteById(id);
         articleTagMapper.delete(Wrappers.lambdaQuery(ArticleTag.class).eq(ArticleTag::getArticleId, id));
+        invalidateArticleCaches();
     }
 
     @Transactional
@@ -186,7 +213,9 @@ public class ArticleService {
         }
         article.setStatus(status);
         articleMapper.updateById(article);
-        return toAdminDetail(articleMapper.selectById(id));
+        AdminArticleDetailVO result = toAdminDetail(articleMapper.selectById(id));
+        invalidateArticleCaches();
+        return result;
     }
 
     @Transactional
@@ -194,7 +223,9 @@ public class ArticleService {
         Article article = getExisting(id);
         article.setIsTop(Boolean.TRUE.equals(isTop));
         articleMapper.updateById(article);
-        return toAdminDetail(articleMapper.selectById(id));
+        AdminArticleDetailVO result = toAdminDetail(articleMapper.selectById(id));
+        invalidateArticleCaches();
+        return result;
     }
 
     private void applyEditableFields(Article article, ArticleSaveRequest request) {
@@ -304,6 +335,13 @@ public class ArticleService {
         }
         return categoryMapper.selectBatchIds(categoryIds).stream()
                 .collect(Collectors.toMap(Category::getId, Function.identity()));
+    }
+
+    private void invalidateArticleCaches() {
+        cacheService.evict(CacheKeys.homeOverview());
+        cacheService.evict(CacheKeys.categoryList());
+        cacheService.evict(CacheKeys.tagList());
+        cacheService.evictByPattern(CacheKeys.articleListPattern());
     }
 
     private void applyPublicSort(LambdaQueryWrapper<Article> query, String sort) {

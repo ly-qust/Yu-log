@@ -61,3 +61,18 @@ export function formatInteractionStatus(value?: string | null): string {
 
   return value ? statusMap[value] ?? value : '-';
 }
+
+export function formatProjectStatus(value?: string | null): string {
+  const statusMap: Record<string, string> = {
+    PLANNING: '规划中',
+    DEVELOPING: '开发中',
+    COMPLETED: '已完成',
+    PUBLISHED: '已展示',
+  };
+
+  return value ? statusMap[value] ?? value : '-';
+}
+
+export function formatBoolean(value?: boolean | null): string {
+  return value ? '是' : '否';
+}

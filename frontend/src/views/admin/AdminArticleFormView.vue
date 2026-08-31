@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { createAdminArticle, fetchAdminArticle, updateAdminArticle } from '@/api/adminArticles';
 import { fetchAdminCategories } from '@/api/adminCategories';
 import { fetchAdminTags } from '@/api/adminTags';
+import ImageUploader from '@/components/common/ImageUploader.vue';
 import type { AdminCategory, AdminTag, ArticleSavePayload, ArticleStatus } from '@/types/content';
 import { getErrorMessage } from '@/utils/errors';
 
@@ -209,14 +210,14 @@ onMounted(async () => {
           </select>
         </label>
 
-        <label class="block">
-          <span class="font-mono text-xs uppercase text-cyber-muted">封面图</span>
-          <input v-model="form.coverImage" class="mt-2 w-full rounded-lg border border-cyber-border bg-cyber-base/70 px-4 py-3 text-cyber-text outline-none focus:border-cyber-cyan" type="text" />
+        <div>
+          <ImageUploader v-model="form.coverImage" biz-type="article-cover" label="文章封面图" />
+          <input v-model="form.coverImage" class="mt-3 w-full rounded-lg border border-cyber-border bg-cyber-base/70 px-4 py-3 text-cyber-text outline-none focus:border-cyber-cyan" placeholder="也可以手动填写封面 URL" type="text" />
           <label class="mt-4 flex items-center gap-3 text-sm text-cyber-muted">
             <input v-model="form.isTop" class="h-4 w-4 accent-cyber-cyan" type="checkbox" />
             是否置顶
           </label>
-        </label>
+        </div>
       </div>
 
       <label class="block">

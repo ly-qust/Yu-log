@@ -18,6 +18,7 @@ public class Project {
     private String name;
     private String slug;
     private String description;
+    private String detailContent;
     private String coverImageUrl;
     private String techStackJson;
     private String repoUrl;
@@ -26,6 +27,7 @@ public class Project {
     private String learningSummary;
     @TableField("is_featured")
     private Boolean isFeatured;
+    private Boolean visible;
     private Integer sortOrder;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

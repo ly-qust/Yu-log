@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yu.blog.auth.AuthenticatedUser;
 import com.yu.blog.common.api.PageResult;
+import com.yu.blog.common.cache.CacheKeys;
+import com.yu.blog.common.cache.CacheService;
 import com.yu.blog.common.exception.BusinessException;
 import com.yu.blog.common.service.RateLimitService;
 import com.yu.blog.module.message.dto.MessageReplyRequest;
@@ -33,6 +35,7 @@ public class MessageService {
 
     private final MessageMapper messageMapper;
     private final RateLimitService rateLimitService;
+    private final CacheService cacheService;
 
     @Transactional
     public String submit(MessageSubmitRequest request, String clientIp, String userAgent) {
@@ -94,6 +97,7 @@ public class MessageService {
         Message message = getExisting(id);
         message.setStatus(status);
         messageMapper.updateById(message);
+        cacheService.evict(CacheKeys.homeOverview());
         return AdminMessageVO.from(messageMapper.selectById(id));
     }
 
@@ -111,6 +115,7 @@ public class MessageService {
     public void delete(Long id) {
         getExisting(id);
         messageMapper.deleteById(id);
+        cacheService.evict(CacheKeys.homeOverview());
     }
 
     private Message getExisting(Long id) {

@@ -12,6 +12,8 @@ spring:
       host: ${YU_LOG_REDIS_HOST:localhost}
       port: ${YU_LOG_REDIS_PORT:6380}
       database: ${YU_LOG_REDIS_DATABASE:0}
+      timeout: ${YU_LOG_REDIS_TIMEOUT:2s}
+      connect-timeout: ${YU_LOG_REDIS_CONNECT_TIMEOUT:2s}
   sql:
     init:
       mode: always
@@ -20,7 +22,13 @@ spring:
         - classpath:db/V1__init_schema.sql
         - classpath:db/V3__add_article_reading_time.sql
         - classpath:db/V4__add_comment_message_reply_fields.sql
+        - classpath:db/V5__extend_project_note_timeline_site.sql
+        - classpath:db/V6__optimize_article_search_indexes.sql
       data-locations: classpath:db/V2__seed_data.sql
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 logging:
   level:
@@ -30,3 +38,33 @@ jwt:
   secret: ${YU_LOG_JWT_SECRET:yu-log-dev-secret-key-for-jwt-hs256-at-least-32-bytes}
   access-token-expire-seconds: ${YU_LOG_JWT_ACCESS_EXPIRE:7200}
   refresh-token-expire-seconds: ${YU_LOG_JWT_REFRESH_EXPIRE:604800}
+
+yu-log:
+  cors:
+    allowed-origins:
+      - ${FRONTEND_ORIGIN:http://localhost:5173}
+      - http://localhost:80
+      - http://localhost
+  cache:
+    enabled: ${YU_LOG_CACHE_ENABLED:true}
+    home-ttl-seconds: ${YU_LOG_CACHE_HOME_TTL:300}
+    category-ttl-seconds: ${YU_LOG_CACHE_CATEGORY_TTL:1800}
+    tag-ttl-seconds: ${YU_LOG_CACHE_TAG_TTL:1800}
+    article-ttl-seconds: ${YU_LOG_CACHE_ARTICLE_TTL:300}
+    project-ttl-seconds: ${YU_LOG_CACHE_PROJECT_TTL:600}
+    note-ttl-seconds: ${YU_LOG_CACHE_NOTE_TTL:600}
+    timeline-ttl-seconds: ${YU_LOG_CACHE_TIMELINE_TTL:600}
+    about-ttl-seconds: ${YU_LOG_CACHE_ABOUT_TTL:1800}
+  article-counter:
+    initial-delay-ms: ${YU_LOG_ARTICLE_COUNTER_INITIAL_DELAY_MS:60000}
+    sync-delay-ms: ${YU_LOG_ARTICLE_COUNTER_SYNC_DELAY_MS:60000}
+  storage:
+    type: local
+    local-path: ${YU_LOG_STORAGE_LOCAL_PATH:./uploads}
+    public-prefix: ${YU_LOG_STORAGE_PUBLIC_PREFIX:/uploads}
+    max-size-mb: ${YU_LOG_STORAGE_MAX_SIZE_MB:5}
+    allowed-types:
+      - image/jpeg
+      - image/png
+      - image/webp
+      - image/gif

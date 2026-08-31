@@ -43,6 +43,26 @@ public record ArticleListVO(
         );
     }
 
+    public ArticleListVO withCounts(long viewCount, long likeCount) {
+        return new ArticleListVO(
+                id,
+                title,
+                slug,
+                summary,
+                coverImage,
+                categoryId,
+                categoryName,
+                tags,
+                viewCount,
+                likeCount,
+                commentCount,
+                readingTime,
+                isTop,
+                publishedAt,
+                updatedAt
+        );
+    }
+
     static long safeLong(Long value) {
         return value == null ? 0 : value;
     }
