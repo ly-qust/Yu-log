@@ -98,7 +98,7 @@ onUnmounted(() => {
   <PublicLayout>
     <div ref="homeRoot" class="home-page -mt-2 sm:-mt-4 lg:-mt-6">
       <HomeHero
-        class="home-reveal"
+        class="home-reveal home-reveal--hero"
         :github-url="siteStore.githubUrl"
         :hero="overview?.hero"
         :learning="overview?.currentlyLearning || []"
@@ -113,13 +113,13 @@ onUnmounted(() => {
       </div>
 
       <template v-else>
-        <HomeAbout class="home-reveal" :about="about" :learning="overview?.currentlyLearning || []" :profile="profile" />
-        <div v-if="hasProjects" class="home-reveal"><FeaturedProjects :projects="overview!.featuredProjects" /></div>
-        <LatestWriting v-if="hasArticles" class="home-reveal" :articles="overview!.latestArticles" />
-        <div v-if="techItems.length" class="home-reveal"><TechLandscape :items="techItems" /></div>
-        <TimelinePreview v-if="hasTimeline" class="home-reveal" :events="overview!.timelinePreview" />
-        <div v-if="hasNotes" class="home-reveal"><GardenNotes :notes="overview!.latestNotes" /></div>
-        <HomeClosing class="home-reveal" :email="siteStore.email" :github-url="siteStore.githubUrl" />
+        <HomeAbout class="home-reveal home-reveal--about" :about="about" :learning="overview?.currentlyLearning || []" :profile="profile" />
+        <div v-if="hasProjects" class="home-reveal home-reveal--projects"><FeaturedProjects :projects="overview!.featuredProjects" /></div>
+        <LatestWriting v-if="hasArticles" class="home-reveal home-reveal--writing" :articles="overview!.latestArticles" />
+        <div v-if="techItems.length" class="home-reveal home-reveal--tech"><TechLandscape :items="techItems" /></div>
+        <TimelinePreview v-if="hasTimeline" class="home-reveal home-reveal--timeline" :events="overview!.timelinePreview" />
+        <div v-if="hasNotes" class="home-reveal home-reveal--notes"><GardenNotes :notes="overview!.latestNotes" /></div>
+        <HomeClosing class="home-reveal home-reveal--closing" :email="siteStore.email" :github-url="siteStore.githubUrl" />
       </template>
     </div>
   </PublicLayout>

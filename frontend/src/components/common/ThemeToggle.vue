@@ -9,6 +9,10 @@ withDefaults(defineProps<{
 });
 
 const themeStore = useThemeStore();
+
+function toggleTheme(event: MouseEvent) {
+  themeStore.cyclePreference(event.currentTarget instanceof HTMLElement ? event.currentTarget : undefined);
+}
 </script>
 
 <template>
@@ -17,7 +21,7 @@ const themeStore = useThemeStore();
     size="sm"
     :title="'主题：' + themeStore.preferenceLabel"
     variant="ghost"
-    @click="themeStore.cyclePreference"
+    @click="toggleTheme"
   >
     <template #icon>
       <svg

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 
 import type { ArticleHeading } from '@/types/markdown';
 import { renderMarkdown } from '@/utils/markdown';
@@ -8,8 +8,40 @@ const props = defineProps<{ content: string }>();
 const emit = defineEmits<{ toc: [headings: ArticleHeading[]] }>();
 const rendered = computed(() => renderMarkdown(props.content));
 const feedbackTimers = new Set<number>();
+const previewImage = ref<{ src: string; alt: string } | null>(null);
+const previewRef = ref<HTMLElement | null>(null);
+const previewTrigger = ref<HTMLElement | null>(null);
+let previousBodyOverflow = '';
 
-watch(rendered, (value) => emit('toc', value.headings), { immediate: true });
+watch(rendered, (value) => {
+  emit('toc', value.headings);
+  void nextTick(decorateImages);
+}, { immediate: true });
+
+function decorateImages() {
+  document.querySelectorAll<HTMLImageElement>('[data-article-prose] img').forEach((image) => {
+    image.dataset.previewImage = 'true';
+    image.tabIndex = 0;
+    image.setAttribute('role', 'button');
+    image.setAttribute('aria-label', image.alt ? `预览图片：${image.alt}` : '预览图片');
+  });
+}
+
+function openPreview(image: HTMLImageElement) {
+  previewTrigger.value = image;
+  previewImage.value = { src: image.currentSrc || image.src, alt: image.alt };
+  previousBodyOverflow = document.body.style.overflow;
+  document.body.style.overflow = 'hidden';
+  void nextTick(() => previewRef.value?.focus());
+}
+
+function closePreview() {
+  previewImage.value = null;
+  document.body.style.overflow = previousBodyOverflow;
+  previousBodyOverflow = '';
+  void nextTick(() => previewTrigger.value?.focus());
+  previewTrigger.value = null;
+}
 
 async function copyText(value: string): Promise<boolean> {
   try {
@@ -39,6 +71,11 @@ function setTemporaryLabel(button: HTMLButtonElement, label: string, resetLabel:
 
 async function handleContentClick(event: MouseEvent) {
   const target = event.target as HTMLElement;
+  const image = target.closest<HTMLImageElement>('img[data-preview-image]');
+  if (image) {
+    openPreview(image);
+    return;
+  }
   const copyButton = target.closest<HTMLButtonElement>('[data-copy-code]');
   if (copyButton) {
     const code = copyButton.closest('[data-code-block]')?.querySelector('code')?.textContent || '';
@@ -60,6 +97,14 @@ async function handleContentClick(event: MouseEvent) {
   }
 }
 
+function handleContentKeydown(event: KeyboardEvent) {
+  const target = event.target as HTMLElement;
+  const image = target.closest<HTMLImageElement>('img[data-preview-image]');
+  if (!image || !['Enter', ' '].includes(event.key)) return;
+  event.preventDefault();
+  openPreview(image);
+}
+
 function handleImageError(event: Event) {
   const image = event.target;
   if (!(image instanceof HTMLImageElement) || image.dataset.failed === 'true') return;
@@ -72,6 +117,10 @@ function handleImageError(event: Event) {
 }
 
 onUnmounted(() => feedbackTimers.forEach((timer) => window.clearTimeout(timer)));
+onMounted(() => void nextTick(decorateImages));
+onUnmounted(() => {
+  if (previewImage.value) document.body.style.overflow = previousBodyOverflow;
+});
 </script>
 
 <template>
@@ -79,9 +128,21 @@ onUnmounted(() => feedbackTimers.forEach((timer) => window.clearTimeout(timer)))
     class="article-prose"
     data-article-prose
     @click="handleContentClick"
+    @keydown="handleContentKeydown"
     @error.capture="handleImageError"
     v-html="rendered.html"
   ></div>
+  <Teleport to="body">
+    <Transition name="image-preview">
+      <div v-if="previewImage" ref="previewRef" class="article-image-preview" role="dialog" aria-modal="true" aria-label="图片预览" tabindex="-1" @click.self="closePreview" @keydown.esc="closePreview">
+        <button type="button" class="article-image-preview__close" aria-label="关闭图片预览" @click="closePreview">ESC</button>
+        <figure class="article-image-preview__figure">
+          <img :src="previewImage.src" :alt="previewImage.alt" />
+          <figcaption v-if="previewImage.alt">{{ previewImage.alt }}</figcaption>
+        </figure>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <style scoped>
@@ -113,6 +174,16 @@ onUnmounted(() => feedbackTimers.forEach((timer) => window.clearTimeout(timer)))
 .article-prose :deep(blockquote p) { margin: .35em 0; }
 .article-prose :deep(hr) { height: 1px; margin: 3rem 0; border: 0; background: linear-gradient(90deg, transparent, rgb(var(--color-border-subtle)), transparent); }
 .article-prose :deep(img) { display: block; max-width: 100%; height: auto; max-height: 42rem; margin: 2rem auto; border: 1px solid rgb(var(--color-border-subtle) / .62); border-radius: .9rem; object-fit: contain; box-shadow: var(--shadow-soft); }
+.article-prose :deep(img[data-preview-image]) { cursor: zoom-in; transition: border-color var(--motion-fast) var(--ease-standard), box-shadow var(--motion-normal) var(--ease-standard), transform var(--motion-normal) var(--ease-emphasized); }
+.article-prose :deep(img[data-preview-image]:hover), .article-prose :deep(img[data-preview-image]:focus-visible) { border-color: rgb(var(--color-border-active) / .72); box-shadow: var(--shadow-glow); outline: none; transform: translateY(-2px); }
+.article-image-preview { position: fixed; z-index: 80; inset: 0; display: grid; place-items: center; padding: clamp(1rem, 4vw, 4rem); background: rgb(var(--color-bg-primary) / .92); backdrop-filter: blur(16px); }
+.article-image-preview__close { position: absolute; top: 1rem; right: 1rem; min-height: 2.4rem; border: 1px solid rgb(var(--color-border-subtle)); border-radius: .5rem; padding: 0 .7rem; background: rgb(var(--color-surface-elevated) / .72); font-family: 'JetBrains Mono',monospace; font-size: .62rem; color: rgb(var(--color-text-secondary)); cursor: pointer; transition: border-color var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); }
+.article-image-preview__close:hover, .article-image-preview__close:focus-visible { border-color: rgb(var(--color-brand-primary)); color: rgb(var(--color-brand-primary)); outline: none; }
+.article-image-preview__figure { display: grid; max-width: min(92vw, 78rem); max-height: 90vh; justify-items: center; gap: .85rem; }
+.article-image-preview__figure img { max-width: 100%; max-height: 78vh; border: 1px solid rgb(var(--color-border-subtle) / .78); border-radius: .85rem; object-fit: contain; box-shadow: var(--shadow-elevated); }
+.article-image-preview__figure figcaption { max-width: 60rem; font-size: .78rem; line-height: 1.6; text-align: center; color: rgb(var(--color-text-secondary)); }
+.image-preview-enter-active, .image-preview-leave-active { transition: opacity var(--motion-normal) var(--ease-standard); }
+.image-preview-enter-from, .image-preview-leave-to { opacity: 0; }
 .article-prose :deep(.article-image-fallback) { display: grid; min-height: 8rem; margin: 1.75rem 0; place-items: center; border: 1px dashed rgb(var(--color-border-subtle)); border-radius: .9rem; padding: 1rem; background: rgb(var(--color-bg-secondary) / .5); font-family: 'JetBrains Mono',monospace; font-size: .72rem; color: rgb(var(--color-text-muted)); }
 .article-prose :deep(.article-table-scroll) { max-width: 100%; margin: 1.8rem 0; overflow-x: auto; border: 1px solid rgb(var(--color-border-subtle) / .68); border-radius: .75rem; background: rgb(var(--color-surface-elevated) / .52); }
 .article-prose :deep(table) { width: 100%; min-width: 36rem; border-collapse: collapse; font-size: .9rem; line-height: 1.6; }
@@ -135,5 +206,5 @@ onUnmounted(() => feedbackTimers.forEach((timer) => window.clearTimeout(timer)))
 .article-prose :deep(.hljs-meta), .article-prose :deep(.hljs-tag), .article-prose :deep(.hljs-name) { color: rgb(var(--color-danger)); }
 .article-prose :deep(.hljs-params), .article-prose :deep(.hljs-property) { color: rgb(var(--color-text-secondary)); }
 @media (max-width: 639px) { .article-prose { font-size: 1rem; line-height: 1.9; } .article-prose :deep(p) { margin: 1.2em 0; } .article-prose :deep(.article-heading-anchor) { position: static; display: inline-flex; width: 1.4rem; min-height: 1.4rem; align-items: center; justify-content: center; margin-left: .25rem; opacity: 0; vertical-align: middle; } .article-prose :deep(.article-heading-anchor:focus-visible) { opacity: 1; } .article-prose :deep(.article-code-frame) { margin-left: -.25rem; margin-right: -.25rem; } .article-prose :deep(.article-code-block) { padding: 1rem; } .article-prose :deep(.article-code-block code) { font-size: .76rem; } }
-@media (prefers-reduced-motion: reduce) { .article-prose :deep(*) { scroll-behavior: auto; } }
+@media (prefers-reduced-motion: reduce) { .article-prose :deep(*) { scroll-behavior: auto; } .article-prose :deep(img[data-preview-image]) { transition: none; } .article-prose :deep(img[data-preview-image]:hover), .article-prose :deep(img[data-preview-image]:focus-visible) { transform: none; } .image-preview-enter-active, .image-preview-leave-active { transition: none; } }
 </style>

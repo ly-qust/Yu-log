@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { nextTick, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { useSiteStore } from '@/stores/site';
+import CommandPalette from '@/components/common/CommandPalette.vue';
 import MobileNavDrawer from './MobileNavDrawer.vue';
 import PublicFooter from './PublicFooter.vue';
 import PublicNav from './PublicNav.vue';
@@ -10,6 +11,12 @@ import PublicNav from './PublicNav.vue';
 const route = useRoute();
 const siteStore = useSiteStore();
 const mobileOpen = ref(false);
+const commandPalette = ref<InstanceType<typeof CommandPalette> | null>(null);
+
+function openSearch() {
+  mobileOpen.value = false;
+  void nextTick(() => commandPalette.value?.open());
+}
 
 watch(
   () => route.fullPath,
@@ -35,12 +42,14 @@ onMounted(() => {
     <PublicNav
       :github-url="siteStore.githubUrl"
       :mobile-open="mobileOpen"
+      @open-search="openSearch"
       @toggle-mobile="mobileOpen = !mobileOpen"
     />
     <MobileNavDrawer
       :github-url="siteStore.githubUrl"
       :open="mobileOpen"
       @close="mobileOpen = false"
+      @open-search="openSearch"
     />
 
     <main
@@ -55,5 +64,6 @@ onMounted(() => {
       :email="siteStore.email"
       :github-url="siteStore.githubUrl"
     />
+    <CommandPalette ref="commandPalette" />
   </div>
 </template>

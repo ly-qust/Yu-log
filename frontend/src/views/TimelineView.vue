@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { fetchTimeline } from '@/api/timeline';
@@ -18,6 +18,8 @@ const loading = ref(false);
 const optionsLoading = ref(false);
 const errorMessage = ref('');
 const allEvents = ref<TimelineEventItem[]>([]);
+const timelineTrack = ref<HTMLElement | null>(null);
+const timelineProgress = ref(0);
 const timelinePage = ref<PageResult<TimelineEventItem>>({
   list: [],
   pageNum: 1,
@@ -30,6 +32,7 @@ const timelinePage = ref<PageResult<TimelineEventItem>>({
 const filters = reactive({ type: '' });
 let requestSequence = 0;
 let cleanupSeo = () => {};
+let timelineFrame = 0;
 
 const typeOptions = computed(() => [...new Set(allEvents.value.map((event) => event.type?.trim()).filter((type): type is string => Boolean(type)))].sort((a, b) => a.localeCompare(b)));
 const resultDescription = computed(() => loading.value ? '正在读取成长记录…' : `公开档案中有 ${timelinePage.value.total} 条记录`);
@@ -73,7 +76,29 @@ async function loadTimeline(page: number) {
     if (requestId === requestSequence) errorMessage.value = '成长记录暂时无法加载，请稍后再试。';
   } finally {
     if (requestId === requestSequence) loading.value = false;
+    if (requestId === requestSequence) {
+      await nextTick();
+      scheduleTimelineProgress();
+    }
   }
+}
+
+function updateTimelineProgress() {
+  timelineFrame = 0;
+  const track = timelineTrack.value;
+  if (!track) {
+    timelineProgress.value = 0;
+    return;
+  }
+  const rect = track.getBoundingClientRect();
+  const viewportMarker = window.innerHeight * 0.66;
+  const progress = ((viewportMarker - rect.top) / Math.max(rect.height, 1)) * 100;
+  timelineProgress.value = Math.max(0, Math.min(100, progress));
+}
+
+function scheduleTimelineProgress() {
+  if (timelineFrame) return;
+  timelineFrame = window.requestAnimationFrame(updateTimelineProgress);
 }
 
 function syncFromRoute() {
@@ -98,6 +123,9 @@ async function clearFilters() {
 
 onMounted(() => {
   void loadAllEvents();
+  window.addEventListener('scroll', scheduleTimelineProgress, { passive: true });
+  window.addEventListener('resize', scheduleTimelineProgress);
+  scheduleTimelineProgress();
   cleanupSeo = applySeo({
     title: 'Timeline — Growth Archive | YU.LOG',
     description: 'Yu 的成长档案：记录真实的项目、学习、数据库和阶段性工程里程碑。',
@@ -107,7 +135,12 @@ onMounted(() => {
 
 watch(() => route.fullPath, syncFromRoute, { immediate: true });
 
-onUnmounted(() => cleanupSeo());
+onUnmounted(() => {
+  window.removeEventListener('scroll', scheduleTimelineProgress);
+  window.removeEventListener('resize', scheduleTimelineProgress);
+  if (timelineFrame) window.cancelAnimationFrame(timelineFrame);
+  cleanupSeo();
+});
 </script>
 
 <template>
@@ -134,7 +167,7 @@ onUnmounted(() => cleanupSeo());
       <section class="timeline-results" aria-label="成长记录列表">
         <div v-if="loading" class="timeline-loading"><div v-for="index in 3" :key="index" class="timeline-loading__item"><LoadingSkeleton :lines="4" /></div></div>
         <EmptyState v-else-if="timelinePage.list.length === 0" :title="filters.type ? '没有匹配的记录' : '成长记录正在生长'" :description="filters.type ? '试试切换记录类型，或重置筛选。' : '新的工程里程碑准备好公开后会出现在这里。'"><template v-if="filters.type" #action><button class="timeline-empty-action" type="button" @click="clearFilters">清空筛选</button></template></EmptyState>
-        <ol v-else class="timeline-track">
+        <ol v-else ref="timelineTrack" class="timeline-track" :style="{ '--timeline-progress': `${timelineProgress}%` }">
           <TimelineEntry v-for="(event, index) in timelinePage.list" :key="event.id" :event="event" :index="(timelinePage.pageNum - 1) * pageSize + index" :side="index % 2 === 0 ? 'left' : 'right'" />
         </ol>
       </section>
@@ -167,7 +200,9 @@ onUnmounted(() => cleanupSeo());
 .timeline-loading { display: grid; gap: 1.25rem; max-width: 50rem; margin: 0 auto; }
 .timeline-loading__item { min-height: 9rem; border: 1px solid rgb(var(--color-border-subtle) / .55); border-radius: .8rem; padding: 1.3rem; }
 .timeline-track { position: relative; max-width: 68rem; margin: 0 auto; padding: 1rem 0 0; list-style: none; }
-.timeline-track::before { position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; content: ''; background: linear-gradient(rgb(var(--color-brand-primary) / .1), rgb(var(--color-brand-primary) / .7) 20%, rgb(var(--color-accent-secondary) / .5) 80%, transparent); }
+.timeline-track::before, .timeline-track::after { position: absolute; top: 0; left: 50%; width: 1px; content: ''; pointer-events: none; }
+.timeline-track::before { bottom: 0; background: linear-gradient(rgb(var(--color-brand-primary) / .1), rgb(var(--color-brand-primary) / .7) 20%, rgb(var(--color-accent-secondary) / .5) 80%, transparent); }
+.timeline-track::after { height: var(--timeline-progress, 0%); background: linear-gradient(rgb(var(--color-brand-primary)), rgb(var(--color-accent-secondary))); box-shadow: 0 0 12px rgb(var(--color-brand-primary) / .5); transition: height var(--motion-normal) var(--ease-standard); }
 .timeline-pagination { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; padding-top: 2rem; font-family: 'JetBrains Mono', monospace; font-size: .65rem; color: rgb(var(--color-text-muted)); }
 .timeline-pagination button { justify-self: start; min-height: 2.5rem; border: 1px solid rgb(var(--color-border-subtle)); border-radius: .5rem; padding: 0 .8rem; color: rgb(var(--color-text-secondary)); }
 .timeline-pagination button:last-child { justify-self: end; }
@@ -176,4 +211,6 @@ onUnmounted(() => cleanupSeo());
 .timeline-empty-action { border: 1px solid rgb(var(--color-border-subtle)); border-radius: .5rem; padding: .6rem .8rem; font-family: 'JetBrains Mono', monospace; font-size: .62rem; color: rgb(var(--color-text-secondary)); }
 @media (max-width: 767px) { .timeline-intro__row { grid-template-columns: 1fr; gap: 1rem; } .timeline-result { padding-bottom: 0; } .timeline-track::before { left: .02rem; } }
 @media (max-width: 479px) { .timeline-pagination span { text-align: center; } .timeline-pagination button { padding: 0 .6rem; font-size: .58rem; } }
+@media (max-width: 767px) { .timeline-track::after { left: .02rem; } }
+@media (prefers-reduced-motion: reduce) { .timeline-track::after { transition: none; } }
 </style>

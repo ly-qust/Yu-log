@@ -24,7 +24,7 @@ const props = withDefaults(defineProps<{
 
 const buttonClass = computed(() => [
   'inline-flex select-none items-center justify-center gap-2 rounded-control border font-mono font-semibold',
-  'transition duration-normal ease-standard active:translate-y-px',
+  'transition duration-normal ease-standard hover:-translate-y-0.5 active:translate-y-px active:scale-[.985]',
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-canvas',
   'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
   {

@@ -15,6 +15,10 @@ function getSystemTheme(): ResolvedTheme {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
+type TransitionDocument = Document & {
+  startViewTransition?: (callback: () => void | Promise<void>) => { finished: Promise<void> };
+};
+
 function applyTheme(theme: ResolvedTheme, preference: ThemePreference) {
   const root = document.documentElement;
   root.dataset.theme = theme;
@@ -44,15 +48,28 @@ export const useThemeStore = defineStore('theme', () => {
     applyTheme(resolvedTheme.value, preference.value);
   }
 
-  function setPreference(nextPreference: ThemePreference) {
+  async function setPreference(nextPreference: ThemePreference, origin?: HTMLElement) {
+    const transitionDocument = document as TransitionDocument;
+    const canTransition = typeof transitionDocument.startViewTransition === 'function'
+      && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (origin) {
+      const rect = origin.getBoundingClientRect();
+      document.documentElement.style.setProperty('--theme-origin-x', `${rect.left + rect.width / 2}px`);
+      document.documentElement.style.setProperty('--theme-origin-y', `${rect.top + rect.height / 2}px`);
+    }
     preference.value = nextPreference;
     window.localStorage.setItem(THEME_STORAGE_KEY, nextPreference);
-    syncTheme();
+    if (canTransition) {
+      const transition = transitionDocument.startViewTransition!(() => syncTheme());
+      await transition.finished.catch(() => undefined);
+    } else {
+      syncTheme();
+    }
   }
 
-  function cyclePreference() {
+  function cyclePreference(origin?: HTMLElement) {
     const currentIndex = THEME_ORDER.indexOf(preference.value);
-    setPreference(THEME_ORDER[(currentIndex + 1) % THEME_ORDER.length]);
+    void setPreference(THEME_ORDER[(currentIndex + 1) % THEME_ORDER.length], origin);
   }
 
   function initialize() {

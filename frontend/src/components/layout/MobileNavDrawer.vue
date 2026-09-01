@@ -15,6 +15,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   close: [];
+  openSearch: [];
 }>();
 
 const panelRef = ref<HTMLElement | null>(null);
@@ -141,6 +142,11 @@ onUnmounted(() => {
               Navigation // garden map
             </p>
 
+            <button class="mobile-search" type="button" @click="emit('openSearch')">
+              <svg aria-hidden="true" fill="none" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.7" /><path d="m16 16 5 5" stroke="currentColor" stroke-linecap="round" stroke-width="1.7" /></svg>
+              <span>Search the garden</span><kbd>⌘K</kbd>
+            </button>
+
             <nav aria-label="移动端主要导航" class="mt-3 grid gap-1.5">
               <RouterLink
                 v-for="(item, index) in publicNavigation"
@@ -187,3 +193,11 @@ onUnmounted(() => {
     </Transition>
   </Teleport>
 </template>
+
+<style scoped>
+.mobile-search { display: flex; min-height: 2.75rem; align-items: center; gap: .6rem; margin-top: .8rem; border: 1px solid rgb(var(--color-border-subtle) / .75); border-radius: .6rem; padding: 0 .8rem; background: rgb(var(--color-bg-primary) / .45); font-family: 'JetBrains Mono', monospace; font-size: .62rem; color: rgb(var(--color-text-secondary)); transition: border-color var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); }
+.mobile-search svg { width: 1rem; height: 1rem; color: rgb(var(--color-brand-primary)); }
+.mobile-search span { flex: 1; text-align: left; }
+.mobile-search kbd { border: 1px solid rgb(var(--color-border-subtle) / .7); border-radius: .25rem; padding: .17rem .28rem; font-size: .52rem; color: rgb(var(--color-text-muted)); }
+.mobile-search:hover { border-color: rgb(var(--color-border-active) / .65); color: rgb(var(--color-brand-primary)); }
+</style>

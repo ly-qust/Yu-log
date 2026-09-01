@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onUnmounted, ref } from 'vue';
 
 import { homepageIdentity } from '@/config/homepage';
 import type { AboutProfile, HomeHero, HomeStats } from '@/types/site';
@@ -20,6 +20,9 @@ const props = withDefaults(defineProps<{
 });
 
 const visual = ref<HTMLElement | null>(null);
+const activeSignal = ref<number | null>(null);
+let pointerFrame = 0;
+let pendingPointer: { clientX: number; clientY: number } | null = null;
 const nickname = computed(() => String(props.profile.nickname || 'Yu'));
 const eyebrow = computed(() => {
   const role = typeof props.profile.role === 'string' ? props.profile.role.trim() : '';
@@ -39,14 +42,40 @@ const metrics = computed(() => props.stats ? [
   { label: 'Notes', value: props.stats.noteCount },
 ] : []);
 
-function trackHeroLight(event: PointerEvent) {
+function trackHeroPointer(event: PointerEvent) {
   if (event.pointerType !== 'mouse' || window.matchMedia('(prefers-reduced-motion: reduce)').matches || !visual.value) {
     return;
   }
-  const rect = visual.value.getBoundingClientRect();
-  visual.value.style.setProperty('--pointer-x', `${event.clientX - rect.left}px`);
-  visual.value.style.setProperty('--pointer-y', `${event.clientY - rect.top}px`);
+  pendingPointer = { clientX: event.clientX, clientY: event.clientY };
+  if (pointerFrame) return;
+  pointerFrame = window.requestAnimationFrame(() => {
+    pointerFrame = 0;
+    if (!visual.value || !pendingPointer) return;
+    const rect = visual.value.getBoundingClientRect();
+    const x = (pendingPointer.clientX - rect.left) / rect.width;
+    const y = (pendingPointer.clientY - rect.top) / rect.height;
+    const clampedX = Math.max(0, Math.min(1, x));
+    const clampedY = Math.max(0, Math.min(1, y));
+    visual.value.style.setProperty('--pointer-x', `${pendingPointer.clientX - rect.left}px`);
+    visual.value.style.setProperty('--pointer-y', `${pendingPointer.clientY - rect.top}px`);
+    visual.value.style.setProperty('--pointer-tilt-x', `${((0.5 - clampedY) * 3.6).toFixed(2)}deg`);
+    visual.value.style.setProperty('--pointer-tilt-y', `${((clampedX - 0.5) * 3.6).toFixed(2)}deg`);
+  });
 }
+
+function resetHeroPointer() {
+  pendingPointer = null;
+  if (pointerFrame) {
+    window.cancelAnimationFrame(pointerFrame);
+    pointerFrame = 0;
+  }
+  visual.value?.style.setProperty('--pointer-x', '50%');
+  visual.value?.style.setProperty('--pointer-y', '50%');
+  visual.value?.style.setProperty('--pointer-tilt-x', '0deg');
+  visual.value?.style.setProperty('--pointer-tilt-y', '0deg');
+}
+
+onUnmounted(() => resetHeroPointer());
 </script>
 
 <template>
@@ -91,7 +120,7 @@ function trackHeroLight(event: PointerEvent) {
         </dl>
       </div>
 
-      <div ref="visual" class="garden-core" @pointermove="trackHeroLight">
+      <div ref="visual" class="garden-core" @pointermove="trackHeroPointer" @pointerleave="resetHeroPointer">
         <div class="garden-core__light" aria-hidden="true"></div>
         <div class="garden-core__header">
           <div class="flex items-center gap-2" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -99,10 +128,10 @@ function trackHeroLight(event: PointerEvent) {
           <p class="hidden sm:block">LIVE_SIGNAL</p>
         </div>
 
-        <div class="garden-core__canvas" aria-hidden="true">
+        <div class="garden-core__canvas" role="group" aria-label="数字花园信号图">
           <svg class="garden-core__lines" viewBox="0 0 520 430" fill="none" preserveAspectRatio="xMidYMid meet">
             <path d="M260 214 100 112M260 214 420 102M260 214 438 292M260 214 126 332M260 214 258 56" />
-            <path class="garden-core__signal" d="M260 214 100 112M260 214 420 102M260 214 438 292M260 214 126 332" />
+            <path v-for="(label, index) in visualLabels" :key="`signal-${label}`" class="garden-core__signal" :class="{ 'is-active': activeSignal === index }" :d="['M260 214 100 112', 'M260 214 420 102', 'M260 214 438 292', 'M260 214 126 332'][index]" />
             <circle cx="260" cy="214" r="88" />
             <circle cx="260" cy="214" r="132" stroke-dasharray="3 13" />
           </svg>
@@ -111,7 +140,7 @@ function trackHeroLight(event: PointerEvent) {
             <span class="garden-core__pulse"></span>
             <svg viewBox="0 0 64 64" fill="none"><path d="M32 52V24m0 17c-8-7-15-7-21-3 3 10 10 15 21 15m0-9c7-7 14-8 21-4-3 10-10 15-21 15M32 29c-8-7-10-14-6-21 10 3 15 10 14 21" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" /></svg>
           </div>
-          <span v-for="(label, index) in visualLabels" :key="label" class="garden-core__node" :class="`garden-core__node--${index + 1}`">{{ label }}</span>
+          <button v-for="(label, index) in visualLabels" :key="label" type="button" class="garden-core__node" :class="[`garden-core__node--${index + 1}`, { 'is-active': activeSignal === index }]" :aria-pressed="activeSignal === index" @mouseenter="activeSignal = index" @mouseleave="activeSignal = null" @focus="activeSignal = index" @blur="activeSignal = null">{{ label }}</button>
         </div>
 
         <div class="garden-core__status">
@@ -137,7 +166,7 @@ function trackHeroLight(event: PointerEvent) {
 .hero-cta--secondary:hover { border-color: rgb(var(--color-border-active) / .65); color: rgb(var(--color-brand-primary)); }
 .hero-github { padding: .65rem .5rem; font-family: 'JetBrains Mono','Cascadia Code',monospace; font-size: .75rem; color: rgb(var(--color-text-muted)); transition: color 200ms; }
 .hero-github:hover { color: rgb(var(--color-brand-primary)); }
-.garden-core { --pointer-x: 50%; --pointer-y: 50%; position: relative; overflow: hidden; min-height: 34rem; border: 1px solid rgb(var(--color-border-subtle) / .72); border-radius: 1.25rem; background: linear-gradient(145deg, rgb(var(--color-surface-elevated) / .74), rgb(var(--color-bg-secondary) / .56)); box-shadow: var(--shadow-elevated); isolation: isolate; }
+.garden-core { --pointer-x: 50%; --pointer-y: 50%; --pointer-tilt-x: 0deg; --pointer-tilt-y: 0deg; position: relative; overflow: hidden; min-height: 34rem; border: 1px solid rgb(var(--color-border-subtle) / .72); border-radius: 1.25rem; background: linear-gradient(145deg, rgb(var(--color-surface-elevated) / .74), rgb(var(--color-bg-secondary) / .56)); box-shadow: var(--shadow-elevated); isolation: isolate; }
 .garden-core::before { position: absolute; inset: 0; content: ''; background-image: linear-gradient(rgb(var(--color-brand-primary) / .05) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--color-brand-primary) / .05) 1px, transparent 1px); background-size: 30px 30px; mask-image: radial-gradient(circle at 50% 45%, black, transparent 78%); }
 .garden-core__light { position: absolute; inset: 0; z-index: -1; background: radial-gradient(260px circle at var(--pointer-x) var(--pointer-y), rgb(var(--color-brand-primary) / .13), transparent 68%); opacity: .7; }
 .garden-core__header { position: relative; z-index: 2; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-height: 3.25rem; border-bottom: 1px solid rgb(var(--color-border-subtle) / .55); padding: 0 1rem; font-family: 'JetBrains Mono','Cascadia Code',monospace; font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; color: rgb(var(--color-text-muted)); }
@@ -145,16 +174,18 @@ function trackHeroLight(event: PointerEvent) {
 .garden-core__header div span { width: .48rem; height: .48rem; border-radius: 99px; background: rgb(var(--color-border-subtle)); }
 .garden-core__header div span:nth-child(2) { background: rgb(var(--color-warning) / .7); }
 .garden-core__header div span:nth-child(3) { background: rgb(var(--color-brand-primary) / .8); }
-.garden-core__canvas { position: relative; min-height: 26.5rem; }
+.garden-core__canvas { position: relative; min-height: 26.5rem; transform: perspective(900px) rotateX(var(--pointer-tilt-x)) rotateY(var(--pointer-tilt-y)); transform-origin: center; transition: transform var(--motion-slow) var(--ease-standard); }
 .garden-core__lines { position: absolute; inset: 1rem 0 0; width: 100%; height: calc(100% - 1rem); stroke: rgb(var(--color-border-active) / .38); stroke-width: 1; }
-.garden-core__signal { stroke: rgb(var(--color-brand-primary) / .75); stroke-dasharray: 4 18; animation: signal-flow 9s linear infinite; }
+.garden-core__signal { stroke: rgb(var(--color-brand-primary) / .44); stroke-dasharray: 4 18; opacity: .68; animation: signal-flow 9s linear infinite; transition: opacity var(--motion-fast) var(--ease-standard), stroke-width var(--motion-fast) var(--ease-standard), stroke var(--motion-fast) var(--ease-standard); }
+.garden-core__signal.is-active { stroke: rgb(var(--color-brand-primary)); stroke-width: 1.8; opacity: 1; }
 .garden-core__orbit { position: absolute; left: 50%; top: 50%; width: 15.5rem; height: 15.5rem; border: 1px solid rgb(var(--color-accent-secondary) / .22); border-radius: 50%; transform: translate(-50%, -50%); }
 .garden-core__orbit::after { position: absolute; left: 50%; top: -.25rem; width: .5rem; height: .5rem; content: ''; border-radius: 50%; background: rgb(var(--color-accent-secondary)); box-shadow: 0 0 18px rgb(var(--color-accent-secondary) / .7); animation: orbit-spin 12s linear infinite; transform-origin: 0 8rem; }
 .garden-core__center { position: absolute; left: 50%; top: 50%; display: grid; width: 6.75rem; height: 6.75rem; place-items: center; border: 1px solid rgb(var(--color-brand-primary) / .7); border-radius: 50%; background: rgb(var(--color-bg-primary) / .86); color: rgb(var(--color-brand-primary)); box-shadow: 0 0 48px rgb(var(--color-brand-primary) / .18); transform: translate(-50%, -50%); }
 .garden-core__center svg { width: 3.5rem; height: 3.5rem; }
 .garden-core__pulse { position: absolute; inset: -.55rem; border: 1px solid rgb(var(--color-brand-primary) / .32); border-radius: 50%; animation: core-breathe 3.8s ease-in-out infinite; }
-.garden-core__node { position: absolute; max-width: 8.5rem; overflow: hidden; border: 1px solid rgb(var(--color-border-subtle) / .8); border-radius: 999px; background: rgb(var(--color-surface-elevated) / .88); padding: .42rem .7rem; font-family: 'JetBrains Mono','Cascadia Code',monospace; font-size: .58rem; text-overflow: ellipsis; white-space: nowrap; color: rgb(var(--color-text-secondary)); box-shadow: var(--shadow-soft); }
+.garden-core__node { position: absolute; max-width: 8.5rem; overflow: hidden; border: 1px solid rgb(var(--color-border-subtle) / .8); border-radius: 999px; background: rgb(var(--color-surface-elevated) / .88); padding: .42rem .7rem; font-family: 'JetBrains Mono','Cascadia Code',monospace; font-size: .58rem; text-overflow: ellipsis; white-space: nowrap; color: rgb(var(--color-text-secondary)); box-shadow: var(--shadow-soft); cursor: pointer; text-align: left; transition: border-color var(--motion-fast) var(--ease-standard), background-color var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), box-shadow var(--motion-fast) var(--ease-standard); }
 .garden-core__node::before { display: inline-block; width: .35rem; height: .35rem; margin-right: .4rem; border-radius: 50%; background: rgb(var(--color-brand-primary)); content: ''; box-shadow: 0 0 8px rgb(var(--color-brand-primary) / .65); }
+.garden-core__node:hover, .garden-core__node:focus-visible, .garden-core__node.is-active { border-color: rgb(var(--color-brand-primary) / .82); background: rgb(var(--color-brand-primary) / .12); color: rgb(var(--color-brand-primary)); box-shadow: var(--shadow-glow); outline: none; }
 .garden-core__node--1 { left: 5%; top: 18%; animation: node-float 5s ease-in-out infinite; }
 .garden-core__node--2 { right: 4%; top: 16%; animation: node-float 6s ease-in-out -1.5s infinite; }
 .garden-core__node--3 { right: 3%; bottom: 15%; animation: node-float 5.5s ease-in-out -.8s infinite; }
@@ -171,5 +202,5 @@ function trackHeroLight(event: PointerEvent) {
 @media (max-width: 1023px) { .hero-shell { min-height: auto; padding-top: 4.5rem; } .garden-core { max-width: 43rem; min-height: 31rem; margin: 0 auto; } .garden-core__canvas { min-height: 23.5rem; } }
 @media (max-width: 639px) { .hero-shell { padding: 3.5rem 0 4.5rem; } .garden-core { min-height: 26rem; } .garden-core__canvas { min-height: 19.5rem; } .garden-core__header { grid-template-columns: 1fr auto; } .garden-core__header > p:first-of-type { text-align: right; } .garden-core__lines { inset: .5rem 0 0; height: calc(100% - .5rem); } .garden-core__orbit { width: 11.5rem; height: 11.5rem; } .garden-core__orbit::after { transform-origin: 0 6rem; } .garden-core__center { width: 5.25rem; height: 5.25rem; } .garden-core__center svg { width: 2.75rem; height: 2.75rem; } .garden-core__node { max-width: 6.7rem; font-size: .52rem; padding: .34rem .5rem; } .garden-core__node--1 { left: 2%; top: 18%; } .garden-core__node--2 { right: 1%; top: 17%; } .garden-core__node--3 { right: 1%; bottom: 12%; } .garden-core__node--4 { left: 2%; bottom: 10%; } .garden-core__status { grid-template-columns: repeat(2, 1fr); } .garden-core__status div:nth-child(3) { display: none; } }
 @media (hover: none) { .garden-core__light { display: none; } }
-@media (prefers-reduced-motion: reduce) { .garden-core__signal, .garden-core__orbit::after, .garden-core__pulse, .garden-core__node { animation: none; } .hero-cta:hover { transform: none; } .garden-core__light { display: none; } }
+@media (prefers-reduced-motion: reduce) { .garden-core__signal, .garden-core__orbit::after, .garden-core__pulse, .garden-core__node { animation: none; } .hero-cta:hover { transform: none; } .garden-core__light { display: none; } .garden-core__canvas { transform: none; transition: none; } .garden-core__signal { transition: none; } }
 </style>

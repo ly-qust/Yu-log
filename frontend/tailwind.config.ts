@@ -80,10 +80,15 @@ export default {
         fast: '150ms',
         normal: '240ms',
         slow: '360ms',
+        'motion-fast': '140ms',
+        'motion-normal': '220ms',
+        'motion-slow': '420ms',
       },
       transitionTimingFunction: {
         standard: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
         entrance: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        emphasized: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        spring: 'cubic-bezier(0.22, 1.25, 0.36, 1)',
       },
       maxWidth: {
         content: '80rem',

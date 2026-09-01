@@ -16,6 +16,7 @@ withDefaults(defineProps<{
 
 const emit = defineEmits<{
   toggleMobile: [];
+  openSearch: [];
 }>();
 
 const isScrolled = ref(false);
@@ -55,7 +56,7 @@ onUnmounted(() => {
           v-for="item in publicNavigation"
           :key="item.to"
           :active-class="item.exact ? '' : 'border-brand/22 bg-brand/8 text-brand'"
-          class="rounded-control border border-transparent px-3 py-2 font-mono text-[0.72rem] font-medium tracking-[0.04em] text-text-secondary transition duration-normal hover:border-border-subtle hover:bg-surface-hover/68 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          class="relative overflow-hidden rounded-control border border-transparent px-3 py-2 font-mono text-[0.72rem] font-medium tracking-[0.04em] text-text-secondary transition duration-normal hover:border-border-subtle hover:bg-surface-hover/68 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           :exact-active-class="item.exact ? 'border-brand/22 bg-brand/8 text-brand' : ''"
           :to="item.to"
         >
@@ -64,6 +65,10 @@ onUnmounted(() => {
       </nav>
 
       <div class="ml-auto hidden items-center gap-1 lg:ml-2 lg:flex">
+        <button class="nav-search" type="button" @click="emit('openSearch')">
+          <svg aria-hidden="true" fill="none" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.7" /><path d="m16 16 5 5" stroke="currentColor" stroke-linecap="round" stroke-width="1.7" /></svg>
+          <span>Search</span><kbd>⌘K</kbd>
+        </button>
         <a
           v-if="githubUrl"
           :href="githubUrl"
@@ -81,6 +86,9 @@ onUnmounted(() => {
       </div>
 
       <div class="ml-auto flex items-center gap-1 lg:hidden">
+        <button aria-label="打开全局搜索" class="nav-search nav-search--mobile" type="button" @click="emit('openSearch')">
+          <svg aria-hidden="true" fill="none" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.7" /><path d="m16 16 5 5" stroke="currentColor" stroke-linecap="round" stroke-width="1.7" /></svg>
+        </button>
         <ThemeToggle />
         <IconButton
           :aria-controls="'mobile-navigation'"
@@ -99,3 +107,14 @@ onUnmounted(() => {
     </div>
   </header>
 </template>
+
+<style scoped>
+.nav-search { display: inline-flex; min-height: 2.25rem; align-items: center; gap: .4rem; border: 1px solid transparent; border-radius: .6rem; padding: 0 .6rem; font-family: 'JetBrains Mono', monospace; font-size: .58rem; color: rgb(var(--color-text-muted)); transition: border-color var(--motion-fast) var(--ease-standard), background-color var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); }
+.nav-search svg { width: .9rem; height: .9rem; }
+.nav-search kbd { border: 1px solid rgb(var(--color-border-subtle) / .7); border-radius: .25rem; padding: .16rem .25rem; font-size: .5rem; }
+.nav-search:hover { border-color: rgb(var(--color-border-subtle)); background: rgb(var(--color-surface-hover) / .7); color: rgb(var(--color-brand-primary)); }
+.nav-search--mobile { width: 2.25rem; justify-content: center; padding: 0; }
+nav a.router-link-active::after { position: absolute; right: .7rem; bottom: .25rem; left: .7rem; height: 1px; content: ''; background: rgb(var(--color-brand-primary)); box-shadow: 0 0 8px rgb(var(--color-brand-primary) / .6); transform-origin: left; animation: nav-indicator-in var(--motion-normal) var(--ease-emphasized) both; }
+@keyframes nav-indicator-in { from { opacity: 0; transform: scaleX(.2); } to { opacity: 1; transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) { nav a.router-link-active::after { animation: none; } }
+</style>

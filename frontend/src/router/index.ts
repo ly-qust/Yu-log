@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { nextTick } from 'vue';
 
 import HomeView from '@/views/HomeView.vue';
 import MessageBoardView from '@/views/MessageBoardView.vue';
@@ -48,6 +49,36 @@ const router = createRouter({
     { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView },
   ],
 });
+
+type NavigationResult = ReturnType<typeof router.push> extends Promise<infer Result> ? Result : never;
+type TransitionDocument = Document & {
+  startViewTransition?: (callback: () => void | Promise<void>) => { finished: Promise<void> };
+};
+
+function canUseViewTransition() {
+  return typeof window !== 'undefined'
+    && typeof (document as TransitionDocument).startViewTransition === 'function'
+    && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+async function navigateWithTransition(navigate: () => Promise<NavigationResult>): Promise<NavigationResult> {
+  if (!canUseViewTransition()) {
+    return navigate();
+  }
+
+  let result: NavigationResult;
+  const transition = (document as TransitionDocument).startViewTransition!(async () => {
+    result = await navigate();
+    await nextTick();
+  });
+  await transition.finished.catch(() => undefined);
+  return result!;
+}
+
+const originalPush = router.push.bind(router);
+const originalReplace = router.replace.bind(router);
+router.push = (to) => navigateWithTransition(() => originalPush(to));
+router.replace = (to) => navigateWithTransition(() => originalReplace(to));
 
 router.beforeEach(async (to) => {
   const authStore = useAuthStore();

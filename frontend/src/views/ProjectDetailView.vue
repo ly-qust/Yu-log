@@ -25,6 +25,7 @@ const project = ref<ProjectDetail | null>(null);
 const projectIndex = ref<ProjectItem[]>([]);
 const loading = ref(false);
 const fatalError = ref('');
+const activeArchitectureNode = ref('');
 let requestSequence = 0;
 let cleanupSeo = () => {};
 
@@ -63,10 +64,10 @@ const architectureNodes = computed<ProjectArchitectureNode[]>(() => architecture
   { id: 'cache', label: 'Redis', caption: 'Cache & counters', tone: 'brand' },
 ] : []);
 const workflowSteps = computed(() => architectureAvailable.value ? [
-  { number: '01', label: 'Public interface', text: 'Vue3 and Tailwind CSS render the public reading and project surfaces.' },
-  { number: '02', label: 'HTTP API', text: 'Spring Boot exposes the public content and project endpoints.' },
-  { number: '03', label: 'Persistent data', text: 'MySQL stores the project and content records used by the site.' },
-  { number: '04', label: 'Fast path', text: 'Redis supports cache and counter-related work already present in the repository.' },
+  { number: '01', nodeId: 'client', label: 'Public interface', text: 'Vue3 and Tailwind CSS render the public reading and project surfaces.' },
+  { number: '02', nodeId: 'api', label: 'HTTP API', text: 'Spring Boot exposes the public content and project endpoints.' },
+  { number: '03', nodeId: 'database', label: 'Persistent data', text: 'MySQL stores the project and content records used by the site.' },
+  { number: '04', nodeId: 'cache', label: 'Fast path', text: 'Redis supports cache and counter-related work already present in the repository.' },
 ] : []);
 const galleryImages = computed<ProjectGalleryImage[]>(() => []);
 
@@ -199,13 +200,13 @@ onUnmounted(() => {
               <p>{{ project.description }}</p>
             </section>
 
-            <ProjectArchitecture :nodes="architectureNodes" />
+            <ProjectArchitecture :active-node="activeArchitectureNode" :nodes="architectureNodes" @select="activeArchitectureNode = $event" />
 
             <section v-if="workflowSteps.length" class="project-section project-workflow" aria-labelledby="project-workflow-title">
               <p class="project-kicker">Workflow</p>
               <h2 id="project-workflow-title">From interface to infrastructure</h2>
               <ol class="project-workflow__list">
-                <li v-for="step in workflowSteps" :key="step.number">
+                <li v-for="step in workflowSteps" :key="step.number" :class="{ 'is-active': activeArchitectureNode === step.nodeId }" tabindex="0" @click="activeArchitectureNode = activeArchitectureNode === step.nodeId ? '' : step.nodeId" @mouseenter="activeArchitectureNode = step.nodeId" @mouseleave="activeArchitectureNode = ''" @focus="activeArchitectureNode = step.nodeId" @blur="activeArchitectureNode = ''">
                   <span>{{ step.number }}</span>
                   <div><h3>{{ step.label }}</h3><p>{{ step.text }}</p></div>
                 </li>
@@ -259,10 +260,12 @@ onUnmounted(() => {
 .project-section h2 { margin-top: .65rem; font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.65rem, 4vw, 2.4rem); font-weight: 650; line-height: 1.15; letter-spacing: -.035em; color: rgb(var(--color-text-primary)); }
 .project-section > p:not(.project-kicker) { max-width: 42rem; margin-top: 1.2rem; font-size: 1rem; line-height: 1.9; color: rgb(var(--color-text-secondary)); }
 .project-workflow__list { display: grid; gap: 0; margin-top: 2rem; }
-.project-workflow__list li { display: grid; grid-template-columns: 3rem minmax(0, 1fr); gap: 1.25rem; border-top: 1px solid rgb(var(--color-border-subtle) / .52); padding: 1.3rem 0; }
+.project-workflow__list li { display: grid; grid-template-columns: 3rem minmax(0, 1fr); gap: 1.25rem; border-top: 1px solid rgb(var(--color-border-subtle) / .52); padding: 1.3rem .75rem; cursor: pointer; transition: border-color var(--motion-fast) var(--ease-standard), background-color var(--motion-fast) var(--ease-standard), transform var(--motion-normal) var(--ease-emphasized); }
+.project-workflow__list li:hover, .project-workflow__list li:focus-visible, .project-workflow__list li.is-active { border-top-color: rgb(var(--color-brand-primary) / .7); background: rgb(var(--color-brand-primary) / .06); outline: none; transform: translateX(.25rem); }
 .project-workflow__list li > span { font-family: 'JetBrains Mono', monospace; font-size: .62rem; color: rgb(var(--color-brand-primary)); }
 .project-workflow__list h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 600; color: rgb(var(--color-text-primary)); }
 .project-workflow__list p { margin-top: .38rem; font-size: .86rem; line-height: 1.75; color: rgb(var(--color-text-secondary)); }
 .project-notes :deep(.article-prose) { margin-top: 1.4rem; font-size: 1rem; }
+@media (prefers-reduced-motion: reduce) { .project-workflow__list li { transition: none; } .project-workflow__list li:hover, .project-workflow__list li:focus-visible, .project-workflow__list li.is-active { transform: none; } }
 @media (max-width: 639px) { .project-detail-page { padding-bottom: 4rem; } .project-hero__meta { align-items: flex-start; flex-direction: column; } .project-hero h1 { font-size: clamp(2.7rem, 14vw, 4.5rem); } .project-reading-grid { margin-top: 3rem; } }
 </style>
