@@ -36,7 +36,10 @@ const groups = [
   },
   {
     label: '系统',
-    items: [{ label: '站点配置', to: '/admin/site-settings', icon: 'S' }],
+    items: [
+      { label: '站点配置', to: '/admin/site-settings', icon: 'S' },
+      { label: '账号安全', to: '/admin/account', icon: 'A' },
+    ],
   },
 ];
 

@@ -21,6 +21,7 @@ public class SysUser {
     private String avatarUrl;
     private String roleCode;
     private String status;
+    private Boolean mustChangePassword;
     private LocalDateTime lastLoginAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

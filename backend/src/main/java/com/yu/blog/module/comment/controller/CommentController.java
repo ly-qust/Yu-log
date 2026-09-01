@@ -1,6 +1,7 @@
 package com.yu.blog.module.comment.controller;
 
 import com.yu.blog.common.api.Result;
+import com.yu.blog.config.ClientIpResolver;
 import com.yu.blog.module.comment.dto.CommentSubmitRequest;
 import com.yu.blog.module.comment.service.CommentService;
 import com.yu.blog.module.comment.vo.PublicCommentVO;
@@ -8,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class CommentController {
     private final CommentService commentService;
+    private final ClientIpResolver clientIpResolver;
 
     @PostMapping
     public Result<String> submit(
@@ -28,20 +29,11 @@ public class CommentController {
             @Valid @RequestBody CommentSubmitRequest request,
             HttpServletRequest servletRequest
     ) {
-        return Result.ok(commentService.submit(articleId, request, clientIp(servletRequest), servletRequest.getHeader("User-Agent")));
+        return Result.ok(commentService.submit(articleId, request, clientIpResolver.resolve(servletRequest), servletRequest.getHeader("User-Agent")));
     }
 
     @GetMapping
     public Result<List<PublicCommentVO>> list(@PathVariable Long articleId) {
         return Result.ok(commentService.listPublic(articleId));
-    }
-
-    private String clientIp(HttpServletRequest request) {
-        String forwardedFor = request.getHeader("X-Forwarded-For");
-        if (StringUtils.hasText(forwardedFor)) {
-            return forwardedFor.split(",")[0].trim();
-        }
-        String realIp = request.getHeader("X-Real-IP");
-        return StringUtils.hasText(realIp) ? realIp.trim() : request.getRemoteAddr();
     }
 }

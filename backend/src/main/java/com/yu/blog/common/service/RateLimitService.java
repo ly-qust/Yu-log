@@ -6,6 +6,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.HexFormat;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,12 @@ public class RateLimitService {
             log.warn("Redis rate limit unavailable, fallback to in-memory counter. scope={}", scope, exception);
             checkInMemory(key, maxRequests, window);
         }
+    }
+
+    public void checkLogin(String clientIp, String username, RateLimitProperties properties) {
+        check("login-ip", clientIp, properties.loginIpMaxRequests(), properties.loginWindow());
+        String normalizedUsername = username == null ? "unknown" : username.trim().toLowerCase(Locale.ROOT);
+        check("login-user", normalizedUsername, properties.loginUsernameMaxRequests(), properties.loginWindow());
     }
 
     public String ipHash(String clientIp) {

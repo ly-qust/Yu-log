@@ -99,7 +99,7 @@ class CommentMessageIntegrationTests {
                         .header("X-Forwarded-For", uniqueIp())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(commentPayload("comment for draft " + System.nanoTime()))))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value(404));
 
         mockMvc.perform(delete("/api/admin/articles/{id}", draftArticleId)

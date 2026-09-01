@@ -6,8 +6,18 @@ spring:
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  flyway:
+    enabled: ${YU_LOG_FLYWAY_ENABLED:true}
+    locations: ${YU_LOG_FLYWAY_LOCATIONS:classpath:db}
+    baseline-on-migrate: ${YU_LOG_FLYWAY_BASELINE_ON_MIGRATE:false}
+    baseline-version: ${YU_LOG_FLYWAY_BASELINE_VERSION:6}
+    validate-on-migrate: true
 
 server:
+  error:
+    include-message: never
+    include-stacktrace: never
+
   port: ${SERVER_PORT:8080}
 
 management:
@@ -20,6 +30,9 @@ management:
       enabled: true
     redis:
       enabled: true
+  endpoint:
+    health:
+      show-details: never
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml

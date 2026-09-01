@@ -3,12 +3,13 @@ import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { useAuthStore } from '@/stores/auth';
+import { getErrorMessage } from '@/utils/errors';
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 
-const username = ref('yu_admin');
+const username = ref('');
 const password = ref('');
 const loading = ref(false);
 const errorMessage = ref('');
@@ -29,8 +30,8 @@ async function submit() {
     });
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/admin';
     await router.push(redirect);
-  } catch {
-    errorMessage.value = '登录失败，请检查账号或密码。';
+  } catch (error) {
+    errorMessage.value = getErrorMessage(error, '登录失败，请检查账号或密码。');
   } finally {
     loading.value = false;
   }

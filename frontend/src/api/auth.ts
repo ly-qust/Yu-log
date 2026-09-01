@@ -1,6 +1,6 @@
 import { http } from './http';
 import type { Result } from '@/types/api';
-import type { AuthTokenResponse, LoginPayload, UserInfo } from '@/types/auth';
+import type { AuthTokenResponse, ChangePasswordPayload, LoginPayload, UserInfo } from '@/types/auth';
 
 export async function loginApi(payload: LoginPayload): Promise<AuthTokenResponse> {
   const response = await http.post<Result<AuthTokenResponse>>('/auth/login', payload);
@@ -18,5 +18,10 @@ export async function logoutApi(): Promise<void> {
 
 export async function fetchMeApi(): Promise<UserInfo> {
   const response = await http.get<Result<UserInfo>>('/users/me');
+  return response.data.data;
+}
+
+export async function changePasswordApi(payload: ChangePasswordPayload): Promise<UserInfo> {
+  const response = await http.post<Result<UserInfo>>('/auth/change-password', payload);
   return response.data.data;
 }

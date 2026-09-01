@@ -114,11 +114,11 @@ onUnmounted(() => {
 
       <template v-else>
         <HomeAbout class="home-reveal" :about="about" :learning="overview?.currentlyLearning || []" :profile="profile" />
-        <FeaturedProjects v-if="hasProjects" class="home-reveal" :projects="overview!.featuredProjects" />
+        <div v-if="hasProjects" class="home-reveal"><FeaturedProjects :projects="overview!.featuredProjects" /></div>
         <LatestWriting v-if="hasArticles" class="home-reveal" :articles="overview!.latestArticles" />
-        <TechLandscape v-if="techItems.length" class="home-reveal" :items="techItems" />
+        <div v-if="techItems.length" class="home-reveal"><TechLandscape :items="techItems" /></div>
         <TimelinePreview v-if="hasTimeline" class="home-reveal" :events="overview!.timelinePreview" />
-        <GardenNotes v-if="hasNotes" class="home-reveal" :notes="overview!.latestNotes" />
+        <div v-if="hasNotes" class="home-reveal"><GardenNotes :notes="overview!.latestNotes" /></div>
         <HomeClosing class="home-reveal" :email="siteStore.email" :github-url="siteStore.githubUrl" />
       </template>
     </div>

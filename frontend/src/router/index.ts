@@ -1,28 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-import AboutView from '@/views/AboutView.vue';
 import HomeView from '@/views/HomeView.vue';
 import MessageBoardView from '@/views/MessageBoardView.vue';
-import NoteDetailView from '@/views/NoteDetailView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
-import NotesView from '@/views/NotesView.vue';
-import TimelineView from '@/views/TimelineView.vue';
-import AdminArticleFormView from '@/views/admin/AdminArticleFormView.vue';
-import AdminArticlesView from '@/views/admin/AdminArticlesView.vue';
-import AdminCategoriesView from '@/views/admin/AdminCategoriesView.vue';
-import AdminCommentsView from '@/views/admin/AdminCommentsView.vue';
-import AdminDashboardView from '@/views/admin/AdminDashboardView.vue';
-import AdminLoginView from '@/views/admin/AdminLoginView.vue';
-import AdminMessagesView from '@/views/admin/AdminMessagesView.vue';
-import AdminNoteFormView from '@/views/admin/AdminNoteFormView.vue';
-import AdminNotesView from '@/views/admin/AdminNotesView.vue';
-import AdminProjectFormView from '@/views/admin/AdminProjectFormView.vue';
-import AdminProjectsView from '@/views/admin/AdminProjectsView.vue';
-import AdminShellView from '@/views/admin/AdminShellView.vue';
-import AdminSiteSettingsView from '@/views/admin/AdminSiteSettingsView.vue';
-import AdminTagsView from '@/views/admin/AdminTagsView.vue';
-import AdminTimelineFormView from '@/views/admin/AdminTimelineFormView.vue';
-import AdminTimelineView from '@/views/admin/AdminTimelineView.vue';
 import { useAuthStore } from '@/stores/auth';
 
 const router = createRouter({
@@ -33,35 +13,36 @@ const router = createRouter({
     { path: '/articles/:id', name: 'article-detail', component: () => import('@/views/ArticleDetailView.vue') },
     { path: '/projects', name: 'projects', component: () => import('@/views/ProjectsView.vue') },
     { path: '/projects/:id', name: 'project-detail', component: () => import('@/views/ProjectDetailView.vue') },
-    { path: '/notes', name: 'notes', component: NotesView },
-    { path: '/notes/:id', name: 'note-detail', component: NoteDetailView },
-    { path: '/timeline', name: 'timeline', component: TimelineView },
-    { path: '/about', name: 'about', component: AboutView },
+    { path: '/notes', name: 'notes', component: () => import('@/views/NotesView.vue') },
+    { path: '/notes/:id', name: 'note-detail', component: () => import('@/views/NoteDetailView.vue') },
+    { path: '/timeline', name: 'timeline', component: () => import('@/views/TimelineView.vue') },
+    { path: '/about', name: 'about', component: () => import('@/views/AboutView.vue') },
     { path: '/messages', name: 'messages', component: MessageBoardView },
-    { path: '/admin/login', name: 'admin-login', component: AdminLoginView },
+    { path: '/admin/login', name: 'admin-login', component: () => import('@/views/admin/AdminLoginView.vue') },
     {
       path: '/admin',
-      component: AdminShellView,
+      component: () => import('@/views/admin/AdminShellView.vue'),
       meta: { requiresAuth: true, requiresAdmin: true },
       children: [
-        { path: '', name: 'admin-dashboard', component: AdminDashboardView },
-        { path: 'articles', name: 'admin-articles', component: AdminArticlesView },
-        { path: 'articles/new', name: 'admin-article-new', component: AdminArticleFormView },
-        { path: 'articles/:id/edit', name: 'admin-article-edit', component: AdminArticleFormView },
-        { path: 'categories', name: 'admin-categories', component: AdminCategoriesView },
-        { path: 'tags', name: 'admin-tags', component: AdminTagsView },
-        { path: 'comments', name: 'admin-comments', component: AdminCommentsView },
-        { path: 'messages', name: 'admin-messages', component: AdminMessagesView },
-        { path: 'projects', name: 'admin-projects', component: AdminProjectsView },
-        { path: 'projects/new', name: 'admin-project-new', component: AdminProjectFormView },
-        { path: 'projects/:id/edit', name: 'admin-project-edit', component: AdminProjectFormView },
-        { path: 'notes', name: 'admin-notes', component: AdminNotesView },
-        { path: 'notes/new', name: 'admin-note-new', component: AdminNoteFormView },
-        { path: 'notes/:id/edit', name: 'admin-note-edit', component: AdminNoteFormView },
-        { path: 'timeline', name: 'admin-timeline', component: AdminTimelineView },
-        { path: 'timeline/new', name: 'admin-timeline-new', component: AdminTimelineFormView },
-        { path: 'timeline/:id/edit', name: 'admin-timeline-edit', component: AdminTimelineFormView },
-        { path: 'site-settings', name: 'admin-site-settings', component: AdminSiteSettingsView },
+        { path: '', name: 'admin-dashboard', component: () => import('@/views/admin/AdminDashboardView.vue') },
+        { path: 'articles', name: 'admin-articles', component: () => import('@/views/admin/AdminArticlesView.vue') },
+        { path: 'articles/new', name: 'admin-article-new', component: () => import('@/views/admin/AdminArticleFormView.vue') },
+        { path: 'articles/:id/edit', name: 'admin-article-edit', component: () => import('@/views/admin/AdminArticleFormView.vue') },
+        { path: 'categories', name: 'admin-categories', component: () => import('@/views/admin/AdminCategoriesView.vue') },
+        { path: 'tags', name: 'admin-tags', component: () => import('@/views/admin/AdminTagsView.vue') },
+        { path: 'comments', name: 'admin-comments', component: () => import('@/views/admin/AdminCommentsView.vue') },
+        { path: 'messages', name: 'admin-messages', component: () => import('@/views/admin/AdminMessagesView.vue') },
+        { path: 'projects', name: 'admin-projects', component: () => import('@/views/admin/AdminProjectsView.vue') },
+        { path: 'projects/new', name: 'admin-project-new', component: () => import('@/views/admin/AdminProjectFormView.vue') },
+        { path: 'projects/:id/edit', name: 'admin-project-edit', component: () => import('@/views/admin/AdminProjectFormView.vue') },
+        { path: 'notes', name: 'admin-notes', component: () => import('@/views/admin/AdminNotesView.vue') },
+        { path: 'notes/new', name: 'admin-note-new', component: () => import('@/views/admin/AdminNoteFormView.vue') },
+        { path: 'notes/:id/edit', name: 'admin-note-edit', component: () => import('@/views/admin/AdminNoteFormView.vue') },
+        { path: 'timeline', name: 'admin-timeline', component: () => import('@/views/admin/AdminTimelineView.vue') },
+        { path: 'timeline/new', name: 'admin-timeline-new', component: () => import('@/views/admin/AdminTimelineFormView.vue') },
+        { path: 'timeline/:id/edit', name: 'admin-timeline-edit', component: () => import('@/views/admin/AdminTimelineFormView.vue') },
+        { path: 'site-settings', name: 'admin-site-settings', component: () => import('@/views/admin/AdminSiteSettingsView.vue') },
+        { path: 'account', name: 'admin-account', component: () => import('@/views/admin/AdminAccountView.vue') },
       ],
     },
     { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView },

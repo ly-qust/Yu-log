@@ -34,7 +34,7 @@ class FileUploadIntegrationTests {
                 "file",
                 "cover.png",
                 "image/png",
-                new byte[]{(byte) 0x89, 'P', 'N', 'G', 0x0D, 0x0A}
+                new byte[]{(byte) 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A}
         );
 
         mockMvc.perform(multipart("/api/admin/files/upload")
@@ -60,7 +60,7 @@ class FileUploadIntegrationTests {
         String url = objectMapper.readTree(response).at("/data/url").asText();
         mockMvc.perform(get(url))
                 .andExpect(status().isOk())
-                .andExpect(content().bytes(new byte[]{(byte) 0x89, 'P', 'N', 'G', 0x0D, 0x0A}));
+                .andExpect(content().bytes(new byte[]{(byte) 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A}));
     }
 
     @Test
@@ -73,10 +73,10 @@ class FileUploadIntegrationTests {
                 "text/plain",
                 "hello".getBytes()
         );
-        mockMvc.perform(multipart("/api/admin/files/upload")
+                mockMvc.perform(multipart("/api/admin/files/upload")
                         .file(textFile)
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnsupportedMediaType())
                 .andExpect(jsonPath("$.message").value("仅支持 jpg、png、webp、gif 图片"));
 
         MockMultipartFile emptyFile = new MockMultipartFile(
@@ -100,7 +100,7 @@ class FileUploadIntegrationTests {
         mockMvc.perform(multipart("/api/admin/files/upload")
                         .file(oversizedFile)
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isPayloadTooLarge())
                 .andExpect(jsonPath("$.message").value("文件大小不能超过 5MB"));
     }
 

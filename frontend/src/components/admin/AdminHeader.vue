@@ -27,6 +27,7 @@ const titleMap: Record<string, string> = {
   'admin-comments': '评论审核',
   'admin-messages': '留言审核',
   'admin-site-settings': '站点配置',
+  'admin-account': '账号安全',
 };
 
 const title = computed(() => titleMap[String(route.name)] || 'Admin 工作台');

@@ -7,22 +7,7 @@
     <meta name="description" content="Yu 的个人技术主页：记录后端系统、AI 应用、项目实践与持续生长的数字花园。" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>Yu — Backend Developer &amp; Digital Gardener | YU.LOG</title>
-    <script>
-      (() => {
-        try {
-          const saved = localStorage.getItem('yu-log-theme');
-          const preference = ['light', 'dark', 'system'].includes(saved) ? saved : 'system';
-          const theme = preference === 'system'
-            ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-            : preference;
-          document.documentElement.dataset.theme = theme;
-          document.documentElement.dataset.themePreference = preference;
-          document.documentElement.style.colorScheme = theme;
-        } catch (_) {
-          document.documentElement.dataset.theme = 'dark';
-        }
-      })();
-    </script>
+    <script src="/theme-init.js"></script>
   </head>
   <body>
     <div id="app"></div>

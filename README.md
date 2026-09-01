@@ -70,7 +70,7 @@ npm run dev
 Copy-Item .env.example .env
 ```
 
-编辑 `.env`，至少修改数据库密码、Redis 密码和 `JWT_SECRET`。
+编辑 `.env`，必须配置数据库密码、Redis 密码、`JWT_SECRET`、生产管理员账号密码和正式站点地址。
 
 启动完整系统：
 
@@ -92,12 +92,11 @@ docker compose down
 
 保留数据卷时不要加 `-v`。如需清空数据再初始化，可执行 `docker compose down -v`。
 
-## 默认管理员
+## 管理员初始化
 
-- 用户名：`yu_admin`
-- 测试密码：`Yu@123456`
+生产环境不会从 Git 中初始化固定管理员密码。首次启动时，通过 `ADMIN_USERNAME` 和 `ADMIN_PASSWORD` 创建管理员；两个变量必须来自未提交的部署环境或 Secret 管理器，密码长度需要为 12–72 位。
 
-第一次部署后必须修改默认管理员密码。当前后台还没有独立改密页面，可先通过数据库更新 `sys_user.password_hash`，或在后续用户设置功能中处理。
+已有数据库升级后，管理员会被标记为需要改密。登录后进入 Admin 的“账号安全”页面完成修改；修改密码需要当前密码，服务端使用 BCrypt 保存。当前 JWT/Refresh Token 不会因为改密立即撤销，仍按原过期时间有效。
 
 ## 环境变量
 
@@ -107,6 +106,11 @@ docker compose down
 - `REDIS_PASSWORD`
 - `JWT_SECRET`：至少 32 位随机字符串
 - `FRONTEND_ORIGIN`：生产域名，例如 `https://example.com`
+- `PUBLIC_BASE_URL`：站点公开根地址，用于 Sitemap
+- `ADMIN_USERNAME`、`ADMIN_PASSWORD`：首次部署管理员初始化凭证
+- `TRUSTED_PROXY_CIDRS`：可信反向代理网段
+- `YU_LOG_FLYWAY_BASELINE_ON_MIGRATE`：已有库首次接入 Flyway 时临时设为 `true`
+- `YU_LOG_FLYWAY_BASELINE_VERSION`：已有当前 V1–V6 数据库固定为 `6`
 - `HTTP_PORT`：前端 Nginx 对外端口，默认 `80`
 - `STORAGE_MAX_SIZE_MB`
 
@@ -118,13 +122,13 @@ docker compose down
 - `STORAGE_LOCAL_PATH`、`STORAGE_PUBLIC_PREFIX`、`STORAGE_MAX_SIZE_MB`
 - `SERVER_PORT`、`FRONTEND_ORIGIN`
 
-## 数据库初始化
+## 数据库迁移
 
-Docker Compose 的 MySQL 服务会在数据卷首次创建时执行 `backend/src/main/resources/db/*.sql`。生产后端配置中 `spring.sql.init.mode=never`，不会在每次后端启动时重复执行 SQL。
+数据库结构由 Flyway 管理，迁移文件位于 `backend/src/main/resources/db/`，当前版本为 V7。生产环境禁用 Spring SQL 初始化和 MySQL entrypoint 自动导入。
 
-已有 SQL 文件使用幂等写法，适合开发环境反复启动。长期建议接入 Flyway 管理迁移版本。
+新数据库直接启动后端即可由 Flyway 执行 V1–V7。已有 V1–V6 数据库首次升级前必须完成备份，并临时设置 `YU_LOG_FLYWAY_BASELINE_ON_MIGRATE=true`、`YU_LOG_FLYWAY_BASELINE_VERSION=6`；启动成功后恢复为 `false`。该 baseline 仅适用于已核对为当前 Schema 的数据库，不能替代备份。
 
-## 数据库备份
+## 数据库备份与恢复
 
 PowerShell：
 
@@ -138,13 +142,25 @@ Shell：
 sh scripts/backup-db.sh
 ```
 
-备份文件输出到 `backups/`，该目录已被 `.gitignore` 排除。
+备份文件输出到 `backups/`，该目录已被 `.gitignore` 排除。脚本不会使用危险默认密码；必须通过 `.env` 或进程环境提供 `MYSQL_PASSWORD`。
+
+恢复前先停止应用，把备份导入临时数据库并核对表数量、核心数据数量和关键 ID；确认无误后再切换数据库。恢复演练命令示例见 [deploy/DEPLOYMENT.md](deploy/DEPLOYMENT.md)。
+
+媒体完整性审计：
+
+```powershell
+$env:DB_PASSWORD = '从 Secret 管理器读取'
+.\scripts\audit-data.ps1
+.\scripts\audit-media.ps1
+```
+
+审计脚本只报告孤儿关联、失效封面和未引用文件，不会自动删除。
 
 ## 常见问题
 
 - `docker compose up` 后没有数据：确认是否第一次启动时 SQL 已执行；如果数据卷已存在，MySQL 不会重新执行 `/docker-entrypoint-initdb.d`。
 - 上传图片不可访问：确认 `uploads_data` 数据卷存在，Nginx 已代理 `/uploads/`。
-- 生产登录失败：确认 `JWT_SECRET` 与后端运行环境一致，数据库种子用户存在。
+- 生产登录失败：确认 `JWT_SECRET` 与后端运行环境一致，且 `ADMIN_USERNAME` / `ADMIN_PASSWORD` 已在部署环境中配置。
 - CORS 报错：确认 `FRONTEND_ORIGIN` 与浏览器访问域名完全一致。
 
 ## 截图

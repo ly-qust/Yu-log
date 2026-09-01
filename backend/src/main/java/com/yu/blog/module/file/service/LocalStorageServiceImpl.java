@@ -4,6 +4,7 @@ import com.yu.blog.common.exception.BusinessException;
 import com.yu.blog.module.file.config.FileUploadProperties;
 import com.yu.blog.module.file.vo.FileUploadVO;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -19,6 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class LocalStorageServiceImpl implements StorageService {
     private static final int FILE_ERROR_CODE = 400;
+    private static final int FILE_TOO_LARGE_CODE = 413;
+    private static final int FILE_TYPE_CODE = 415;
     private static final DateTimeFormatter YEAR_FORMAT = DateTimeFormatter.ofPattern("yyyy");
     private static final DateTimeFormatter MONTH_FORMAT = DateTimeFormatter.ofPattern("MM");
     private static final Set<String> ALLOWED_BIZ_TYPES = Set.of(
@@ -49,6 +52,7 @@ public class LocalStorageServiceImpl implements StorageService {
         String contentType = normalizeContentType(file.getContentType());
         String extension = extractExtension(originalFilename);
         validateType(contentType, extension);
+        validateMagicBytes(file, contentType);
 
         LocalDate now = LocalDate.now();
         String year = now.format(YEAR_FORMAT);
@@ -78,7 +82,7 @@ public class LocalStorageServiceImpl implements StorageService {
             throw new BusinessException(FILE_ERROR_CODE, "上传文件不能为空");
         }
         if (file.getSize() > properties.maxSizeBytes()) {
-            throw new BusinessException(FILE_ERROR_CODE, "文件大小不能超过 " + properties.getMaxSizeMb() + "MB");
+            throw new BusinessException(FILE_TOO_LARGE_CODE, "文件大小不能超过 " + properties.getMaxSizeMb() + "MB");
         }
     }
 
@@ -107,11 +111,47 @@ public class LocalStorageServiceImpl implements StorageService {
 
     private void validateType(String contentType, String extension) {
         if (!properties.getAllowedTypes().contains(contentType)) {
-            throw new BusinessException(FILE_ERROR_CODE, "仅支持 jpg、png、webp、gif 图片");
+            throw new BusinessException(FILE_TYPE_CODE, "仅支持 jpg、png、webp、gif 图片");
         }
         Set<String> allowedExtensions = CONTENT_TYPE_EXTENSIONS.get(contentType);
         if (allowedExtensions == null || !allowedExtensions.contains(extension)) {
-            throw new BusinessException(FILE_ERROR_CODE, "文件扩展名与类型不匹配");
+            throw new BusinessException(FILE_TYPE_CODE, "文件扩展名与类型不匹配");
         }
+    }
+
+    private void validateMagicBytes(MultipartFile file, String contentType) {
+        try (InputStream input = file.getInputStream()) {
+            byte[] header = input.readNBytes(12);
+            boolean valid = switch (contentType) {
+                case "image/jpeg" -> header.length >= 3
+                        && (header[0] & 0xFF) == 0xFF
+                        && (header[1] & 0xFF) == 0xD8
+                        && (header[2] & 0xFF) == 0xFF;
+                case "image/png" -> startsWith(header, new byte[]{(byte) 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A});
+                case "image/gif" -> startsWith(header, new byte[]{'G', 'I', 'F', '8'})
+                        && header.length >= 6 && (header[4] == '7' || header[4] == '9') && header[5] == 'a';
+                case "image/webp" -> header.length >= 12
+                        && header[0] == 'R' && header[1] == 'I' && header[2] == 'F' && header[3] == 'F'
+                        && header[8] == 'W' && header[9] == 'E' && header[10] == 'B' && header[11] == 'P';
+                default -> false;
+            };
+            if (!valid) {
+                throw new BusinessException(FILE_TYPE_CODE, "文件内容与图片类型不匹配");
+            }
+        } catch (IOException exception) {
+            throw new BusinessException(FILE_TYPE_CODE, "无法读取图片文件");
+        }
+    }
+
+    private boolean startsWith(byte[] value, byte[] prefix) {
+        if (value.length < prefix.length) {
+            return false;
+        }
+        for (int index = 0; index < prefix.length; index++) {
+            if (value[index] != prefix[index]) {
+                return false;
+            }
+        }
+        return true;
     }
 }

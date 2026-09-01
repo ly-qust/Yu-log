@@ -1,19 +1,3 @@
-INSERT IGNORE INTO `sys_user` (
-  `id`, `username`, `email`, `password_hash`, `nickname`, `avatar_url`, `role_code`, `status`, `created_at`, `updated_at`, `deleted`
-) VALUES (
-  1,
-  'yu_admin',
-  'yu_admin@example.com',
-  '{bcrypt}$2a$10$AA4g8dZHPkgE9UKMSBfAPem0uTctQbclwdgfprYl8RWHyYCK/STua',
-  'Yu',
-  NULL,
-  'ADMIN',
-  'ENABLED',
-  NOW(),
-  NOW(),
-  0
-);
-
 INSERT IGNORE INTO `category` (`id`, `biz_type`, `name`, `slug`, `description`, `sort_order`, `status`)
 VALUES
   (100, 'ARTICLE', '后端开发', 'backend-development', 'Java、Spring Boot 与服务端工程实践', 10, 'ENABLED'),

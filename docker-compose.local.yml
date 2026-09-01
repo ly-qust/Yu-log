@@ -17,7 +17,6 @@ services:
       - --default-time-zone=+08:00
     volumes:
       - mysql_dev_data:/var/lib/mysql
-      - ./backend/src/main/resources/db:/docker-entrypoint-initdb.d:ro
 
   redis:
     image: redis:7-alpine

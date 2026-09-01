@@ -13,7 +13,11 @@ fi
 
 MYSQL_DATABASE="${MYSQL_DATABASE:-yu_log}"
 MYSQL_USER="${MYSQL_USER:-yu_log}"
-MYSQL_PASSWORD="${MYSQL_PASSWORD:-change_me_mysql_password}"
+if [ -z "${MYSQL_PASSWORD:-}" ]; then
+  echo "MYSQL_PASSWORD is required. Set it in .env or the process environment before backing up." >&2
+  exit 1
+fi
+MYSQL_PASSWORD="$MYSQL_PASSWORD"
 OUTPUT="$BACKUP_DIR/${MYSQL_DATABASE}-${TIMESTAMP}.sql"
 
 mkdir -p "$BACKUP_DIR"

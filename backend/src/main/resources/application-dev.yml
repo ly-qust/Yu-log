@@ -16,19 +16,14 @@ spring:
       connect-timeout: ${YU_LOG_REDIS_CONNECT_TIMEOUT:2s}
   sql:
     init:
-      mode: always
-      encoding: UTF-8
-      schema-locations:
-        - classpath:db/V1__init_schema.sql
-        - classpath:db/V3__add_article_reading_time.sql
-        - classpath:db/V4__add_comment_message_reply_fields.sql
-        - classpath:db/V5__extend_project_note_timeline_site.sql
-        - classpath:db/V6__optimize_article_search_indexes.sql
-      data-locations: classpath:db/V2__seed_data.sql
+      mode: never
+  flyway:
+    baseline-on-migrate: ${YU_LOG_FLYWAY_BASELINE_ON_MIGRATE:true}
+    baseline-version: ${YU_LOG_FLYWAY_BASELINE_VERSION:6}
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+      max-file-size: 5MB
+      max-request-size: 5MB
 
 logging:
   level:
@@ -40,6 +35,16 @@ jwt:
   refresh-token-expire-seconds: ${YU_LOG_JWT_REFRESH_EXPIRE:604800}
 
 yu-log:
+  public-base-url: ${YU_LOG_PUBLIC_BASE_URL:http://localhost:5173}
+  admin:
+    username: ${YU_LOG_ADMIN_USERNAME:}
+    password: ${YU_LOG_ADMIN_PASSWORD:}
+  rate-limit:
+    login-ip-max-requests: ${YU_LOG_LOGIN_IP_MAX_REQUESTS:30}
+    login-username-max-requests: ${YU_LOG_LOGIN_USERNAME_MAX_REQUESTS:20}
+    login-window-seconds: ${YU_LOG_LOGIN_WINDOW_SECONDS:60}
+  trusted-proxy:
+    cidrs: ${TRUSTED_PROXY_CIDRS:127.0.0.1/32,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
   cors:
     allowed-origins:
       - ${FRONTEND_ORIGIN:http://localhost:5173}

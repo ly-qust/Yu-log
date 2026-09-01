@@ -25,6 +25,14 @@ const qa = {
   uploadUrl: null,
   uploadFilename: null,
 };
+const qaRunId = Date.now().toString();
+const qaCategoryName = `YU_LOG_QA_R3_CATEGORY_${qaRunId}`;
+const qaCategorySlug = `yu-log-qa-category-${qaRunId}`;
+const qaTagName = `YU_LOG_QA_R3_TAG_${qaRunId}`;
+const qaTagSlug = `yu-log-qa-tag-${qaRunId}`;
+const qaArticleSlug = `yu-log-qa-article-${qaRunId}`;
+const qaNoteSlug = `yu-log-qa-note-${qaRunId}`;
+const qaProjectSlug = `yu-log-qa-project-${qaRunId}`;
 
 page.on('console', (message) => {
   if (message.type() === 'error') consoleErrors.push(message.text());
@@ -121,8 +129,8 @@ try {
     method: 'POST',
     body: {
       bizType: 'ARTICLE',
-      name: 'YU_LOG_QA_R3_CATEGORY',
-      slug: 'yu-log-qa-category-20260901-r3',
+      name: qaCategoryName,
+      slug: qaCategorySlug,
       description: 'Temporary QA category. Remove after write-chain test.',
       sortOrder: 9999,
       status: 'ENABLED',
@@ -133,8 +141,8 @@ try {
   const tag = expectOk(await api('/admin/tags', {
     method: 'POST',
     body: {
-      name: 'YU_LOG_QA_R3_TAG',
-      slug: 'yu-log-qa-tag-20260901-r3',
+      name: qaTagName,
+      slug: qaTagSlug,
       color: '#00e5ff',
       description: 'Temporary QA tag. Remove after write-chain test.',
       status: 'ENABLED',
@@ -144,7 +152,7 @@ try {
 
   await ready('/admin/articles/new');
   await page.getByLabel('标题 *').fill('YU_LOG_QA_R3_ARTICLE');
-  await page.getByLabel('访问标识 slug *').fill('yu-log-qa-article-20260901-r3');
+  await page.getByLabel('访问标识 slug *').fill(qaArticleSlug);
   await page.getByLabel('摘要').fill('YU_LOG_QA article summary for the real write-chain test.');
   await page.locator('select').first().selectOption(qa.categoryId);
   await page.locator(`input[type="checkbox"][value="${qa.tagId}"]`).check();
@@ -171,7 +179,7 @@ try {
   const invalidUploadResponsePromise = page.waitForResponse((response) => response.url().includes('/api/admin/files/upload') && response.request().method() === 'POST');
   await page.locator('.admin-editor input[type="file"]').setInputFiles({ name: 'yu-log-qa-invalid.txt', mimeType: 'text/plain', buffer: Buffer.from('not an image') });
   const invalidUploadResponse = await invalidUploadResponsePromise;
-  expectStatus(await invalidUploadResponse.json().then((body) => ({ status: invalidUploadResponse.status(), body })), 400, 'invalid image type is rejected by API');
+  expectStatus(await invalidUploadResponse.json().then((body) => ({ status: invalidUploadResponse.status(), body })), 415, 'invalid image type is rejected by API');
   check('invalid image type shows visible editor error', await page.locator('.admin-editor__error').isVisible());
 
   const createArticleResponsePromise = page.waitForResponse((response) => response.url().includes('/api/admin/articles') && response.request().method() === 'POST');
@@ -271,13 +279,13 @@ try {
   const publicArticleList = expectOk(await api(`/articles?keyword=${encodeURIComponent('YU_LOG_QA_R3_ARTICLE_TITLE_EDITED')}&size=100`), 'read published article from public API');
   check('published QA article appears in public API list', publicArticleList.list.some((item) => item.id === qa.articleId));
   const publicArticle = expectOk(await api(`/articles/${qa.articleId}`), 'read published article detail from public API');
-  check('public article detail exposes title/body/category/tags', publicArticle.title === 'YU_LOG_QA_R3_ARTICLE_TITLE_EDITED' && publicArticle.content.includes('YU_LOG_QA_R3_ARTICLE_BODY_EDITED') && publicArticle.categoryName === 'YU_LOG_QA_R3_CATEGORY' && publicArticle.tags.some((tagItem) => tagItem.name === 'YU_LOG_QA_R3_TAG'));
+  check('public article detail exposes title/body/category/tags', publicArticle.title === 'YU_LOG_QA_R3_ARTICLE_TITLE_EDITED' && publicArticle.content.includes('YU_LOG_QA_R3_ARTICLE_BODY_EDITED') && publicArticle.categoryName === qaCategoryName && publicArticle.tags.some((tagItem) => tagItem.name === qaTagName));
 
   await ready(`/articles?q=${encodeURIComponent('YU_LOG_QA_R3_ARTICLE_TITLE_EDITED')}`);
   check('public article list renders QA article', (await page.locator('body').innerText()).includes('YU_LOG_QA_R3_ARTICLE_TITLE_EDITED'));
   await ready(`/articles/${qa.articleId}`);
   check('public article page renders full Markdown content', await page.locator('h1').filter({ hasText: 'YU_LOG_QA_R3_ARTICLE_TITLE_EDITED' }).count() === 1 && await page.locator('.article-prose h2').count() >= 2 && await page.locator('.article-prose h3').count() >= 1 && await page.locator('.article-prose pre code').count() >= 1 && await page.locator('.article-prose table').count() >= 1 && await page.locator('.article-prose blockquote').count() >= 1 && await page.locator('.article-prose a').count() >= 1 && await page.locator('.article-prose code').count() >= 2);
-  check('public article page renders TOC/category/tag/SEO', await page.locator('.article-toc').count() >= 1 && (await page.locator('body').innerText()).includes('YU_LOG_QA_R3_CATEGORY') && (await page.locator('body').innerText()).includes('YU_LOG_QA_R3_TAG') && (await page.title()).includes('YU_LOG_QA_R3_ARTICLE_TITLE_EDITED') && Boolean(await page.locator('meta[name="description"]').getAttribute('content')) && (await page.locator('link[rel="canonical"]').getAttribute('href'))?.endsWith(`/articles/${qa.articleId}`));
+  check('public article page renders TOC/category/tag/SEO', await page.locator('.article-toc').count() >= 1 && (await page.locator('body').innerText()).includes(qaCategoryName) && (await page.locator('body').innerText()).includes(qaTagName) && (await page.title()).includes('YU_LOG_QA_R3_ARTICLE_TITLE_EDITED') && Boolean(await page.locator('meta[name="description"]').getAttribute('content')) && (await page.locator('link[rel="canonical"]').getAttribute('href'))?.endsWith(`/articles/${qa.articleId}`));
   const articleImageSrc = await page.locator('.article-prose img').first().getAttribute('src');
   check('public article renders uploaded Markdown image', Boolean(articleImageSrc) && articleImageSrc === qa.uploadUrl);
   const articleImageResponse = await page.evaluate(async (src) => { const response = await fetch(src); return response.status; }, articleImageSrc);
@@ -303,11 +311,11 @@ try {
   const hiddenPublicList = expectOk(await api(`/articles?keyword=${encodeURIComponent('YU_LOG_QA_R3_ARTICLE_TITLE_EDITED')}&size=100`), 'read public list after hiding article');
   check('hidden QA article disappears from public list', !hiddenPublicList.list.some((item) => item.id === qa.articleId));
   const hiddenPublicDetail = await api(`/articles/${qa.articleId}`);
-  check('hidden QA article is inaccessible publicly', hiddenPublicDetail.status === 400 && hiddenPublicDetail.body?.code === 404, responseMessage(hiddenPublicDetail));
+  check('hidden QA article is inaccessible publicly', hiddenPublicDetail.status === 404 && hiddenPublicDetail.body?.code === 404, responseMessage(hiddenPublicDetail));
 
   const note = expectOk(await api('/admin/notes', {
     method: 'POST',
-    body: { title: 'YU_LOG_QA_R3_NOTE', slug: 'yu-log-qa-note-20260901-r3', summary: 'QA note summary', content: '## QA Note\n\nYU_LOG_QA_R3_NOTE_CONTENT', topic: 'QA', tags: ['YU_LOG_QA_R3_NOTE', 'workflow'], isPublic: true, sortOrder: 9999 },
+    body: { title: 'YU_LOG_QA_R3_NOTE', slug: qaNoteSlug, summary: 'QA note summary', content: '## QA Note\n\nYU_LOG_QA_R3_NOTE_CONTENT', topic: 'QA', tags: ['YU_LOG_QA_R3_NOTE', 'workflow'], isPublic: true, sortOrder: 9999 },
   }), 'create QA note');
   qa.noteId = String(note.id);
   check('QA note is visible through public API', (await expectOk(await api(`/notes?keyword=${encodeURIComponent('YU_LOG_QA_R3_NOTE')}&size=100`), 'read QA note public list')).list.some((item) => item.id === qa.noteId));
@@ -332,7 +340,7 @@ try {
 
   const project = expectOk(await api('/admin/projects', {
     method: 'POST',
-    body: { name: 'YU_LOG_QA_R3_PROJECT', slug: 'yu-log-qa-project-20260901-r3', description: 'QA project description', detailContent: '## QA Project\n\nYU_LOG_QA_R3_PROJECT_CONTENT', coverImage: '', techStack: ['Vue3', 'Spring Boot', 'YU_LOG_QA'], status: 'COMPLETED', githubUrl: 'https://github.com/ly-qust/Yu-log', demoUrl: 'https://example.com/yu-log-qa', sortOrder: 9999, visible: true },
+    body: { name: 'YU_LOG_QA_R3_PROJECT', slug: qaProjectSlug, description: 'QA project description', detailContent: '## QA Project\n\nYU_LOG_QA_R3_PROJECT_CONTENT', coverImage: '', techStack: ['Vue3', 'Spring Boot', 'YU_LOG_QA'], status: 'COMPLETED', githubUrl: 'https://github.com/ly-qust/Yu-log', demoUrl: 'https://example.com/yu-log-qa', sortOrder: 9999, visible: true },
   }), 'create QA project');
   qa.projectId = String(project.id);
   check('QA project appears in public list', (await expectOk(await api(`/projects?keyword=${encodeURIComponent('YU_LOG_QA_R3_PROJECT')}&size=100`), 'read QA project public list')).list.some((item) => item.id === qa.projectId));
@@ -347,7 +355,7 @@ try {
   await page.getByRole('button', { name: '保存草稿', exact: true }).click();
   check('missing article required fields show visible validation', await page.getByRole('alert').count() >= 1 && (await page.locator('body').innerText()).includes('请填写文章标题'));
   await page.getByLabel('标题 *').fill('YU_LOG_QA_R3_DUPLICATE_UI');
-  await page.getByLabel('访问标识 slug *').fill('yu-log-qa-article-20260901-r3');
+  await page.getByLabel('访问标识 slug *').fill(qaArticleSlug);
   await page.getByLabel('访问标识 slug *').press('Tab');
   await page.getByLabel('摘要').fill('duplicate UI validation');
   await page.locator('select').first().selectOption(qa.categoryId);
@@ -397,7 +405,7 @@ try {
   }
 }
 
-const expectedConsoleErrors = consoleErrors.filter((message) => message.includes('status of 400'));
-const unexpectedConsoleErrors = consoleErrors.filter((message) => !message.includes('status of 400'));
+const expectedConsoleErrors = consoleErrors.filter((message) => message.includes('status of 400') || message.includes('status of 404') || message.includes('status of 415'));
+const unexpectedConsoleErrors = consoleErrors.filter((message) => !message.includes('status of 400') && !message.includes('status of 404') && !message.includes('status of 415'));
 console.log(JSON.stringify({ checks, cleanupResults, qa: { ...qa, uploadUrl: qa.uploadUrl ? '[recorded]' : null }, consoleErrors: unexpectedConsoleErrors, expectedConsoleErrors, consoleWarnings, failedRequests }, null, 2));
 if (runFailed || cleanupResults.some((result) => !result.pass)) process.exitCode = 1;
