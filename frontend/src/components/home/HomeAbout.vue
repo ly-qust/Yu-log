@@ -26,8 +26,8 @@ const location = computed(() => typeof props.profile.location === 'string' ? pro
 <template>
   <section class="mx-auto grid max-w-6xl gap-8 py-16 sm:py-20 lg:grid-cols-[0.72fr_1.28fr] lg:gap-16 lg:py-28" aria-labelledby="about-snapshot-title">
     <div class="lg:sticky lg:top-28 lg:self-start">
-      <p class="terminal-label text-xs uppercase tracking-[0.14em]">01 // IDENTITY</p>
-      <h2 id="about-snapshot-title" class="mt-3 font-display text-h2">系统背后，<br />是一个仍在学习的人。</h2>
+      <p class="terminal-label text-xs uppercase tracking-[0.14em]">ABOUT</p>
+      <h2 id="about-snapshot-title" class="mt-3 font-display text-h2">系统背后，<br />是一个还在学习的人。</h2>
       <RouterLink class="mt-5 inline-flex items-center gap-2 font-mono text-xs text-brand transition hover:text-brand-strong" to="/about">完整了解我 <span aria-hidden="true">→</span></RouterLink>
     </div>
 

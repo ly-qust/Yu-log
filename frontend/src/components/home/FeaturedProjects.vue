@@ -15,7 +15,7 @@ const visibleProjects = computed(() => props.projects.slice(0, 3));
   <section class="relative left-1/2 w-[min(100vw-2rem,80rem)] -translate-x-1/2 py-16 sm:py-20 lg:py-28" aria-labelledby="featured-projects-title">
     <div class="mb-9 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p class="terminal-label text-xs uppercase tracking-[0.14em]">02 // SELECTED WORK</p>
+        <p class="terminal-label text-xs uppercase tracking-[0.14em]">SELECTED WORK</p>
         <h2 id="featured-projects-title" class="mt-3 font-display text-h2">精选项目</h2>
         <p class="mt-3 max-w-2xl text-sm leading-7 text-text-secondary">把想法变成可运行的系统，也把过程中遇到的问题沉淀下来。</p>
       </div>

@@ -9,7 +9,7 @@ defineProps<{ articles: ArticleListItem[] }>();
   <section class="mx-auto max-w-5xl py-16 sm:py-20 lg:py-28" aria-labelledby="latest-writing-title">
     <div class="grid gap-8 lg:grid-cols-[0.42fr_1fr] lg:gap-14">
       <div>
-        <p class="terminal-label text-xs uppercase tracking-[0.14em]">03 // TECHNICAL JOURNAL</p>
+        <p class="terminal-label text-xs uppercase tracking-[0.14em]">LATEST WRITING</p>
         <h2 id="latest-writing-title" class="mt-3 font-display text-h2">最近在写</h2>
         <p class="mt-4 max-w-sm text-sm leading-7 text-text-secondary">关于系统、工具与实践的阶段性理解。写下来，是为了让知识可以再次被调用。</p>
         <RouterLink class="mt-6 inline-flex font-mono text-xs text-brand transition hover:text-brand-strong" to="/articles">浏览全部文章 →</RouterLink>

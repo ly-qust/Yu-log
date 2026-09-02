@@ -99,11 +99,13 @@ onUnmounted(() => resetHeroPointer());
           {{ eyebrow }}
         </div>
 
-        <h1 id="home-hero-title" class="mt-6 font-display text-[clamp(2.65rem,7vw,5.75rem)] font-bold leading-[0.94] tracking-[-0.055em] text-text-primary">
-          <span class="block text-[0.42em] font-medium leading-none tracking-[-0.025em] text-text-secondary">{{ title }}</span>
-          <span class="mt-5 block">Build. Learn.</span>
-          <span class="block text-brand">Document. Grow.</span>
+        <h1 id="home-hero-title" class="mt-6 max-w-3xl font-display text-[clamp(3rem,6.2vw,5.75rem)] font-bold leading-[1.04] tracking-[-0.055em] text-text-primary">
+          <KineticText :text="title" />
         </h1>
+
+        <p class="mt-6 font-mono text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-brand">
+          BUILD · LEARN · DOCUMENT · GROW
+        </p>
 
         <p v-if="hero?.subtitle" class="mt-6 font-mono text-xs uppercase tracking-[0.13em] text-text-muted">
           {{ hero.subtitle }}

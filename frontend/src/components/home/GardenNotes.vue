@@ -8,8 +8,8 @@ defineProps<{ notes: NoteItem[] }>();
 <template>
   <section class="relative left-1/2 w-[min(100vw-2rem,72rem)] -translate-x-1/2 py-16 sm:py-20 lg:py-28" aria-labelledby="garden-notes-title">
     <div class="garden-heading text-center">
-      <p class="terminal-label text-xs uppercase tracking-[0.14em]">06 // DIGITAL GARDEN</p>
-      <h2 id="garden-notes-title" class="mt-3 font-display text-h2">随手记</h2>
+      <p class="terminal-label text-xs uppercase tracking-[0.14em]">KNOWLEDGE IN MOTION</p>
+      <h2 id="garden-notes-title" class="mt-3 font-display text-h2">正在生长的笔记</h2>
       <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-text-secondary">文章是阶段性结论，笔记则保留知识仍在生长时的样子。</p>
     </div>
 

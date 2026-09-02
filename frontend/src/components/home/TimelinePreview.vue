@@ -10,7 +10,7 @@ defineProps<{ events: TimelineEventItem[] }>();
   <section class="mx-auto max-w-6xl py-16 sm:py-20 lg:py-28" aria-labelledby="timeline-preview-title">
     <div class="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p class="terminal-label text-xs uppercase tracking-[0.14em]">05 // GROWTH LOG</p>
+        <p class="terminal-label text-xs uppercase tracking-[0.14em]">GROWTH LOG</p>
         <h2 id="timeline-preview-title" class="mt-3 font-display text-h2">成长轨迹</h2>
       </div>
       <RouterLink class="font-mono text-xs text-brand transition hover:text-brand-strong" to="/timeline">查看完整轨迹 →</RouterLink>
