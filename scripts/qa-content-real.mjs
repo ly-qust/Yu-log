@@ -39,12 +39,12 @@ async function setTheme(theme) {
 
 try {
   await ready('/about');
-  check('about page renders real profile headline', (await page.locator('h1').textContent()).includes('Behind the systems'));
+  check('about page renders real profile headline', (await page.locator('h1').textContent()).includes('系统背后'));
   check('about page renders real role', (await page.locator('.about-identity__role').textContent()).includes('计算机科学与技术本科生'));
   check('about page groups real skills', await page.locator('.about-skill-group').count() === 5);
   check('about page renders real education', (await page.locator('.about-record').allTextContents()).some((text) => text.includes('计算机科学与技术本科在读')));
   check('about page hides placeholder social link', await page.locator('a[href*="your-name"]').count() === 0);
-  check('about page title is SEO applied', await page.title() === 'About — Personal Engineering Profile | YU.LOG');
+  check('about page title is SEO applied', await page.title() === '关于我｜YU.LOG · Yu 的个人工程档案');
   await noOverflow('about desktop');
   await page.setViewportSize({ width: 1440, height: 900 });
   await setTheme('dark');
@@ -56,7 +56,7 @@ try {
   check('timeline page renders five real records', await page.locator('.timeline-entry').count() === 5);
   check('timeline types are derived from real data', await page.locator('.timeline-field option').count() === 4);
   check('timeline exposes cleanup candidates without deleting them', (await page.locator('.timeline-results').textContent()).includes('6B测试时间线') && (await page.locator('.timeline-results').textContent()).includes('adfa'));
-  check('timeline title is SEO applied', await page.title() === 'Timeline — Growth Archive | YU.LOG');
+  check('timeline title is SEO applied', await page.title() === '成长轨迹｜YU.LOG · Yu 的成长记录');
   await page.locator('.timeline-field select').selectOption('PROJECT');
   await page.waitForTimeout(250);
   check('timeline type filter is reflected in URL', new URL(page.url()).searchParams.get('type') === 'PROJECT');
@@ -77,7 +77,7 @@ try {
   check('notes page renders four real nodes', await page.locator('.note-node').count() === 4);
   check('note topics are derived from real data', await page.locator('.notes-field select option').count() === 4);
   check('notes display updated time', await page.locator('.note-node__head time').count() === 4);
-  check('notes title is SEO applied', await page.title() === 'Notes — Digital Garden | YU.LOG');
+  check('notes title is SEO applied', await page.title() === '笔记｜YU.LOG · Yu 的数字花园');
   const noteIds = await page.locator('.note-node a').evaluateAll((links) => links.map((link) => link.getAttribute('href')?.split('/').pop()).filter(Boolean));
   check('notes expose all real detail links', noteIds.length === 4 && noteIds.includes('1206'));
   await page.locator('.notes-field select').selectOption('TIL');
@@ -98,7 +98,7 @@ try {
     await ready(`/notes/${id}`);
     check(`note ${id} detail renders a title`, Boolean((await page.locator('h1').textContent())?.trim()));
     check(`note ${id} detail uses shared Markdown renderer`, await page.locator('.article-prose').count() === 1 && await page.locator('.note-content pre').count() === 0);
-    check(`note ${id} detail has dynamic SEO`, (await page.title()).endsWith(' | Notes | YU.LOG') && await page.locator('link[rel="canonical"]').count() === 1);
+    check(`note ${id} detail has dynamic SEO`, (await page.title()).endsWith('｜笔记｜YU.LOG') && await page.locator('link[rel="canonical"]').count() === 1);
     check(`note ${id} detail does not show an empty TOC`, await page.locator('.article-toc__mobile').count() === 0 || await page.locator('.article-toc__mobile ol li').count() > 0);
   }
   await ready('/notes/1200');

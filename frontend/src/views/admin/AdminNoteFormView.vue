@@ -61,7 +61,7 @@ function snapshot() {
   return JSON.stringify(formData());
 }
 
-const guard = useUnsavedChangesGuard(snapshot, { label: 'Note', isSaving: () => saving.value });
+const guard = useUnsavedChangesGuard(snapshot, { label: '笔记', isSaving: () => saving.value });
 
 watch(
   form,
@@ -89,9 +89,9 @@ function applyForm(data: NoteFormState) {
 }
 
 function validateForm(): string {
-  if (!form.title.trim()) return '请填写 Note 标题';
+  if (!form.title.trim()) return '请填写笔记标题';
   if (!form.slug.trim()) return '请填写 slug';
-  if (!form.content.trim()) return '请填写 Note 内容';
+  if (!form.content.trim()) return '请填写笔记内容';
   return '';
 }
 
@@ -138,7 +138,7 @@ async function loadEditor() {
     guard.markClean();
     ready.value = true;
   } catch (error) {
-    errorMessage.value = getErrorMessage(error, 'Note 编辑器加载失败，请稍后重试');
+    errorMessage.value = getErrorMessage(error, '笔记编辑器加载失败，请稍后重试');
   } finally {
     loading.value = false;
   }
@@ -148,7 +148,7 @@ function restoreDraft() {
   if (!recoveryDraft.value) return;
   applyForm(recoveryDraft.value.data);
   recoveryDraft.value = null;
-  feedback.info('本地 Note 草稿已恢复。');
+  feedback.info('本地笔记草稿已恢复。');
 }
 
 function discardDraft() {
@@ -159,7 +159,7 @@ function clearDraft(showFeedback: boolean) {
   discardLocalDraft(draftKey.value);
   recoveryDraft.value = null;
   localDraftSavedAt.value = null;
-  if (showFeedback) feedback.info('本地 Note 草稿已丢弃。');
+  if (showFeedback) feedback.info('本地笔记草稿已丢弃。');
 }
 
 async function saveNote() {
@@ -171,7 +171,7 @@ async function saveNote() {
   try {
     if (isEdit.value && noteId.value) {
       await updateAdminNote(noteId.value, toPayload());
-      feedback.success('Note 已保存。');
+      feedback.success('笔记已保存。');
       clearDraft(false);
       guard.markClean();
     } else {
@@ -200,18 +200,18 @@ onMounted(loadEditor);
     >
       <template #actions>
         <div class="flex flex-wrap gap-2">
-          <span class="admin-editor-state" :class="guard.isDirty ? 'is-dirty' : 'is-clean'"><i aria-hidden="true"></i>{{ guard.isDirty ? 'Unsaved changes' : 'Saved' }}</span>
-          <RouterLink to="/admin/notes"><BaseButton variant="secondary" size="sm">返回 Notes</BaseButton></RouterLink>
+          <span class="admin-editor-state" :class="guard.isDirty ? 'is-dirty' : 'is-clean'"><i aria-hidden="true"></i>{{ guard.isDirty ? '有未保存修改' : '已保存' }}</span>
+          <RouterLink to="/admin/notes"><BaseButton variant="secondary" size="sm">返回笔记</BaseButton></RouterLink>
         </div>
       </template>
     </AdminPageHeader>
 
     <div v-if="recoveryDraft" class="admin-recovery" role="status">
-      <div><strong>发现较新的本地 Note 草稿</strong><p>本地保存于 {{ formatLocalDraftTime(recoveryDraft.savedAt) }}，不会自动覆盖服务器内容。</p></div>
+      <div><strong>发现较新的本地笔记草稿</strong><p>本地保存于 {{ formatLocalDraftTime(recoveryDraft.savedAt) }}，不会自动覆盖服务器内容。</p></div>
       <div class="flex flex-wrap gap-2"><BaseButton size="sm" @click="restoreDraft">恢复</BaseButton><BaseButton size="sm" variant="secondary" @click="discardDraft">丢弃</BaseButton></div>
     </div>
 
-    <div v-if="loading" class="surface-muted rounded-panel p-8 font-mono text-sm text-brand" role="status">Note 编辑器加载中...</div>
+    <div v-if="loading" class="surface-muted rounded-panel p-8 font-mono text-sm text-brand" role="status">笔记编辑器加载中...</div>
     <div v-else-if="errorMessage && !ready" class="rounded-control border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger" role="alert">{{ errorMessage }}</div>
 
     <form v-else class="admin-editor-form admin-editor-form--note" @submit.prevent="saveNote">
@@ -224,24 +224,24 @@ onMounted(loadEditor);
           </div>
         </section>
         <section class="surface-muted rounded-panel p-3 md:p-4">
-          <div class="mb-3 flex items-center justify-between gap-3 px-2"><div><p class="admin-eyebrow">garden // markdown</p><h2 class="mt-1 text-lg font-semibold text-text-primary">内容</h2></div><span v-if="localDraftSavedAt" class="font-mono text-[11px] text-text-muted">Saved locally {{ formatLocalDraftTime(localDraftSavedAt) }}</span></div>
+          <div class="mb-3 flex items-center justify-between gap-3 px-2"><div><p class="admin-eyebrow">内容 // MARKDOWN</p><h2 class="mt-1 text-lg font-semibold text-text-primary">内容</h2></div><span v-if="localDraftSavedAt" class="font-mono text-[11px] text-text-muted">已在本地保存 · {{ formatLocalDraftTime(localDraftSavedAt) }}</span></div>
           <MarkdownEditor v-model="form.content" @save="saveNote" />
         </section>
       </div>
       <aside class="admin-editor-form__aside">
         <section class="surface-muted rounded-panel p-5">
-          <p class="admin-eyebrow">garden // metadata</p>
+            <p class="admin-eyebrow">笔记设置 // METADATA</p>
           <h2 class="mt-1 text-lg font-semibold text-text-primary">记录设置</h2>
           <div class="mt-5 grid gap-4">
             <BaseInput v-model="form.topic" label="主题" hint="例如 NOTE、TIL 或阶段验证。" />
             <BaseInput v-model="form.tagsText" label="标签" hint="用逗号分隔：Linux, MySQL" />
             <label class="admin-native-field"><span>排序</span><input v-model.number="form.sortOrder" type="number" /></label>
-            <label class="admin-check-field"><input v-model="form.isPublic" type="checkbox" /><span>公开到 Digital Garden</span></label>
+            <label class="admin-check-field"><input v-model="form.isPublic" type="checkbox" /><span>公开到数字花园</span></label>
           </div>
         </section>
       </aside>
       <div v-if="errorMessage" class="admin-form-error" role="alert">{{ errorMessage }}</div>
-      <div class="admin-editor-form__actions"><span class="text-xs text-text-muted">{{ guard.isDirty ? '修改会自动保存在本地。' : '当前内容与服务器一致。' }}</span><div class="flex flex-wrap gap-2"><BaseButton variant="secondary" :loading="saving" type="submit">保存 Note</BaseButton></div></div>
+      <div class="admin-editor-form__actions"><span class="text-xs text-text-muted">{{ guard.isDirty ? '修改会自动保存在本地。' : '当前内容与服务器一致。' }}</span><div class="flex flex-wrap gap-2"><BaseButton variant="secondary" :loading="saving" type="submit">保存笔记</BaseButton></div></div>
     </form>
   </section>
 </template>

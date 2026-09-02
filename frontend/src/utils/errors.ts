@@ -4,7 +4,7 @@ interface ApiErrorBody {
   message?: string;
 }
 
-export function getErrorMessage(error: unknown, fallback = 'Request failed'): string {
+export function getErrorMessage(error: unknown, fallback = '加载失败，请稍后重试'): string {
   if (axios.isAxiosError<ApiErrorBody>(error)) {
     return error.response?.data?.message || error.message || fallback;
   }

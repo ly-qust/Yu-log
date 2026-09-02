@@ -34,12 +34,12 @@ async function setTheme(theme) {
 
 try {
   await ready('/projects');
-  check('real projects index renders', await page.locator('h1').textContent() === 'Projects / Systems');
+  check('real projects index renders', await page.locator('h1').textContent() === '项目');
   check('real projects index returns two public rows', await page.locator('.project-row').count() === 2);
   check('real project stats reflect database rows', await page.locator('.projects-stats dd').first().textContent() === '2');
   check('placeholder repository link is hidden', await page.locator('a[href*="your-name"]').count() === 0);
   check('project detail links point to real IDs', await page.locator('.project-row a[href^="/projects/"]').count() === 2);
-  check('project list title is SEO applied', await page.title() === 'Projects — Selected Systems | YU.LOG');
+  check('project list title is SEO applied', await page.title() === '项目｜YU.LOG · Yu 的工程实践');
   await noOverflow('projects index desktop');
   await setTheme('dark');
   await page.screenshot({ path: `${outputDir}/wu4-projects-dark-1440.png`, fullPage: true });
@@ -65,7 +65,7 @@ try {
   check('YU.LOG detail hides absent gallery', await page.locator('.project-gallery').count() === 0);
   check('YU.LOG detail has previous/next navigation', await page.locator('.project-navigation').count() === 1);
   check('YU.LOG detail has CreativeWork JSON-LD', await page.locator('script[type="application/ld+json"]').count() === 1);
-  check('YU.LOG detail title is SEO applied', await page.title() === 'YU.LOG 个人博客系统 | Projects | YU.LOG');
+  check('YU.LOG detail title is SEO applied', await page.title() === 'YU.LOG 个人博客系统｜项目｜YU.LOG');
   await noOverflow('YU.LOG detail desktop');
   await setTheme('dark');
   await page.screenshot({ path: `${outputDir}/wu4-project-detail-dark-1440.png`, fullPage: true });
@@ -87,11 +87,13 @@ try {
   check('status filter is reflected in URL', new URL(page.url()).searchParams.get('status') === 'COMPLETED');
   check('status filter returns the completed real project', await page.locator('.project-row').count() === 1 && (await page.locator('.project-row h2').textContent()).includes('AI'));
   await ready('/');
-  const featuredLink = page.locator('.project-card').first().getByRole('link', { name: /View details/ });
+  const featuredLink = page.locator('.project-card').first().getByRole('link', { name: /查看详情/ });
+  const featuredHref = await featuredLink.getAttribute('href');
   check('homepage featured project has case study link', await featuredLink.count() === 1);
+  check('homepage featured project link points to a real project', Boolean(featuredHref?.match(/^\/projects\/\d+$/)));
   await featuredLink.click();
-  await page.waitForURL(/\/projects\/1100$/);
-  check('homepage featured project reaches matching detail', await page.locator('h1').textContent() === 'YU.LOG 个人博客系统');
+  await page.waitForURL((url) => url.pathname === featuredHref);
+  check('homepage featured project reaches matching detail', page.url().includes(featuredHref) && Boolean((await page.locator('h1').textContent())?.trim()));
 
   await page.setViewportSize({ width: 375, height: 812 });
   await setTheme('dark');

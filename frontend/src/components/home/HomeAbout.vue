@@ -26,8 +26,8 @@ const location = computed(() => typeof props.profile.location === 'string' ? pro
 <template>
   <section class="mx-auto grid max-w-6xl gap-8 py-16 sm:py-20 lg:grid-cols-[0.72fr_1.28fr] lg:gap-16 lg:py-28" aria-labelledby="about-snapshot-title">
     <div class="lg:sticky lg:top-28 lg:self-start">
-      <p class="terminal-label text-xs uppercase tracking-[0.14em]">01 // identity</p>
-      <h2 id="about-snapshot-title" class="mt-3 font-display text-h2">A human behind<br />the system.</h2>
+      <p class="terminal-label text-xs uppercase tracking-[0.14em]">01 // IDENTITY</p>
+      <h2 id="about-snapshot-title" class="mt-3 font-display text-h2">系统背后，<br />是一个仍在学习的人。</h2>
       <RouterLink class="mt-5 inline-flex items-center gap-2 font-mono text-xs text-brand transition hover:text-brand-strong" to="/about">完整了解我 <span aria-hidden="true">→</span></RouterLink>
     </div>
 
@@ -37,13 +37,13 @@ const location = computed(() => typeof props.profile.location === 'string' ? pro
       </p>
       <div class="mt-8 grid gap-px overflow-hidden rounded-panel border border-border-subtle/65 bg-border-subtle/65 sm:grid-cols-2">
         <div class="bg-surface-elevated/75 p-5 sm:p-6">
-          <p class="font-mono text-[0.625rem] uppercase tracking-[0.15em] text-text-muted">Current role</p>
+          <p class="font-mono text-[0.625rem] uppercase tracking-[0.15em] text-text-muted">当前身份</p>
           <p class="mt-3 text-base font-medium text-text-primary">{{ role }}</p>
           <p v-if="location" class="mt-1 text-sm text-text-muted">{{ location }}</p>
         </div>
         <div class="bg-surface-elevated/75 p-5 sm:p-6">
-          <p class="font-mono text-[0.625rem] uppercase tracking-[0.15em] text-text-muted">Learning principle</p>
-          <p class="mt-3 text-sm leading-7 text-text-secondary">{{ about?.learningPhilosophy || 'Learn by building. Keep what can be reused.' }}</p>
+          <p class="font-mono text-[0.625rem] uppercase tracking-[0.15em] text-text-muted">学习方式</p>
+          <p class="mt-3 text-sm leading-7 text-text-secondary">{{ about?.learningPhilosophy || '通过实践学习，把真正可复用的部分留下来。' }}</p>
         </div>
       </div>
 
@@ -55,7 +55,7 @@ const location = computed(() => typeof props.profile.location === 'string' ? pro
       </div>
 
       <div v-if="learning.length" class="mt-8 flex flex-wrap items-center gap-2">
-        <span class="mr-2 font-mono text-[0.625rem] uppercase tracking-[0.14em] text-text-muted">Now exploring</span>
+            <span class="mr-2 font-mono text-[0.625rem] uppercase tracking-[0.14em] text-text-muted">最近在看</span>
         <span v-for="item in learning.slice(0, 6)" :key="item" class="rounded-full border border-border-subtle/75 px-2.5 py-1 font-mono text-[0.65rem] text-text-secondary">{{ item }}</span>
       </div>
     </div>

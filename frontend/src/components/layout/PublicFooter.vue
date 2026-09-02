@@ -28,13 +28,13 @@ const footerNavigation = [
             <BrandMark />
           </RouterLink>
           <p class="mt-4 max-w-sm text-sm leading-6 text-text-secondary">
-            Building systems. Writing what I learn.<br />
-            Growing a digital garden.
+            记录代码，也记录成长。<br />
+            一片还在持续生长的数字花园。
           </p>
         </div>
 
         <nav aria-label="页脚导航">
-          <p class="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-muted">Explore</p>
+          <p class="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-muted">浏览</p>
           <div class="mt-3 grid grid-cols-2 gap-x-5 gap-y-2.5 md:grid-cols-1">
             <RouterLink
               v-for="item in footerNavigation"
@@ -48,7 +48,7 @@ const footerNavigation = [
         </nav>
 
         <div>
-          <p class="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-muted">Connect</p>
+          <p class="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-muted">联系</p>
           <div class="mt-3 flex flex-wrap gap-x-4 gap-y-2.5">
             <a
               v-if="githubUrl"
@@ -84,8 +84,8 @@ const footerNavigation = [
       </div>
 
       <div class="mt-8 flex flex-col gap-2 border-t border-border-subtle/55 pt-5 font-mono text-[0.65rem] text-text-muted sm:flex-row sm:items-center sm:justify-between">
-        <p>© {{ currentYear }} Yu. All systems growing.</p>
-        <p>Built for clarity, learning and long-term memory.</p>
+        <p>© {{ currentYear }} Yu。系统仍在生长。</p>
+        <p>为清晰、学习与长期记忆而写。</p>
       </div>
     </div>
   </footer>

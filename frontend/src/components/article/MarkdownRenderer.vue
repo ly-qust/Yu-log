@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 
 import type { ArticleHeading } from '@/types/markdown';
+import { uiCopy } from '@/config/ui-copy';
 import { renderMarkdown } from '@/utils/markdown';
 
 const props = defineProps<{ content: string }>();
@@ -80,7 +81,7 @@ async function handleContentClick(event: MouseEvent) {
   if (copyButton) {
     const code = copyButton.closest('[data-code-block]')?.querySelector('code')?.textContent || '';
     const copied = await copyText(code);
-    setTemporaryLabel(copyButton, copied ? 'Copied' : 'Failed', 'Copy');
+    setTemporaryLabel(copyButton, copied ? uiCopy.copied : uiCopy.copyFailed, uiCopy.copy);
     return;
   }
 

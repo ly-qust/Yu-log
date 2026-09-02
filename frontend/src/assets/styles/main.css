@@ -93,7 +93,7 @@ html[data-theme='dark'] {
     min-height: 100%;
     scroll-behavior: smooth;
     background: rgb(var(--color-bg-primary));
-    font-family: Inter, 'Segoe UI Variable Text', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, sans-serif;
+    font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Segoe UI Variable Text', Inter, system-ui, sans-serif;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
   }
@@ -148,12 +148,18 @@ html[data-theme='dark'] {
   h5,
   h6 {
     margin: 0;
-    font-family: 'Space Grotesk', 'Segoe UI Variable Display', Inter, 'Noto Sans SC', system-ui, sans-serif;
+    font-family: 'Space Grotesk', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Segoe UI Variable Display', Inter, system-ui, sans-serif;
     color: rgb(var(--color-text-primary));
   }
 
   p {
     margin: 0;
+  }
+
+  :lang(zh-CN),
+  :lang(zh) {
+    font-kerning: normal;
+    line-height: 1.75;
   }
 
   a {

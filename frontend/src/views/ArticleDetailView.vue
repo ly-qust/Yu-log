@@ -68,7 +68,7 @@ function applyArticleSeo(value: ArticleDetail) {
   const author = siteStore.profile?.nickname || 'Yu';
   const canonicalUrl = new URL(route.path, window.location.origin).toString();
   cleanupSeo = applySeo({
-    title: `${value.title} | YU.LOG`,
+    title: `${value.title}｜YU.LOG · Yu 的技术文章`,
     description: plainDescription(value),
     canonicalPath: route.path,
     type: 'article',
@@ -198,7 +198,7 @@ async function likeCurrentArticle() {
   try {
     const likeCount = await likeArticle(article.value.id);
     article.value = { ...article.value, likeCount };
-    likeFeedback.value = 'Thanks — 已收到';
+    likeFeedback.value = '已收到，谢谢';
   } catch {
     likeFeedback.value = '暂时未能同步，请稍后再试';
   } finally {
@@ -264,7 +264,7 @@ onUnmounted(() => {
       </div>
 
       <section v-else-if="fatalError" class="article-unavailable">
-        <p class="font-mono text-[0.65rem] uppercase tracking-[0.15em] text-brand">Article unavailable</p>
+        <p class="font-mono text-[0.65rem] uppercase tracking-[0.15em] text-brand">文章暂不可用 // ARTICLE</p>
         <h1>这一页暂时读不到</h1>
         <p>{{ fatalError }}</p>
         <div class="mt-7 flex flex-wrap gap-3">
@@ -284,7 +284,7 @@ onUnmounted(() => {
               <MarkdownRenderer :content="article.content" @toc="updateToc" />
               <footer class="article-end">
                 <span aria-hidden="true">◆</span>
-                <p>Last revised {{ formatDate(article.updatedAt || article.publishedAt) }}</p>
+                <p>最后更新于 {{ formatDate(article.updatedAt || article.publishedAt) }}</p>
               </footer>
             </div>
 

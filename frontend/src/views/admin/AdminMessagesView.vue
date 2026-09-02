@@ -127,7 +127,7 @@ onMounted(loadMessages);
   <section class="space-y-5">
     <div class="glass-panel rounded-glass p-6">
       <div>
-        <p class="terminal-label text-sm">admin_messages // moderation</p>
+        <p class="terminal-label text-sm">留言 // 审核</p>
         <h2 class="mt-3 font-display text-3xl font-semibold">留言审核</h2>
         <p class="mt-2 text-sm text-cyber-muted">审核留言板内容，支持通过、拒绝、改回待审核、回复和删除。</p>
       </div>

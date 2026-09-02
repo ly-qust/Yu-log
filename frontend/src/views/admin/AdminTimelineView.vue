@@ -6,7 +6,7 @@ import { useAdminFeedbackStore } from '@/stores/adminFeedback';
 import type { PageResult } from '@/types/api';
 import type { AdminTimelineQuery, TimelineEventItem } from '@/types/timeline';
 import { getErrorMessage } from '@/utils/errors';
-import { formatBoolean, formatDate, formatDateTime } from '@/utils/format';
+import { formatBoolean, formatDate, formatDateTime, formatTimelineType } from '@/utils/format';
 
 const pageSize = 10;
 const feedback = useAdminFeedbackStore();
@@ -63,7 +63,7 @@ async function changePage(page: number) {
 
 async function removeEvent(event: TimelineEventItem) {
   const confirmed = await feedback.confirm({
-    title: '删除 Timeline 节点',
+    title: '删除时间线节点',
     message: `确定要删除「${event.title}」吗？此操作不可恢复。`,
     confirmLabel: '删除节点',
     danger: true,
@@ -96,7 +96,7 @@ onMounted(loadTimeline);
     <div class="glass-panel rounded-glass p-6">
       <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <p class="terminal-label text-sm">admin_timeline // index</p>
+          <p class="terminal-label text-sm">时间线 // 管理</p>
           <h2 class="mt-3 font-display text-3xl font-semibold">时间线管理</h2>
           <p class="mt-2 text-sm text-cyber-muted">管理学习轨迹、项目节点和阶段复盘。</p>
         </div>
@@ -142,7 +142,7 @@ onMounted(loadTimeline);
               <p class="mt-1 max-w-xs truncate text-xs text-cyber-muted">{{ event.description || '-' }}</p>
             </td>
             <td class="px-4 py-4 font-mono text-xs text-cyber-cyan">{{ formatDate(event.eventDate) }}</td>
-            <td class="px-4 py-4 text-cyber-muted">{{ event.type || '-' }}</td>
+            <td class="px-4 py-4 text-cyber-muted">{{ formatTimelineType(event.type) }}</td>
             <td class="px-4 py-4">
               <div class="flex max-w-56 flex-wrap gap-1">
                 <span v-for="tag in event.tags" :key="tag" class="rounded-full border border-cyber-border px-2 py-0.5 font-mono text-[11px] text-cyber-muted">{{ tag }}</span>

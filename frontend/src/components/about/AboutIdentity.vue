@@ -22,24 +22,24 @@ const github = computed(() => safeExternalUrl(props.githubUrl || props.profile.g
 <template>
   <section class="about-identity" aria-labelledby="about-identity-title">
     <div class="about-identity__topline">
-      <span>PROFILE NODE</span>
+      <span>个人档案 // PROFILE</span>
       <span class="about-identity__pulse" aria-hidden="true"></span>
     </div>
     <div class="about-identity__monogram" aria-hidden="true">{{ initials }}</div>
-    <p class="about-kicker">Current identity</p>
+    <p class="about-kicker">当前身份</p>
     <h2 id="about-identity-title">{{ profile.nickname || 'Yu' }}</h2>
     <p class="about-identity__role">{{ profile.role || '计算机科学与技术学习者' }}</p>
     <p v-if="profile.location" class="about-identity__location">{{ profile.location }}</p>
 
     <div v-if="careerDirection.length" class="about-identity__focus">
-      <p class="about-kicker">Current focus</p>
+      <p class="about-kicker">当前聚焦</p>
       <ul>
         <li v-for="direction in careerDirection" :key="direction">{{ direction }}</li>
       </ul>
     </div>
 
     <div v-if="github || email" class="about-identity__contact">
-      <p class="about-kicker">Open channels</p>
+      <p class="about-kicker">联系方式</p>
       <a v-if="github" :href="github" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
       <a v-if="email" :href="`mailto:${email}`">{{ email }}</a>
     </div>

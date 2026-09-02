@@ -46,14 +46,14 @@ onMounted(loadStats);
   <section class="space-y-5">
     <div class="surface-muted rounded-panel p-6 md:p-8">
       <AdminPageHeader
-        eyebrow="workspace // overview"
+        eyebrow="工作台 // OVERVIEW"
         title="把下一次维护变得更容易。"
         description="这里是内容工作台的入口：查看内容状态，直接进入写作或审核，不做无关的数据可视化。"
       >
         <template #actions>
           <div class="flex flex-wrap gap-2">
             <RouterLink to="/admin/articles/new"><BaseButton size="sm">新建文章</BaseButton></RouterLink>
-            <RouterLink to="/admin/notes/new"><BaseButton size="sm" variant="secondary">新建 Note</BaseButton></RouterLink>
+            <RouterLink to="/admin/notes/new"><BaseButton size="sm" variant="secondary">新建笔记</BaseButton></RouterLink>
           </div>
         </template>
       </AdminPageHeader>
@@ -69,10 +69,10 @@ onMounted(loadStats);
       <article v-for="item in [
         { label: '文章', value: stats.articleCount, to: '/admin/articles', tone: 'brand' },
         { label: '项目', value: stats.projectCount, to: '/admin/projects', tone: 'accent' },
-        { label: 'Notes', value: stats.noteCount, to: '/admin/notes', tone: 'brand' },
+        { label: '笔记', value: stats.noteCount, to: '/admin/notes', tone: 'brand' },
         { label: '留言总数', value: stats.messageCount, to: '/admin/messages', tone: 'accent' },
       ]" :key="item.label" class="surface-muted interactive-surface rounded-panel p-5">
-        <p class="admin-eyebrow">content // {{ item.label }}</p>
+        <p class="admin-eyebrow">内容 // {{ item.label }}</p>
         <p class="mt-4 font-display text-4xl font-semibold" :class="item.tone === 'accent' ? 'text-accent' : 'text-brand'">{{ item.value }}</p>
         <RouterLink class="mt-4 inline-flex text-sm text-text-secondary hover:text-brand" :to="item.to">打开管理 →</RouterLink>
       </article>
@@ -80,7 +80,7 @@ onMounted(loadStats);
 
     <div v-if="stats" class="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
       <section class="surface-muted rounded-panel p-6">
-        <AdminPageHeader eyebrow="queue // attention" title="待处理事项" description="只显示需要你下一步操作的真实队列。" />
+        <AdminPageHeader eyebrow="待处理 // ATTENTION" title="待处理事项" description="只显示需要你下一步操作的真实队列。" />
         <div class="mt-6 grid gap-3 sm:grid-cols-2">
           <RouterLink to="/admin/comments?status=PENDING" class="admin-queue-card">
             <span class="admin-queue-card__count">{{ stats.pendingCommentCount }}</span>
@@ -93,7 +93,7 @@ onMounted(loadStats);
         </div>
       </section>
       <section class="surface-muted rounded-panel p-6">
-        <AdminPageHeader eyebrow="shortcuts // start" title="快速入口" description="把常用动作放在离你最近的地方。" />
+        <AdminPageHeader eyebrow="快捷入口 // SHORTCUTS" title="快速入口" description="把常用动作放在离你最近的地方。" />
         <div class="mt-6 grid gap-2">
           <RouterLink class="admin-shortcut" to="/admin/articles?status=DRAFT">继续编辑草稿 <span>→</span></RouterLink>
           <RouterLink class="admin-shortcut" to="/admin/projects/new">维护一个项目 <span>→</span></RouterLink>

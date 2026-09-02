@@ -65,9 +65,9 @@ async function changePage(page: number) {
 
 async function removeNote(note: NoteItem) {
   const confirmed = await feedback.confirm({
-    title: '删除 Note',
+    title: '删除笔记',
     message: `确定要删除「${note.title}」吗？此操作不可恢复。`,
-    confirmLabel: '删除 Note',
+    confirmLabel: '删除笔记',
     danger: true,
   });
   if (!confirmed) {
@@ -98,7 +98,7 @@ onMounted(loadNotes);
     <div class="glass-panel rounded-glass p-6">
       <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <p class="terminal-label text-sm">admin_notes // index</p>
+          <p class="terminal-label text-sm">笔记 // 管理</p>
           <h2 class="mt-3 font-display text-3xl font-semibold">笔记管理</h2>
           <p class="mt-2 text-sm text-cyber-muted">管理数字花园笔记，支持主题筛选、公开状态和标签维护。</p>
         </div>

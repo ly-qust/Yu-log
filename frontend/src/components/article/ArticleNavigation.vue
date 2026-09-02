@@ -7,11 +7,11 @@ withDefaults(defineProps<{ previous?: ArticleListItem | null; next?: ArticleList
 <template>
   <nav v-if="previous || next" class="article-navigation" aria-label="上一篇和下一篇文章">
     <RouterLink v-if="previous" :to="`/articles/${previous.id}`" class="article-navigation__item">
-      <span>← Previous article</span><strong>{{ previous.title }}</strong>
+      <span>← 上一篇文章</span><strong>{{ previous.title }}</strong>
     </RouterLink>
     <span v-else></span>
     <RouterLink v-if="next" :to="`/articles/${next.id}`" class="article-navigation__item text-right">
-      <span>Next article →</span><strong>{{ next.title }}</strong>
+      <span>下一篇文章 →</span><strong>{{ next.title }}</strong>
     </RouterLink>
   </nav>
 </template>

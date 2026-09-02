@@ -17,14 +17,14 @@ const extraTechCount = computed(() => Math.max(props.project.techStack.length - 
 <template>
   <section class="project-snapshot" aria-labelledby="project-snapshot-title">
     <div class="project-snapshot__heading">
-      <p class="font-mono text-[0.63rem] uppercase tracking-[0.15em] text-brand">Project snapshot</p>
-      <h2 id="project-snapshot-title">The working set</h2>
+      <p class="font-mono text-[0.63rem] uppercase tracking-[0.15em] text-brand">项目快照 // SNAPSHOT</p>
+      <h2 id="project-snapshot-title">当前组成</h2>
     </div>
     <dl class="project-snapshot__grid">
-      <div><dt>Stack</dt><dd><span v-for="tech in visibleTech" :key="tech">{{ tech }}</span><span v-if="extraTechCount">+{{ extraTechCount }}</span></dd></div>
-      <div><dt>Status</dt><dd><BaseBadge :variant="statusVariant" dot>{{ formatProjectStatus(project.status) }}</BaseBadge></dd></div>
-      <div><dt>Updated</dt><dd>{{ formatDate(project.updatedAt || project.createdAt) }}</dd></div>
-      <div v-if="githubUrl || demoUrl"><dt>Links</dt><dd class="project-snapshot__links"><a v-if="githubUrl" :href="githubUrl" target="_blank" rel="noreferrer">GitHub ↗</a><a v-if="demoUrl" :href="demoUrl" target="_blank" rel="noreferrer">Demo ↗</a></dd></div>
+      <div><dt>技术栈</dt><dd><span v-for="tech in visibleTech" :key="tech">{{ tech }}</span><span v-if="extraTechCount">+{{ extraTechCount }}</span></dd></div>
+      <div><dt>状态</dt><dd><BaseBadge :variant="statusVariant" dot>{{ formatProjectStatus(project.status) }}</BaseBadge></dd></div>
+      <div><dt>更新于</dt><dd>{{ formatDate(project.updatedAt || project.createdAt) }}</dd></div>
+      <div v-if="githubUrl || demoUrl"><dt>链接</dt><dd class="project-snapshot__links"><a v-if="githubUrl" :href="githubUrl" target="_blank" rel="noreferrer">GitHub ↗</a><a v-if="demoUrl" :href="demoUrl" target="_blank" rel="noreferrer">Demo ↗</a></dd></div>
     </dl>
   </section>
 </template>

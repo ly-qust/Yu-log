@@ -9,6 +9,7 @@ import PublicLayout from '@/components/layout/PublicLayout.vue';
 import TimelineEntry from '@/components/timeline/TimelineEntry.vue';
 import type { PageResult } from '@/types/api';
 import type { TimelineEventItem } from '@/types/timeline';
+import { formatTimelineType } from '@/utils/format';
 import { applySeo } from '@/utils/seo';
 
 const route = useRoute();
@@ -127,7 +128,7 @@ onMounted(() => {
   window.addEventListener('resize', scheduleTimelineProgress);
   scheduleTimelineProgress();
   cleanupSeo = applySeo({
-    title: 'Timeline — Growth Archive | YU.LOG',
+    title: '成长轨迹｜YU.LOG · Yu 的成长记录',
     description: 'Yu 的成长档案：记录真实的项目、学习、数据库和阶段性工程里程碑。',
     canonicalPath: '/timeline',
   });
@@ -147,18 +148,18 @@ onUnmounted(() => {
   <PublicLayout>
     <div class="timeline-page">
       <header class="timeline-intro">
-        <p class="timeline-kicker">Timeline / Growth log</p>
+        <p class="timeline-kicker">成长轨迹 // GROWTH LOG</p>
         <div class="timeline-intro__row">
-          <div><h1>A record of things<br /><span>built, learned and finished.</span></h1><p>完整保存项目、学习和工程实践留下的成长信号。</p></div>
+          <div><h1>一路留下的节点</h1><p>完整保存项目、学习和工程实践留下的成长信号。</p></div>
           <p class="timeline-result" aria-live="polite">{{ resultDescription }}</p>
         </div>
       </header>
 
       <section class="timeline-controls" aria-label="成长记录筛选">
         <form class="timeline-filter" @submit.prevent="updateRoute(1)">
-          <label class="timeline-field"><span>Record type</span><select v-model="filters.type" :disabled="optionsLoading" @change="updateRoute(1)"><option value="">All records</option><option v-for="type in typeOptions" :key="type" :value="type">{{ type }}</option></select></label>
-          <button type="submit" :disabled="loading">Filter</button>
-          <button v-if="filters.type" class="timeline-reset" type="button" @click="clearFilters">Reset</button>
+          <label class="timeline-field"><span>记录类型</span><select v-model="filters.type" :disabled="optionsLoading" @change="updateRoute(1)"><option value="">全部记录</option><option v-for="type in typeOptions" :key="type" :value="type">{{ formatTimelineType(type) }}</option></select></label>
+          <button type="submit" :disabled="loading">筛选</button>
+          <button v-if="filters.type" class="timeline-reset" type="button" @click="clearFilters">重置</button>
         </form>
       </section>
 
@@ -172,7 +173,7 @@ onUnmounted(() => {
         </ol>
       </section>
 
-      <nav v-if="!loading && timelinePage.totalPages > 1" class="timeline-pagination" aria-label="成长记录分页"><button :disabled="!timelinePage.hasPrevious" type="button" @click="updateRoute(timelinePage.pageNum - 1)">← Previous</button><span>Page {{ timelinePage.pageNum }} / {{ timelinePage.totalPages }}</span><button :disabled="!timelinePage.hasNext" type="button" @click="updateRoute(timelinePage.pageNum + 1)">Next →</button></nav>
+      <nav v-if="!loading && timelinePage.totalPages > 1" class="timeline-pagination" aria-label="成长记录分页"><button :disabled="!timelinePage.hasPrevious" type="button" @click="updateRoute(timelinePage.pageNum - 1)">← 上一页</button><span>第 {{ timelinePage.pageNum }} / {{ timelinePage.totalPages }} 页</span><button :disabled="!timelinePage.hasNext" type="button" @click="updateRoute(timelinePage.pageNum + 1)">下一页 →</button></nav>
     </div>
   </PublicLayout>
 </template>

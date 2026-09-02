@@ -18,22 +18,22 @@ watch(() => props.article.coverImage, () => { coverFailed.value = false; });
 
 <template>
   <header class="article-header">
-    <RouterLink class="inline-flex items-center gap-2 font-mono text-[0.68rem] text-text-muted transition hover:text-brand" :to="backTo"><span aria-hidden="true">←</span> Back to writing</RouterLink>
+    <RouterLink class="inline-flex items-center gap-2 font-mono text-[0.68rem] text-text-muted transition hover:text-brand" :to="backTo"><span aria-hidden="true">←</span> 返回文章</RouterLink>
 
     <div class="mt-10 max-w-4xl">
       <div class="flex flex-wrap items-center gap-3 font-mono text-[0.65rem] uppercase tracking-[0.12em] text-text-muted">
-        <span class="text-brand">{{ article.categoryName || 'Uncategorized' }}</span>
-        <span v-if="article.isTop" class="rounded-full border border-accent/30 px-2 py-0.5 text-accent">Featured</span>
+        <span class="text-brand">{{ article.categoryName || '未分类' }}</span>
+        <span v-if="article.isTop" class="rounded-full border border-accent/30 px-2 py-0.5 text-accent">精选</span>
       </div>
       <h1 class="mt-5 font-display text-[clamp(2.45rem,6.5vw,5rem)] font-bold leading-[1.03] tracking-[-0.05em] text-text-primary">{{ article.title }}</h1>
       <p v-if="article.summary" class="mt-6 max-w-3xl text-base leading-8 text-text-secondary sm:text-lg">{{ article.summary }}</p>
 
       <div class="mt-8 flex flex-wrap gap-x-6 gap-y-3 border-y border-border-subtle/62 py-4 font-mono text-[0.65rem] text-text-muted">
-        <span>Published <strong>{{ formatDate(article.publishedAt) }}</strong></span>
-        <span v-if="showUpdatedDate">Updated <strong>{{ formatDate(article.updatedAt) }}</strong></span>
-        <span><strong>{{ article.readingTime }}</strong> min read</span>
-        <span><strong>{{ formatCount(article.viewCount) }}</strong> views</span>
-        <span><strong>{{ formatCount(article.commentCount) }}</strong> comments</span>
+        <span>发布于 <strong>{{ formatDate(article.publishedAt) }}</strong></span>
+        <span v-if="showUpdatedDate">更新于 <strong>{{ formatDate(article.updatedAt) }}</strong></span>
+        <span>预计阅读 <strong>{{ article.readingTime }}</strong> 分钟</span>
+        <span><strong>{{ formatCount(article.viewCount) }}</strong> 次阅读</span>
+        <span><strong>{{ formatCount(article.commentCount) }}</strong> 条评论</span>
       </div>
 
       <div class="mt-5 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
@@ -44,7 +44,7 @@ watch(() => props.article.coverImage, () => { coverFailed.value = false; });
           <span v-if="likeFeedback" aria-live="polite" class="font-mono text-[0.65rem] text-brand">{{ likeFeedback }}</span>
           <button class="article-like" :disabled="liking" type="button" @click="emit('like')">
             <span aria-hidden="true">◇</span>
-            {{ liking ? 'Syncing…' : `Appreciate · ${formatCount(article.likeCount)}` }}
+            {{ liking ? '正在同步……' : `喜欢 · ${formatCount(article.likeCount)}` }}
           </button>
         </div>
       </div>
@@ -53,7 +53,7 @@ watch(() => props.article.coverImage, () => { coverFailed.value = false; });
     <div v-if="article.coverImage" class="article-cover" :class="{ 'is-failed': coverFailed }">
       <img v-if="!coverFailed" :src="article.coverImage" :alt="article.title" decoding="async" @error="coverFailed = true" />
       <div v-else class="article-cover__fallback" role="img" :aria-label="`${article.title} 封面暂不可用`">
-        <span>ARTICLE // COVER UNAVAILABLE</span><strong>{{ article.title.slice(0, 2).toUpperCase() }}</strong>
+        <span>封面暂不可用 // COVER</span><strong>{{ article.title.slice(0, 2).toUpperCase() }}</strong>
       </div>
     </div>
   </header>

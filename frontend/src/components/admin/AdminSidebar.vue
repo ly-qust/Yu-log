@@ -23,8 +23,8 @@ const groups = [
     label: '花园',
     items: [
       { label: '项目', to: '/admin/projects', icon: 'P' },
-      { label: 'Notes', to: '/admin/notes', icon: 'N' },
-      { label: 'Timeline', to: '/admin/timeline', icon: 'T' },
+      { label: '笔记', to: '/admin/notes', icon: 'N' },
+      { label: '时间线', to: '/admin/timeline', icon: 'T' },
     ],
   },
   {
@@ -56,9 +56,9 @@ watch(() => route.fullPath, () => emit('close'));
 
 <template>
   <div v-if="open" class="admin-sidebar__backdrop" aria-hidden="true" @click="emit('close')"></div>
-  <aside class="admin-sidebar" :class="{ 'admin-sidebar--open': open }" aria-label="Admin 主导航">
+  <aside class="admin-sidebar" :class="{ 'admin-sidebar--open': open }" aria-label="管理端主导航">
     <div class="admin-sidebar__brand">
-      <RouterLink to="/admin" class="admin-brand-mark" aria-label="返回 Admin 控制台">
+      <RouterLink to="/admin" class="admin-brand-mark" aria-label="返回管理端控制台">
         <span>Y</span>
       </RouterLink>
       <div>
@@ -71,7 +71,7 @@ watch(() => route.fullPath, () => emit('close'));
     <div class="admin-sidebar__identity">
       <span class="admin-avatar">{{ (authStore.user?.nickname || authStore.user?.username || 'A').slice(0, 1).toUpperCase() }}</span>
       <span>
-        <strong>{{ authStore.user?.nickname || authStore.user?.username || 'Admin' }}</strong>
+        <strong>{{ authStore.user?.nickname || authStore.user?.username || '管理员' }}</strong>
         <small>管理员</small>
       </span>
     </div>
@@ -79,7 +79,7 @@ watch(() => route.fullPath, () => emit('close'));
     <nav class="admin-sidebar__nav">
       <RouterLink to="/admin" class="admin-nav-item" :class="{ 'is-active': route.path === '/admin' }" exact-active-class="is-active">
         <span class="admin-nav-item__icon" aria-hidden="true">⌂</span>
-        <span>Dashboard</span>
+        <span>控制台</span>
       </RouterLink>
 
       <section v-for="group in groups" :key="group.label" class="admin-nav-group">
@@ -100,7 +100,7 @@ watch(() => route.fullPath, () => emit('close'));
 
     <div class="admin-sidebar__footer">
       <RouterLink to="/" class="admin-sidebar__footer-link">↗ 查看公开站点</RouterLink>
-      <p>Writing is maintenance.</p>
+      <p>写作也是维护。</p>
     </div>
   </aside>
 </template>

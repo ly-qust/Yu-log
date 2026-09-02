@@ -227,7 +227,7 @@ onMounted(loadEditor);
       <template #actions>
         <div class="flex flex-wrap gap-2">
           <span class="admin-editor-state" :class="guard.isDirty ? 'is-dirty' : 'is-clean'">
-            <i aria-hidden="true"></i>{{ guard.isDirty ? 'Unsaved changes' : 'Saved' }}
+            <i aria-hidden="true"></i>{{ guard.isDirty ? '有未保存修改' : '已保存' }}
           </span>
           <RouterLink to="/admin/articles"><BaseButton variant="secondary" size="sm">返回文章</BaseButton></RouterLink>
         </div>
@@ -261,10 +261,10 @@ onMounted(loadEditor);
         <section class="surface-muted rounded-panel p-3 md:p-4">
           <div class="mb-3 flex items-center justify-between gap-3 px-2">
             <div>
-              <p class="admin-eyebrow">writing // markdown</p>
+              <p class="admin-eyebrow">正文 // MARKDOWN</p>
               <h2 class="mt-1 text-lg font-semibold text-text-primary">正文</h2>
             </div>
-            <span v-if="localDraftSavedAt" class="font-mono text-[11px] text-text-muted">Saved locally {{ formatLocalDraftTime(localDraftSavedAt) }}</span>
+            <span v-if="localDraftSavedAt" class="font-mono text-[11px] text-text-muted">已在本地保存 · {{ formatLocalDraftTime(localDraftSavedAt) }}</span>
           </div>
           <MarkdownEditor v-model="form.content" upload-biz-type="other" @save="saveShortcut" />
         </section>
@@ -272,7 +272,7 @@ onMounted(loadEditor);
 
       <aside class="admin-editor-form__aside">
         <section class="surface-muted rounded-panel p-5">
-          <p class="admin-eyebrow">settings // publish</p>
+          <p class="admin-eyebrow">发布设置 // PUBLISH</p>
           <h2 class="mt-1 text-lg font-semibold text-text-primary">发布设置</h2>
           <div class="mt-5 grid gap-4">
             <BaseSelect v-model="form.categoryId" label="分类 *">
@@ -296,7 +296,7 @@ onMounted(loadEditor);
         </section>
 
         <section class="surface-muted rounded-panel p-5">
-          <p class="admin-eyebrow">taxonomy // organize</p>
+          <p class="admin-eyebrow">分类与标签 // ORGANIZE</p>
           <h2 class="mt-1 text-lg font-semibold text-text-primary">标签</h2>
           <div class="mt-4 grid gap-2">
             <label v-for="tag in tags" :key="tag.id" class="admin-check-field admin-check-field--chip">
@@ -308,7 +308,7 @@ onMounted(loadEditor);
         </section>
 
         <section class="surface-muted rounded-panel p-5">
-          <p class="admin-eyebrow">media // cover</p>
+          <p class="admin-eyebrow">媒体 // COVER</p>
           <h2 class="mt-1 text-lg font-semibold text-text-primary">封面</h2>
           <div class="mt-4">
             <ImageUploader v-model="form.coverImage" biz-type="article-cover" label="文章封面图" />

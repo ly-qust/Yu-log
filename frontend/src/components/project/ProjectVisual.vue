@@ -17,7 +17,7 @@ watch(() => props.project.coverImage, () => { coverFailed.value = false; });
       <div class="project-visual__signal" aria-hidden="true">
         <span v-for="(signal, index) in stackSignal" :key="signal" :style="{ '--signal-index': index }">{{ signal }}</span>
       </div>
-      <span class="project-visual__label">PROJECT // SYSTEM MAP</span>
+      <span class="project-visual__label">项目 // SYSTEM MAP</span>
       <strong>{{ initials }}</strong>
       <i aria-hidden="true"></i>
     </div>

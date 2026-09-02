@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { TimelineEventItem } from '@/types/timeline';
 import { formatDate } from '@/utils/format';
+import { formatTimelineType } from '@/utils/format';
 
 defineProps<{ events: TimelineEventItem[] }>();
 </script>
@@ -9,8 +10,8 @@ defineProps<{ events: TimelineEventItem[] }>();
   <section class="mx-auto max-w-6xl py-16 sm:py-20 lg:py-28" aria-labelledby="timeline-preview-title">
     <div class="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p class="terminal-label text-xs uppercase tracking-[0.14em]">05 // growth signal</p>
-        <h2 id="timeline-preview-title" class="mt-3 font-display text-h2">A path still growing</h2>
+        <p class="terminal-label text-xs uppercase tracking-[0.14em]">05 // GROWTH LOG</p>
+        <h2 id="timeline-preview-title" class="mt-3 font-display text-h2">成长轨迹</h2>
       </div>
       <RouterLink class="font-mono text-xs text-brand transition hover:text-brand-strong" to="/timeline">查看完整轨迹 →</RouterLink>
     </div>
@@ -22,7 +23,7 @@ defineProps<{ events: TimelineEventItem[] }>();
         <h3 class="mt-3 font-display text-xl font-semibold leading-snug text-text-primary">{{ event.title }}</h3>
         <p v-if="event.description" class="mt-2 line-clamp-3 text-sm leading-6 text-text-secondary">{{ event.description }}</p>
         <div class="mt-4 flex flex-wrap gap-2">
-          <span v-if="event.type" class="rounded-full border border-brand/25 px-2 py-0.5 font-mono text-[0.58rem] uppercase text-brand">{{ event.type }}</span>
+          <span v-if="event.type" class="rounded-full border border-brand/25 px-2 py-0.5 font-mono text-[0.58rem] text-brand">{{ formatTimelineType(event.type) }}</span>
           <span v-for="tag in event.tags.slice(0, 2)" :key="tag" class="font-mono text-[0.6rem] text-text-muted">#{{ tag }}</span>
         </div>
         <span class="absolute right-4 top-4 font-mono text-[0.58rem] text-text-muted">0{{ index + 1 }}</span>

@@ -22,11 +22,11 @@ async function noOverflow(name) {
 
 try {
   await page.goto(`${baseUrl}/articles`, { waitUntil: 'networkidle' });
-  check('real articles list renders', await page.locator('h1').textContent() === 'Writing');
+  check('real articles list renders', await page.locator('h1').textContent() === '文章');
   console.log('real list rows=', await page.locator('.article-row').count(), 'body=', (await page.locator('body').innerText()).slice(0, 600));
   check('real API returns three public articles', await page.locator('.article-row').count() === 3);
   check('real list includes existing cover article', await page.locator('.article-row__cover').count() === 1);
-  check('real list title is SEO applied', await page.title() === 'Writing — 技术文章 | YU.LOG');
+  check('real list title is SEO applied', await page.title() === '文章｜YU.LOG · Yu 的个人技术博客');
   await noOverflow('real list desktop');
   await page.screenshot({ path: `${outputDir}/wu3-real-articles-1440.png`, fullPage: true });
 
@@ -39,7 +39,7 @@ try {
   await page.goto(`${baseUrl}/articles/1001`, { waitUntil: 'networkidle' });
   check('real article detail title renders', await page.locator('h1').textContent() === 'MySQL 与 Redis 在博客系统中的职责边界');
   check('real Markdown content is rendered', await page.locator('.article-prose h2').count() >= 1 && await page.locator('.article-prose p').count() >= 1);
-  check('real article metadata is applied', await page.title() === 'MySQL 与 Redis 在博客系统中的职责边界 | YU.LOG');
+  check('real article metadata is applied', await page.title() === 'MySQL 与 Redis 在博客系统中的职责边界｜YU.LOG · Yu 的技术文章');
   check('real comments section renders', await page.locator('#discussion-title').count() === 1);
   check('real article has previous navigation when available', await page.locator('.article-navigation').count() === 1);
   await noOverflow('real article desktop');

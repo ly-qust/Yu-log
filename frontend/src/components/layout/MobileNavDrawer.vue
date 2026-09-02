@@ -139,12 +139,12 @@ onUnmounted(() => {
             </div>
 
             <p class="mt-8 font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-text-muted">
-              Navigation // garden map
+              导航 // 花园地图
             </p>
 
             <button class="mobile-search" type="button" @click="emit('openSearch')">
               <svg aria-hidden="true" fill="none" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.7" /><path d="m16 16 5 5" stroke="currentColor" stroke-linecap="round" stroke-width="1.7" /></svg>
-              <span>Search the garden</span><kbd>⌘K</kbd>
+              <span>搜索这片数字花园</span><kbd>⌘ K</kbd>
             </button>
 
             <nav aria-label="移动端主要导航" class="mt-3 grid gap-1.5">
@@ -166,7 +166,7 @@ onUnmounted(() => {
 
             <div class="mt-auto border-t border-border-subtle/70 pt-5">
               <div class="flex items-center justify-between gap-3">
-                <span class="font-mono text-xs text-text-muted">Theme</span>
+                <span class="font-mono text-xs text-text-muted">主题</span>
                 <ThemeToggle show-label />
               </div>
 
@@ -184,7 +184,7 @@ onUnmounted(() => {
               </a>
 
               <p class="mt-5 font-mono text-[0.65rem] leading-5 text-text-muted">
-                Building systems.<br />Growing a digital garden.
+                构建系统，也记录一片持续生长的数字花园。
               </p>
             </div>
           </aside>

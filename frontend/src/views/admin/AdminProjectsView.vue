@@ -96,7 +96,7 @@ onMounted(loadProjects);
     <div class="glass-panel rounded-glass p-6">
       <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <p class="terminal-label text-sm">admin_projects // index</p>
+          <p class="terminal-label text-sm">项目 // 管理</p>
           <h2 class="mt-3 font-display text-3xl font-semibold">项目管理</h2>
           <p class="mt-2 text-sm text-cyber-muted">管理项目展示，支持状态筛选、前台可见和技术栈维护。</p>
         </div>

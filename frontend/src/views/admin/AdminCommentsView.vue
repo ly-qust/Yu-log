@@ -127,7 +127,7 @@ onMounted(loadComments);
   <section class="space-y-5">
     <div class="glass-panel rounded-glass p-6">
       <div>
-        <p class="terminal-label text-sm">admin_comments // moderation</p>
+        <p class="terminal-label text-sm">评论 // 审核</p>
         <h2 class="mt-3 font-display text-3xl font-semibold">评论审核</h2>
         <p class="mt-2 text-sm text-cyber-muted">审核文章评论，支持通过、拒绝、改回待审核、回复和删除。</p>
       </div>

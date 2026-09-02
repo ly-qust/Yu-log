@@ -118,7 +118,7 @@ async function handleUpload(event: Event) {
         <input ref="fileInput" class="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/gif" @change="handleUpload" />
       </div>
       <div class="admin-editor__modes" role="tablist" aria-label="编辑预览模式">
-        <button v-for="item in [['editor', 'Editor'], ['split', 'Split'], ['preview', 'Preview']] as const" :key="item[0]" type="button" role="tab" :aria-selected="mode === item[0]" :class="{ 'is-active': mode === item[0] }" @click="mode = item[0]">
+        <button v-for="item in [['editor', '编辑'], ['split', '分栏'], ['preview', '预览']] as const" :key="item[0]" type="button" role="tab" :aria-selected="mode === item[0]" :class="{ 'is-active': mode === item[0] }" @click="mode = item[0]">
           {{ item[1] }}
         </button>
       </div>
@@ -138,13 +138,13 @@ async function handleUpload(event: Event) {
         ></textarea>
       </label>
       <div v-if="mode !== 'editor'" class="admin-editor__preview">
-        <div class="admin-editor__preview-label">Rendered preview</div>
+        <div class="admin-editor__preview-label">渲染预览</div>
         <MarkdownRenderer :content="modelValue" />
       </div>
     </div>
     <div class="admin-editor__footer">
-      <span>Markdown · sanitized · shared public renderer</span>
-      <span>Tab = indent · Ctrl/Cmd + S = save draft</span>
+      <span>Markdown · 已清理 · 与公开端共享渲染器</span>
+      <span>Tab = 缩进 · Ctrl/Cmd + S = 保存草稿</span>
     </div>
   </section>
 </template>

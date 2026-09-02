@@ -55,19 +55,19 @@ try {
   check('slash opens quick search from page body', await page.locator('.command-palette').isVisible());
   await closePalette();
   await page.keyboard.press('Control+k');
-  await page.locator('.command-palette__input-wrap input').fill('Light mode');
+  await page.locator('.command-palette__input-wrap input').fill('浅色模式');
   await page.waitForTimeout(240);
-  await page.getByRole('option', { name: /Light mode/ }).click();
+  await page.getByRole('option', { name: /浅色模式/ }).click();
   await page.waitForFunction(() => document.documentElement.dataset.theme === 'light');
   check('command palette can switch to light theme', await page.evaluate(() => document.documentElement.dataset.theme === 'light'));
   await page.waitForTimeout(260);
   await closePalette();
   await page.keyboard.press('Control+k');
   await page.locator('.command-palette').waitFor({ state: 'visible' });
-  await page.locator('.command-palette__input-wrap input').fill('Dark mode');
+  await page.locator('.command-palette__input-wrap input').fill('深色模式');
   await page.waitForTimeout(240);
-  await page.getByRole('option', { name: /Dark mode/ }).waitFor({ state: 'visible' });
-  await page.getByRole('option', { name: /Dark mode/ }).click();
+  await page.getByRole('option', { name: /深色模式/ }).waitFor({ state: 'visible' });
+  await page.getByRole('option', { name: /深色模式/ }).click();
   await page.waitForFunction(() => document.documentElement.dataset.theme === 'dark');
   check('command palette can switch back to dark theme', await page.evaluate(() => document.documentElement.dataset.theme === 'dark'));
 

@@ -15,8 +15,8 @@ const visibleProjects = computed(() => props.projects.slice(0, 3));
   <section class="relative left-1/2 w-[min(100vw-2rem,80rem)] -translate-x-1/2 py-16 sm:py-20 lg:py-28" aria-labelledby="featured-projects-title">
     <div class="mb-9 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p class="terminal-label text-xs uppercase tracking-[0.14em]">02 // selected builds</p>
-        <h2 id="featured-projects-title" class="mt-3 font-display text-h2">Featured Projects</h2>
+        <p class="terminal-label text-xs uppercase tracking-[0.14em]">02 // SELECTED WORK</p>
+        <h2 id="featured-projects-title" class="mt-3 font-display text-h2">精选项目</h2>
         <p class="mt-3 max-w-2xl text-sm leading-7 text-text-secondary">把想法变成可运行的系统，也把过程中遇到的问题沉淀下来。</p>
       </div>
       <RouterLink class="font-mono text-xs text-brand transition hover:text-brand-strong" to="/projects">进入项目实验室 →</RouterLink>
@@ -36,7 +36,7 @@ const visibleProjects = computed(() => props.projects.slice(0, 3));
         <div class="project-card__body" :class="index === 0 ? 'sm:p-7' : ''">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <BaseBadge :variant="project.status === 'COMPLETED' ? 'success' : 'brand'" dot>{{ formatProjectStatus(project.status) }}</BaseBadge>
-            <span class="font-mono text-[0.625rem] uppercase tracking-[0.13em] text-text-muted">Project // 0{{ index + 1 }}</span>
+            <span class="font-mono text-[0.625rem] uppercase tracking-[0.13em] text-text-muted">项目 // 0{{ index + 1 }}</span>
           </div>
           <h3 class="mt-5 font-display font-semibold tracking-tight text-text-primary" :class="index === 0 ? 'text-3xl sm:text-4xl' : 'text-xl'">{{ project.name }}</h3>
           <p class="mt-3 text-sm leading-7 text-text-secondary" :class="index === 0 ? 'max-w-2xl sm:text-base' : 'line-clamp-3'">{{ project.description || '项目说明正在整理中。' }}</p>
@@ -46,7 +46,7 @@ const visibleProjects = computed(() => props.projects.slice(0, 3));
           </div>
 
           <div class="mt-6 flex flex-wrap items-center gap-4">
-            <RouterLink class="inline-flex items-center gap-2 font-mono text-xs font-semibold text-brand transition group-hover:gap-3" :to="`/projects/${project.id}`">View details <span aria-hidden="true">→</span></RouterLink>
+            <RouterLink class="inline-flex items-center gap-2 font-mono text-xs font-semibold text-brand transition group-hover:gap-3" :to="`/projects/${project.id}`">查看详情 <span aria-hidden="true">→</span></RouterLink>
             <a v-if="safeExternalUrl(project.githubUrl)" :href="safeExternalUrl(project.githubUrl)" class="font-mono text-xs text-text-muted transition hover:text-text-primary" target="_blank" rel="noreferrer">GitHub ↗</a>
             <a v-if="safeExternalUrl(project.demoUrl)" :href="safeExternalUrl(project.demoUrl)" class="font-mono text-xs text-text-muted transition hover:text-text-primary" target="_blank" rel="noreferrer">Demo ↗</a>
           </div>

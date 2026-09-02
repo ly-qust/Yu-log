@@ -77,7 +77,7 @@ function parseStructuredSetting(setting: SiteSetting) {
       structuredLists[setting.settingKey] = Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
     }
   } catch {
-    errorMessage.value = `${keyLabels[setting.settingKey] || setting.settingKey} 的 JSON 数据无法解析，请使用 Advanced JSON 修复。`;
+    errorMessage.value = `${keyLabels[setting.settingKey] || setting.settingKey} 的 JSON 数据无法解析，请使用高级 JSON 修复。`;
   }
 }
 
@@ -158,8 +158,8 @@ onMounted(loadSettings);
 
 <template>
   <section class="space-y-5">
-    <AdminPageHeader eyebrow="system // site settings" title="站点配置" description="常用配置使用结构化表单维护；只有真正开放的未知 JSON 才进入 Advanced JSON，保存前会校验格式。">
-      <template #actions><div class="flex flex-wrap gap-2"><span class="admin-editor-state" :class="guard.isDirty ? 'is-dirty' : 'is-clean'"><i aria-hidden="true"></i>{{ guard.isDirty ? 'Unsaved changes' : 'Saved' }}</span><BaseButton :loading="savingAll" :disabled="loading" size="sm" @click="saveAll">批量保存</BaseButton></div></template>
+    <AdminPageHeader eyebrow="站点配置 // SETTINGS" title="站点配置" description="常用配置使用结构化表单维护；只有真正开放的未知 JSON 才进入高级 JSON，保存前会校验格式。">
+      <template #actions><div class="flex flex-wrap gap-2"><span class="admin-editor-state" :class="guard.isDirty ? 'is-dirty' : 'is-clean'"><i aria-hidden="true"></i>{{ guard.isDirty ? '有未保存修改' : '已保存' }}</span><BaseButton :loading="savingAll" :disabled="loading" size="sm" @click="saveAll">批量保存</BaseButton></div></template>
     </AdminPageHeader>
 
     <div v-if="errorMessage" class="admin-form-error" role="alert">{{ errorMessage }}</div>
@@ -167,7 +167,7 @@ onMounted(loadSettings);
 
     <div v-else class="space-y-5">
       <section v-if="profile.nickname || profile.role || settings.some(isProfileSetting)" class="surface-muted rounded-panel p-5 md:p-6">
-        <div class="flex flex-wrap items-start justify-between gap-4"><div><p class="admin-eyebrow">about // profile</p><h2 class="mt-1 text-xl font-semibold text-text-primary">关于我资料</h2><p class="mt-1 text-sm text-text-muted">字段直接映射现有 About 配置，未知字段会被保留。</p></div><BaseButton size="sm" :loading="savingKey === 'site.about.profile'" @click="saveSetting(settings.find(isProfileSetting)!)">保存资料</BaseButton></div>
+        <div class="flex flex-wrap items-start justify-between gap-4"><div><p class="admin-eyebrow">关于我 // PROFILE</p><h2 class="mt-1 text-xl font-semibold text-text-primary">关于我资料</h2><p class="mt-1 text-sm text-text-muted">字段直接映射现有 About 配置，未知字段会被保留。</p></div><BaseButton size="sm" :loading="savingKey === 'site.about.profile'" @click="saveSetting(settings.find(isProfileSetting)!)">保存资料</BaseButton></div>
         <div class="mt-5 grid gap-4 md:grid-cols-2"><BaseInput v-for="field in profileFields" :key="field.key" v-model="profile[field.key]" :label="field.label" :type="field.key === 'email' ? 'email' : field.key === 'githubUrl' ? 'url' : 'text'" /><BaseTextarea v-model="profile.description" class="md:col-span-2" label="个人简介" :rows="3" /></div>
         <div class="mt-4"><ImageUploader v-model="profile.avatar" biz-type="avatar" label="头像" /></div>
         <div class="mt-5"><div class="flex items-center justify-between"><p class="text-sm font-medium text-text-secondary">职业方向</p><BaseButton size="sm" variant="ghost" @click="addCareerDirection">+ 添加</BaseButton></div><div class="mt-2 grid gap-2 sm:grid-cols-2"><div v-for="(_, index) in profile.careerDirection" :key="index" class="flex gap-2"><input v-model="profile.careerDirection[index]" class="admin-structured-input" type="text" placeholder="Java 后端开发" /><BaseButton size="sm" variant="ghost" aria-label="移除职业方向" @click="removeCareerDirection(index)">×</BaseButton></div></div></div>
@@ -180,7 +180,7 @@ onMounted(loadSettings);
           <div v-if="!isProfileSetting(setting)" class="admin-setting-card">
             <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between"><div><p class="font-medium text-text-primary">{{ keyLabels[setting.settingKey] || setting.settingKey }}</p><p class="mt-1 font-mono text-[11px] text-text-muted">{{ setting.settingKey }} · {{ setting.settingType || 'TEXT' }}</p><p v-if="setting.description" class="mt-2 text-xs text-text-muted">{{ setting.description }}</p><p class="mt-2 text-xs text-text-muted">更新时间：{{ formatDateTime(setting.updatedAt) }}</p></div><BaseButton size="sm" variant="secondary" :loading="savingKey === setting.settingKey" @click="saveSetting(setting)">保存</BaseButton></div>
             <div v-if="isListSetting(setting)" class="mt-4 grid gap-2"><div v-for="(_, index) in listValue(setting.settingKey)" :key="index" class="flex gap-2"><input v-model="listValue(setting.settingKey)[index]" class="admin-structured-input" type="text" /><BaseButton size="sm" variant="ghost" aria-label="移除条目" @click="removeListItem(setting.settingKey, index)">×</BaseButton></div><BaseButton class="w-fit" size="sm" variant="ghost" @click="addListItem(setting.settingKey)">+ 添加条目</BaseButton></div>
-            <BaseTextarea v-else-if="isJsonSetting(setting)" v-model="editableValues[setting.settingKey]" class="mt-4" label="Advanced JSON" hint="仅开放 JSON 配置使用；保存前会校验语法。" :rows="6" />
+            <BaseTextarea v-else-if="isJsonSetting(setting)" v-model="editableValues[setting.settingKey]" class="mt-4" label="高级 JSON" hint="仅开放 JSON 配置使用；保存前会校验语法。" :rows="6" />
             <BaseInput v-else v-model="editableValues[setting.settingKey]" class="mt-4" label="配置值" />
           </div>
           </template>

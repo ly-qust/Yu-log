@@ -6,14 +6,14 @@ withDefaults(defineProps<{ githubUrl?: string; email?: string }>(), { githubUrl:
 
 <template>
   <section class="closing-section py-20 text-center sm:py-28 lg:py-36" aria-labelledby="home-closing-title">
-    <p class="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-brand">The garden remains open</p>
+    <p class="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-brand">这片花园还在开放</p>
     <h2 id="home-closing-title" class="mx-auto mt-6 max-w-4xl font-display text-[clamp(2.5rem,7vw,5.75rem)] font-bold leading-[.98] tracking-[-.055em] text-text-primary">
       <span v-for="(line, index) in homepageIdentity.closingLines" :key="line" class="block" :class="index === 2 ? 'text-brand' : ''">{{ line }}</span>
     </h2>
     <p class="mx-auto mt-7 max-w-xl text-sm leading-7 text-text-secondary sm:text-base">这里记录尚未完成的理解、正在构建的系统，以及每一次向前生长的痕迹。</p>
     <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
-      <RouterLink class="closing-link closing-link--primary" to="/articles">Explore the garden</RouterLink>
-      <RouterLink class="closing-link" to="/about">About Yu</RouterLink>
+      <RouterLink class="closing-link closing-link--primary" to="/articles">继续逛逛</RouterLink>
+      <RouterLink class="closing-link" to="/about">了解 Yu</RouterLink>
       <a v-if="githubUrl" :href="githubUrl" class="closing-link" target="_blank" rel="noreferrer">GitHub ↗</a>
       <a v-if="email" :href="`mailto:${email}`" class="closing-link">Email</a>
     </div>

@@ -45,7 +45,7 @@ async function loadAbout() {
 onMounted(() => {
   void loadAbout();
   cleanupSeo = applySeo({
-    title: 'About — Personal Engineering Profile | YU.LOG',
+    title: '关于我｜YU.LOG · Yu 的个人工程档案',
     description: 'Yu 的个人工程档案：当前方向、学习方式、公开技能与成长中的系统。',
     canonicalPath: '/about',
   });
@@ -58,8 +58,8 @@ onUnmounted(() => cleanupSeo());
   <PublicLayout>
     <div class="about-page">
       <header class="about-intro">
-        <p class="about-kicker">About / Profile</p>
-        <h1>Behind the systems,<br /><span>there is someone still learning.</span></h1>
+        <p class="about-kicker">关于我 // ABOUT</p>
+        <h1>系统背后，<br /><span>是一个仍在学习的人。</span></h1>
         <p class="about-intro__lede">这不是一份静态简历，而是一张持续更新的个人工程地图：我在什么方向上工作，又如何把学习留下来。</p>
       </header>
 
@@ -75,7 +75,7 @@ onUnmounted(() => cleanupSeo());
       <article v-else class="about-content">
         <div class="about-intro-grid">
           <div>
-            <p class="about-section-label">01 / Who I am</p>
+            <p class="about-section-label">01 / 我是谁</p>
             <p class="about-lead">{{ profile.description || '我正在通过课程、项目和问题排查积累可复用的工程经验。' }}</p>
           </div>
           <AboutIdentity :profile="profile" :career-direction="careerDirection" :github-url="githubUrl" :email="email" />
@@ -85,19 +85,19 @@ onUnmounted(() => cleanupSeo());
 
         <div class="about-record-grid">
           <section v-if="about.learningPhilosophy" class="about-record" aria-labelledby="about-learning-title">
-            <p class="about-section-label">03 / How I learn</p>
-            <h2 id="about-learning-title">Build it, explain it, keep it reusable.</h2>
+            <p class="about-section-label">03 / 我如何学习</p>
+            <h2 id="about-learning-title">做出来，讲清楚，留下可复用的部分。</h2>
             <p>{{ about.learningPhilosophy }}</p>
           </section>
           <section v-if="about.education.length" class="about-record" aria-labelledby="about-education-title">
-            <p class="about-section-label">04 / The current chapter</p>
-            <h2 id="about-education-title">Education & preparation</h2>
+            <p class="about-section-label">04 / 当前章节</p>
+            <h2 id="about-education-title">学习与准备</h2>
             <ul><li v-for="item in about.education" :key="item">{{ item }}</li></ul>
           </section>
         </div>
 
         <section v-if="githubUrl || email" class="about-contact" aria-labelledby="about-contact-title">
-          <div><p class="about-section-label">05 / Open channels</p><h2 id="about-contact-title">Keep the loop open.</h2></div>
+          <div><p class="about-section-label">05 / 联系方式</p><h2 id="about-contact-title">保持联系。</h2></div>
           <div class="about-contact__links">
             <a v-if="githubUrl" :href="githubUrl" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
             <a v-if="email" :href="`mailto:${email}`">{{ email }}</a>

@@ -44,14 +44,14 @@ watch(() => props.success, (value) => {
   <section class="discussion" aria-labelledby="discussion-title">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-brand">Discussion</p>
+        <p class="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-brand">评论区 // DISCUSSION</p>
         <h2 id="discussion-title" class="mt-2 font-display text-3xl font-semibold text-text-primary">继续这篇讨论</h2>
         <p class="mt-2 max-w-xl text-sm leading-7 text-text-secondary">问题、补充和不同观点会在审核通过后公开展示。</p>
       </div>
-      <button class="discussion__refresh" type="button" :disabled="loading" @click="emit('refresh')">{{ loading ? 'Loading…' : 'Refresh' }}</button>
+      <button class="discussion__refresh" type="button" :disabled="loading" @click="emit('refresh')">{{ loading ? '正在加载……' : '刷新评论' }}</button>
     </div>
 
-    <button v-if="!composerOpen" class="discussion__open" type="button" @click="composerOpen = true"><span>写下你的想法…</span><strong>Comment</strong></button>
+    <button v-if="!composerOpen" class="discussion__open" type="button" @click="composerOpen = true"><span>写下你的想法……</span><strong>发表评论</strong></button>
     <form v-else class="discussion__form" @submit.prevent="submitForm">
       <div class="grid gap-4 sm:grid-cols-2">
         <label><span>昵称 *</span><input v-model="form.nickname" maxlength="30" autocomplete="name" type="text" /></label>
@@ -71,7 +71,7 @@ watch(() => props.success, (value) => {
     <p v-if="success" class="discussion__message is-success" role="status">{{ success }}</p>
 
     <div class="mt-8 border-t border-border-subtle/62">
-      <div v-if="loading && comments.length === 0" class="py-8 font-mono text-xs text-text-muted">Loading discussion…</div>
+      <div v-if="loading && comments.length === 0" class="py-8 font-mono text-xs text-text-muted">正在加载评论……</div>
       <div v-else-if="comments.length === 0" class="py-8 text-sm text-text-muted">这里还没有公开评论，欢迎留下第一条讨论。</div>
       <article v-for="comment in comments" v-else :key="comment.id" class="discussion__comment">
         <div class="flex flex-wrap items-center justify-between gap-3">
@@ -80,7 +80,7 @@ watch(() => props.success, (value) => {
         </div>
         <p class="mt-3 whitespace-pre-wrap break-words text-sm leading-7 text-text-secondary">{{ comment.content }}</p>
         <div v-if="comment.adminReply" class="discussion__reply">
-          <p class="font-mono text-[0.62rem] uppercase tracking-[0.1em] text-brand">Yu replied · {{ formatDateTime(comment.repliedAt) }}</p>
+          <p class="font-mono text-[0.62rem] uppercase tracking-[0.1em] text-brand">Yu 回复于 · {{ formatDateTime(comment.repliedAt) }}</p>
           <p class="mt-2 whitespace-pre-wrap break-words text-sm leading-7 text-text-primary">{{ comment.adminReply }}</p>
         </div>
       </article>

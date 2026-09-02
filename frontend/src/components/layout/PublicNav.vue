@@ -67,7 +67,7 @@ onUnmounted(() => {
       <div class="ml-auto hidden items-center gap-1 lg:ml-2 lg:flex">
         <button class="nav-search" type="button" @click="emit('openSearch')">
           <svg aria-hidden="true" fill="none" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.7" /><path d="m16 16 5 5" stroke="currentColor" stroke-linecap="round" stroke-width="1.7" /></svg>
-          <span>Search</span><kbd>⌘K</kbd>
+          <span>搜索</span><kbd>⌘ K</kbd>
         </button>
         <a
           v-if="githubUrl"

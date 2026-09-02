@@ -3,7 +3,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 import BaseBadge from '@/components/common/BaseBadge.vue';
 import type { TimelineEventItem } from '@/types/timeline';
-import { formatDate } from '@/utils/format';
+import { formatDate, formatTimelineType } from '@/utils/format';
 
 const props = withDefaults(defineProps<{
   event: TimelineEventItem;
@@ -13,8 +13,9 @@ const props = withDefaults(defineProps<{
   side: 'left',
 });
 
-const type = computed(() => props.event.type?.trim() || 'MILESTONE');
-const variant = computed(() => type.value === 'PROJECT' ? 'brand' : type.value === 'DATABASE' ? 'accent' : type.value === 'AWARD' ? 'warning' : 'success');
+const rawType = computed(() => props.event.type?.trim() || 'MILESTONE');
+const type = computed(() => formatTimelineType(rawType.value));
+const variant = computed(() => rawType.value === 'PROJECT' ? 'brand' : rawType.value === 'DATABASE' ? 'accent' : rawType.value === 'AWARD' ? 'warning' : 'success');
 const entryId = computed(() => `timeline-entry-${props.event.id}`);
 const cardRef = ref<HTMLElement | null>(null);
 const active = ref(false);

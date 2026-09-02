@@ -17,6 +17,7 @@ import { useUnsavedChangesGuard } from '@/composables/useUnsavedChangesGuard';
 import { useAdminFeedbackStore } from '@/stores/adminFeedback';
 import type { TimelineSavePayload } from '@/types/timeline';
 import { getErrorMessage } from '@/utils/errors';
+import { formatTimelineType } from '@/utils/format';
 
 const route = useRoute();
 const router = useRouter();
@@ -47,7 +48,7 @@ function snapshot() {
   return JSON.stringify({ ...form });
 }
 
-const guard = useUnsavedChangesGuard(snapshot, { label: 'Timeline 节点', isSaving: () => saving.value });
+const guard = useUnsavedChangesGuard(snapshot, { label: '时间线节点', isSaving: () => saving.value });
 
 function splitText(value: string): string[] {
   return value
@@ -144,8 +145,8 @@ onMounted(async () => {
 
 <template>
   <section class="glass-panel rounded-glass p-6">
-    <AdminPageHeader :eyebrow="`garden / timeline // ${isEdit ? 'edit' : 'new'}`" :title="isEdit ? '编辑 Timeline' : '新建 Timeline'" description="Timeline 使用结构化字段记录成长节点，不引入不属于当前模型的长文内容。">
-      <template #actions><div class="flex flex-wrap gap-2"><span class="admin-editor-state" :class="guard.isDirty ? 'is-dirty' : 'is-clean'"><i aria-hidden="true"></i>{{ guard.isDirty ? 'Unsaved changes' : 'Saved' }}</span><RouterLink to="/admin/timeline"><BaseButton variant="secondary" size="sm">返回 Timeline</BaseButton></RouterLink></div></template>
+    <AdminPageHeader :eyebrow="`时间线 // ${isEdit ? '编辑' : '新建'} · TIMELINE`" :title="isEdit ? '编辑时间线' : '新建时间线'" description="时间线使用结构化字段记录成长节点，不引入不属于当前模型的长文内容。">
+      <template #actions><div class="flex flex-wrap gap-2"><span class="admin-editor-state" :class="guard.isDirty ? 'is-dirty' : 'is-clean'"><i aria-hidden="true"></i>{{ guard.isDirty ? '有未保存修改' : '已保存' }}</span><RouterLink to="/admin/timeline"><BaseButton variant="secondary" size="sm">返回时间线</BaseButton></RouterLink></div></template>
     </AdminPageHeader>
 
     <p v-if="loading" class="mt-8 font-mono text-sm text-cyber-cyan">表单加载中...</p>
@@ -159,7 +160,7 @@ onMounted(async () => {
       <BaseTextarea v-model="form.description" label="描述" :rows="4" />
 
       <div class="grid gap-5 lg:grid-cols-3">
-        <BaseSelect v-model="form.type" label="类型"><option v-for="type in typeOptions" :key="type" :value="type">{{ type }}</option></BaseSelect>
+        <BaseSelect v-model="form.type" label="类型"><option v-for="type in typeOptions" :key="type" :value="type">{{ formatTimelineType(type) }}</option></BaseSelect>
         <BaseInput v-model="form.tagsText" label="标签" placeholder="课程设计, 实习准备" />
         <label class="admin-native-field"><span>排序</span><input v-model.number="form.sortOrder" type="number" /></label>
       </div>
@@ -172,7 +173,7 @@ onMounted(async () => {
       <p v-if="successMessage" class="rounded-lg border border-cyber-cyan/40 bg-cyber-cyan/10 px-4 py-3 text-sm text-cyber-cyan">{{ successMessage }}</p>
       <p v-if="errorMessage" class="rounded-lg border border-cyber-danger/40 bg-cyber-danger/10 px-4 py-3 text-sm text-cyber-danger">{{ errorMessage }}</p>
 
-      <div class="flex flex-wrap gap-3"><BaseButton :loading="saving" type="submit">保存 Timeline</BaseButton><RouterLink to="/admin/timeline"><BaseButton variant="secondary">取消</BaseButton></RouterLink></div>
+      <div class="flex flex-wrap gap-3"><BaseButton :loading="saving" type="submit">保存时间线</BaseButton><RouterLink to="/admin/timeline"><BaseButton variant="secondary">取消</BaseButton></RouterLink></div>
     </form>
   </section>
 </template>

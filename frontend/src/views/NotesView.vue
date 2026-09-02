@@ -103,7 +103,7 @@ async function clearFilters() {
 onMounted(() => {
   void loadAllNotes();
   cleanupSeo = applySeo({
-    title: 'Notes — Digital Garden | YU.LOG',
+    title: '笔记｜YU.LOG · Yu 的数字花园',
     description: 'YU.LOG 的数字花园：记录仍在生长的学习碎片、工程命令和知识节点。',
     canonicalPath: '/notes',
   });
@@ -118,21 +118,21 @@ onUnmounted(() => cleanupSeo());
   <PublicLayout>
     <div class="notes-page">
       <header class="notes-intro">
-        <p class="notes-kicker">Notes / Digital garden</p>
+        <p class="notes-kicker">随手记 // DIGITAL GARDEN</p>
         <div class="notes-intro__row">
-          <div><h1>Small pieces of knowledge,<br /><span>still growing.</span></h1><p>文章保存阶段性结论，笔记保留知识仍在形成时的样子。</p></div>
+          <div><h1>正在生长的笔记</h1><p>文章保存阶段性结论，笔记保留知识仍在形成时的样子。</p></div>
           <p class="notes-result" aria-live="polite">{{ resultDescription }}</p>
         </div>
-        <div class="notes-stats" aria-label="笔记统计"><span><strong>{{ allNotes.length }}</strong> public nodes</span><span><strong>{{ topicOptions.length }}</strong> topics</span><span>Updated by learning</span></div>
+        <div class="notes-stats" aria-label="笔记统计"><span><strong>{{ allNotes.length }}</strong> 篇公开笔记</span><span><strong>{{ topicOptions.length }}</strong> 个主题</span><span>随学习更新</span></div>
       </header>
 
       <section class="notes-controls" aria-label="笔记筛选">
         <form class="grid gap-3 lg:grid-cols-[minmax(13rem,1.5fr)_minmax(11rem,1fr)_auto]" @submit.prevent="updateRoute(1)">
-          <label class="notes-field"><span>Search</span><input v-model="filters.keyword" type="search" placeholder="标题、摘要或内容" /></label>
-          <label class="notes-field"><span>Topic</span><select v-model="filters.topic" :disabled="optionsLoading" @change="updateRoute(1)"><option value="">All topics</option><option v-for="topic in topicOptions" :key="topic" :value="topic">{{ topic }}</option></select></label>
-          <button class="notes-submit" :disabled="loading" type="submit">Search</button>
+          <label class="notes-field"><span>搜索</span><input v-model="filters.keyword" type="search" placeholder="标题、摘要或内容" /></label>
+          <label class="notes-field"><span>主题</span><select v-model="filters.topic" :disabled="optionsLoading" @change="updateRoute(1)"><option value="">全部主题</option><option v-for="topic in topicOptions" :key="topic" :value="topic">{{ topic }}</option></select></label>
+          <button class="notes-submit" :disabled="loading" type="submit">搜索</button>
         </form>
-        <button v-if="hasActiveFilters" class="notes-clear" type="button" @click="clearFilters">Reset all filters</button>
+        <button v-if="hasActiveFilters" class="notes-clear" type="button" @click="clearFilters">重置筛选</button>
       </section>
 
       <p v-if="errorMessage" class="notes-error" role="alert">{{ errorMessage }}</p>
@@ -143,7 +143,7 @@ onUnmounted(() => cleanupSeo());
         <div v-else class="notes-list"><NoteNode v-for="(note, index) in notePage.list" :key="note.id" :note="note" :index="(notePage.pageNum - 1) * pageSize + index" /></div>
       </section>
 
-      <nav v-if="!loading && notePage.totalPages > 1" class="notes-pagination" aria-label="笔记分页"><button :disabled="!notePage.hasPrevious" type="button" @click="updateRoute(notePage.pageNum - 1)">← Previous</button><span>Page {{ notePage.pageNum }} / {{ notePage.totalPages }}</span><button :disabled="!notePage.hasNext" type="button" @click="updateRoute(notePage.pageNum + 1)">Next →</button></nav>
+      <nav v-if="!loading && notePage.totalPages > 1" class="notes-pagination" aria-label="笔记分页"><button :disabled="!notePage.hasPrevious" type="button" @click="updateRoute(notePage.pageNum - 1)">← 上一页</button><span>第 {{ notePage.pageNum }} / {{ notePage.totalPages }} 页</span><button :disabled="!notePage.hasNext" type="button" @click="updateRoute(notePage.pageNum + 1)">下一页 →</button></nav>
     </div>
   </PublicLayout>
 </template>

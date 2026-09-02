@@ -132,7 +132,7 @@ watch(() => route.fullPath, syncFromRoute, { immediate: true });
 onMounted(() => {
   void loadOptions();
   cleanupSeo = applySeo({
-    title: 'Writing — 技术文章 | YU.LOG',
+    title: '文章｜YU.LOG · Yu 的个人技术博客',
     description: '关于软件工程、项目实践与持续学习的技术文章归档。',
     canonicalPath: '/articles',
   });
@@ -147,10 +147,10 @@ onUnmounted(() => {
   <PublicLayout>
     <div class="articles-page">
       <header class="articles-intro">
-        <p class="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-brand">Writing archive</p>
+        <p class="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-brand">文章归档 // WRITING ARCHIVE</p>
         <div class="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div>
-            <h1 class="font-display text-[clamp(2.8rem,8vw,6.5rem)] font-bold leading-[0.95] tracking-[-0.065em] text-text-primary">Writing</h1>
+            <h1 class="font-display text-[clamp(2.8rem,8vw,6.5rem)] font-bold leading-[0.95] tracking-[-0.065em] text-text-primary">文章</h1>
             <p class="mt-5 max-w-2xl text-base leading-8 text-text-secondary sm:text-lg">记录那些值得被反复查阅的工程经验、技术判断和项目复盘。</p>
           </div>
           <p class="font-mono text-[0.68rem] text-text-muted" aria-live="polite">{{ resultDescription }}</p>
@@ -160,25 +160,25 @@ onUnmounted(() => {
       <section class="articles-controls" aria-label="文章筛选">
         <form class="grid gap-3 lg:grid-cols-[minmax(13rem,1.6fr)_repeat(3,minmax(9rem,1fr))_auto]" @submit.prevent="updateRoute(1)">
           <label class="articles-field">
-            <span>Search</span>
+            <span>搜索</span>
             <input v-model="filters.keyword" type="search" placeholder="标题、摘要或关键词" />
           </label>
           <label class="articles-field">
-            <span>Category</span>
+            <span>分类</span>
             <select v-model="filters.categoryId" :disabled="optionsLoading" @change="updateRoute(1)">
               <option value="">全部分类</option>
               <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }} · {{ category.articleCount }}</option>
             </select>
           </label>
           <label class="articles-field">
-            <span>Tag</span>
+            <span>标签</span>
             <select v-model="filters.tagId" :disabled="optionsLoading" @change="updateRoute(1)">
               <option value="">全部标签</option>
               <option v-for="tag in tags" :key="tag.id" :value="tag.id">{{ tag.name }} · {{ tag.articleCount }}</option>
             </select>
           </label>
           <label class="articles-field">
-            <span>Sort by</span>
+            <span>排序</span>
             <select v-model="filters.sort" @change="updateRoute(1)">
               <option value="latest">最新发布</option>
               <option value="oldest">最早发布</option>
@@ -186,9 +186,9 @@ onUnmounted(() => {
               <option value="likes">点赞最多</option>
             </select>
           </label>
-          <button class="articles-submit" :disabled="loading" type="submit">Search</button>
+          <button class="articles-submit" :disabled="loading" type="submit">搜索</button>
         </form>
-        <button v-if="hasActiveFilters || filters.sort !== 'latest'" class="articles-clear" type="button" @click="clearFilters">Reset all filters</button>
+        <button v-if="hasActiveFilters || filters.sort !== 'latest'" class="articles-clear" type="button" @click="clearFilters">重置筛选</button>
       </section>
 
       <p v-if="errorMessage" class="articles-error" role="alert">{{ errorMessage }}</p>
@@ -211,8 +211,8 @@ onUnmounted(() => {
             <div class="article-row__index" aria-hidden="true">{{ String((articlePage.pageNum - 1) * pageSize + index + 1).padStart(2, '0') }}</div>
             <div class="min-w-0">
               <div class="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[0.64rem] uppercase tracking-[0.1em] text-text-muted">
-                <span class="text-brand">{{ item.categoryName || 'Uncategorized' }}</span>
-                <span v-if="item.isTop" class="text-accent">Featured</span>
+                <span class="text-brand">{{ item.categoryName || '未分类' }}</span>
+                <span v-if="item.isTop" class="text-accent">精选</span>
                 <time>{{ formatDate(item.publishedAt) }}</time>
               </div>
               <h2>{{ item.title }}</h2>
@@ -224,19 +224,19 @@ onUnmounted(() => {
               <span v-else aria-hidden="true">YU.LOG</span>
             </div>
             <div class="article-row__meta">
-              <span>{{ item.readingTime }} min</span>
-              <span>{{ formatCount(item.viewCount) }} views</span>
-              <span>{{ formatCount(item.likeCount) }} likes</span>
-              <strong>Read article <span aria-hidden="true">↗</span></strong>
+              <span>预计阅读 {{ item.readingTime }} 分钟</span>
+              <span>{{ formatCount(item.viewCount) }} 次阅读</span>
+              <span>{{ formatCount(item.likeCount) }} 次喜欢</span>
+              <strong>读文章 <span aria-hidden="true">↗</span></strong>
             </div>
           </RouterLink>
         </article>
       </section>
 
       <nav v-if="!loading && articlePage.totalPages > 1" class="articles-pagination" aria-label="文章分页">
-        <button :disabled="!articlePage.hasPrevious" type="button" @click="updateRoute(articlePage.pageNum - 1)">← Previous</button>
-        <span>Page {{ articlePage.pageNum }} / {{ articlePage.totalPages }}</span>
-        <button :disabled="!articlePage.hasNext" type="button" @click="updateRoute(articlePage.pageNum + 1)">Next →</button>
+        <button :disabled="!articlePage.hasPrevious" type="button" @click="updateRoute(articlePage.pageNum - 1)">← 上一页</button>
+        <span>第 {{ articlePage.pageNum }} / {{ articlePage.totalPages }} 页</span>
+        <button :disabled="!articlePage.hasNext" type="button" @click="updateRoute(articlePage.pageNum + 1)">下一页 →</button>
       </nav>
     </div>
   </PublicLayout>

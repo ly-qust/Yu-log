@@ -133,7 +133,7 @@ onMounted(async () => {
     <div class="glass-panel rounded-glass p-6">
       <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <p class="terminal-label text-sm">admin_articles // index</p>
+          <p class="terminal-label text-sm">文章 // 管理</p>
           <h2 class="mt-3 font-display text-3xl font-semibold">文章管理</h2>
           <p class="mt-2 text-sm text-cyber-muted">管理博客文章，支持草稿、发布、隐藏和置顶。</p>
         </div>

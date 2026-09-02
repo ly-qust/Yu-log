@@ -11,11 +11,11 @@ type SkillGroup = {
 };
 
 const groupDefinitions = [
-  { label: 'Backend engineering', match: ['java', 'spring'], tone: 'brand' },
-  { label: 'Data & cache', match: ['mysql', 'redis'], tone: 'accent' },
-  { label: 'Infrastructure', match: ['linux', 'docker', 'nginx'], tone: 'neutral' },
-  { label: 'Frontend', match: ['vue', 'typescript', 'vite'], tone: 'brand' },
-  { label: 'AI application', match: ['ai', 'llm', 'rag', 'prompt'], tone: 'accent' },
+  { label: '后端工程', match: ['java', 'spring'], tone: 'brand' },
+  { label: '数据与缓存', match: ['mysql', 'redis'], tone: 'accent' },
+  { label: '基础设施', match: ['linux', 'docker', 'nginx'], tone: 'neutral' },
+  { label: '前端体验', match: ['vue', 'typescript', 'vite'], tone: 'brand' },
+  { label: 'AI 应用', match: ['ai', 'llm', 'rag', 'prompt'], tone: 'accent' },
 ] as const;
 
 const groups = computed<SkillGroup[]>(() => {
@@ -30,7 +30,7 @@ const groups = computed<SkillGroup[]>(() => {
     return { ...definition, items };
   }).filter((group) => group.items.length);
   const other = props.skills.filter((skill) => !used.has(skill));
-  if (other.length) result.push({ label: 'Other tools', match: [], tone: 'neutral', items: other });
+  if (other.length) result.push({ label: '其他工具', match: [], tone: 'neutral', items: other });
   return result;
 });
 </script>
@@ -38,9 +38,9 @@ const groups = computed<SkillGroup[]>(() => {
 <template>
   <section class="about-skills" aria-labelledby="about-skills-title">
     <div class="about-section-heading">
-      <p class="about-kicker">Engineering interests</p>
-      <h2 id="about-skills-title">Tools I am learning to use well.</h2>
-      <p>技能按领域归组，只展示当前 About API 返回的公开技术，不使用主观熟练度。</p>
+      <p class="about-kicker">技术方向 // ENGINEERING</p>
+      <h2 id="about-skills-title">正在认真学会使用的工具。</h2>
+      <p>技能按领域归组，只展示当前 About 接口返回的公开技术，不使用主观熟练度。</p>
     </div>
     <div v-if="groups.length" class="about-skill-grid">
       <div v-for="group in groups" :key="group.label" class="about-skill-group" :class="`is-${group.tone}`">

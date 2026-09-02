@@ -13,12 +13,12 @@ withDefaults(defineProps<{
 <template>
   <nav v-if="previous || next" class="project-navigation" aria-label="项目导航">
     <RouterLink v-if="previous" class="project-navigation__item is-previous" :to="`/projects/${previous.id}`">
-      <span>← Previous project</span>
+      <span>← 上一个项目</span>
       <strong>{{ previous.name }}</strong>
     </RouterLink>
     <span v-else class="project-navigation__empty" aria-hidden="true"></span>
     <RouterLink v-if="next" class="project-navigation__item is-next" :to="`/projects/${next.id}`">
-      <span>Next project →</span>
+      <span>下一个项目 →</span>
       <strong>{{ next.name }}</strong>
     </RouterLink>
   </nav>

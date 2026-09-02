@@ -16,7 +16,7 @@ const groups = computed(() => {
   }).filter((group) => group.technologies.length);
 
   if (remaining.size) {
-    matched.push({ key: 'other', label: 'Toolkit', hint: 'learning / practice', patterns: [], technologies: [...remaining] });
+    matched.push({ key: 'other', label: '其他工具', hint: 'LEARNING / PRACTICE', patterns: [], technologies: [...remaining] });
   }
   return matched;
 });
@@ -26,8 +26,8 @@ const groups = computed(() => {
   <section class="relative left-1/2 w-[min(100vw-2rem,76rem)] -translate-x-1/2 py-16 sm:py-20 lg:py-28" aria-labelledby="tech-landscape-title">
     <div class="tech-shell">
       <div class="tech-shell__intro">
-        <p class="terminal-label text-xs uppercase tracking-[0.14em]">04 // working landscape</p>
-        <h2 id="tech-landscape-title" class="mt-3 font-display text-h2">Technologies in practice</h2>
+        <p class="terminal-label text-xs uppercase tracking-[0.14em]">04 // TECH LANDSCAPE</p>
+        <h2 id="tech-landscape-title" class="mt-3 font-display text-h2">技术栈</h2>
         <p class="mt-4 max-w-xl text-sm leading-7 text-text-secondary">不是 Logo 墙，而是当前学习与项目中实际出现的技术坐标。</p>
       </div>
 
@@ -42,7 +42,7 @@ const groups = computed(() => {
           </div>
         </article>
       </div>
-      <p v-if="activeTech" class="tech-signal" aria-live="polite">Working signal // {{ activeTech }} is part of the current garden stack.</p>
+      <p v-if="activeTech" class="tech-signal" aria-live="polite">当前选择：{{ activeTech }}，它正在这片花园里工作。</p>
     </div>
   </section>
 </template>

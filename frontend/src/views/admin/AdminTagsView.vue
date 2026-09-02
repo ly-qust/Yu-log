@@ -120,7 +120,7 @@ onMounted(loadTags);
 <template>
   <section class="grid gap-5 xl:grid-cols-[380px_1fr]">
     <form class="glass-panel rounded-glass p-6" @submit.prevent="submit">
-      <p class="terminal-label text-sm">admin_tags // {{ editingId ? 'edit' : 'new' }}</p>
+      <p class="terminal-label text-sm">标签 // {{ editingId ? '编辑' : '新建' }}</p>
       <h2 class="mt-3 font-display text-3xl font-semibold">标签管理</h2>
 
       <div class="mt-6 grid gap-4">

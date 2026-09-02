@@ -2,6 +2,7 @@
 import { computed, onUnmounted, ref } from 'vue';
 
 import { homepageIdentity } from '@/config/homepage';
+import KineticText from '@/components/common/KineticText.vue';
 import type { AboutProfile, HomeHero, HomeStats } from '@/types/site';
 import { formatCount } from '@/utils/format';
 
@@ -26,20 +27,28 @@ let pendingPointer: { clientX: number; clientY: number } | null = null;
 const nickname = computed(() => String(props.profile.nickname || 'Yu'));
 const eyebrow = computed(() => {
   const role = typeof props.profile.role === 'string' ? props.profile.role.trim() : '';
-  return role ? `${role} · Digital Gardener` : homepageIdentity.eyebrowFallback;
+  return role ? `${role} · 数字花园` : homepageIdentity.eyebrowFallback;
 });
-const title = computed(() => props.hero?.title?.trim() || `Hi, I’m ${nickname.value}.` || homepageIdentity.heroTitleFallback);
+const title = computed(() => props.hero?.title?.trim() || `你好，我是 ${nickname.value}。` || homepageIdentity.heroTitleFallback);
 const description = computed(() => props.hero?.description?.trim() || homepageIdentity.heroDescriptionFallback);
-const status = computed(() => props.hero?.statusText?.trim() || homepageIdentity.statusFallback);
-const focus = computed(() => props.learning[0] || 'Backend Systems');
+const status = computed(() => {
+  const value = props.hero?.statusText?.trim();
+  const statusMap: Record<string, string> = {
+    'online & learning': '在线学习中',
+    online: '在线',
+    learning: '学习中',
+  };
+  return value ? statusMap[value.toLowerCase()] || value : homepageIdentity.statusFallback;
+});
+const focus = computed(() => props.learning[0] || '后端系统');
 const visualLabels = computed(() => {
   const labels = props.learning.slice(0, 4);
-  return labels.length ? labels : ['build', 'learn', 'document', 'grow'];
+  return labels.length ? labels : ['构建', '学习', '记录', '成长'];
 });
 const metrics = computed(() => props.stats ? [
-  { label: 'Articles', value: props.stats.articleCount },
-  { label: 'Projects', value: props.stats.projectCount },
-  { label: 'Notes', value: props.stats.noteCount },
+  { label: '文章', value: props.stats.articleCount },
+  { label: '项目', value: props.stats.projectCount },
+  { label: '笔记', value: props.stats.noteCount },
 ] : []);
 
 function trackHeroPointer(event: PointerEvent) {
@@ -100,15 +109,15 @@ onUnmounted(() => resetHeroPointer());
           {{ hero.subtitle }}
         </p>
         <p class="mt-4 max-w-2xl text-base leading-8 text-text-secondary sm:text-lg">
-          {{ description }}
+          <KineticText :text="description" />
         </p>
 
         <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
           <RouterLink class="hero-cta hero-cta--primary" to="/projects">
-            Explore my work
+            看看我做过的项目
             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 12h14m-6-6 6 6-6 6" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" /></svg>
           </RouterLink>
-          <RouterLink class="hero-cta hero-cta--secondary" to="/articles">Read the writing</RouterLink>
+          <RouterLink class="hero-cta hero-cta--secondary" to="/articles">读点文章</RouterLink>
           <a v-if="githubUrl" :href="githubUrl" class="hero-github" target="_blank" rel="noreferrer" aria-label="访问 Yu 的 GitHub">GitHub ↗</a>
         </div>
 
@@ -125,7 +134,7 @@ onUnmounted(() => resetHeroPointer());
         <div class="garden-core__header">
           <div class="flex items-center gap-2" aria-hidden="true"><span></span><span></span><span></span></div>
           <p>~/yu-log/garden.core</p>
-          <p class="hidden sm:block">LIVE_SIGNAL</p>
+          <p class="hidden sm:block">实时信号</p>
         </div>
 
         <div class="garden-core__canvas" role="group" aria-label="数字花园信号图">
@@ -144,9 +153,9 @@ onUnmounted(() => resetHeroPointer());
         </div>
 
         <div class="garden-core__status">
-          <div><span>Status</span><strong>{{ status }}</strong></div>
-          <div><span>Focus</span><strong>{{ focus }}</strong></div>
-          <div v-if="stats"><span>Garden</span><strong>{{ formatCount(stats.noteCount) }} notes</strong></div>
+          <div><span>状态</span><strong>{{ status }}</strong></div>
+          <div><span>当前聚焦</span><strong>{{ focus }}</strong></div>
+          <div v-if="stats"><span>花园</span><strong>{{ formatCount(stats.noteCount) }} 篇笔记</strong></div>
         </div>
       </div>
     </div>

@@ -38,7 +38,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown));
 
 <template>
   <section v-if="images.length" class="project-gallery" aria-labelledby="project-gallery-title">
-    <div class="project-section-heading"><p class="font-mono text-[0.63rem] uppercase tracking-[0.15em] text-brand">Selected screens</p><h2 id="project-gallery-title">A closer look</h2></div>
+    <div class="project-section-heading"><p class="font-mono text-[0.63rem] uppercase tracking-[0.15em] text-brand">界面截图 // SCREENS</p><h2 id="project-gallery-title">再近一点看</h2></div>
     <div class="project-gallery__grid">
       <button v-for="(image, index) in images" :key="image.src" class="project-gallery__item" type="button" @click="openImage(index, $event)">
         <img :src="image.src" :alt="image.alt" loading="lazy" decoding="async" />

@@ -47,7 +47,7 @@ async function submit() {
         <span class="h-3 w-3 rounded-full bg-emerald-400"></span>
       </div>
 
-      <p class="terminal-label text-sm">admin_terminal // authentication</p>
+      <p class="terminal-label text-sm">管理员终端 // AUTHENTICATION</p>
       <h1 class="mt-3 font-display text-3xl font-semibold text-cyber-text">管理员登录</h1>
 
       <form class="mt-8 space-y-5" @submit.prevent="submit">

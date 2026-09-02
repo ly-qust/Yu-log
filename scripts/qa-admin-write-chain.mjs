@@ -157,10 +157,10 @@ try {
   await page.locator('select').first().selectOption(qa.categoryId);
   await page.locator(`input[type="checkbox"][value="${qa.tagId}"]`).check();
   await page.locator('.admin-editor__input-wrap textarea').fill(articleContent);
-  await page.getByRole('tab', { name: 'Preview' }).click();
+  await page.getByRole('tab', { name: '预览' }).click();
   check('article preview renders H2 and H3', await page.locator('.admin-editor__preview .article-prose h2').count() >= 2 && await page.locator('.admin-editor__preview .article-prose h3').count() >= 1);
   check('article preview renders code/table/blockquote/link/inline code', await page.locator('.admin-editor__preview pre code').count() >= 1 && await page.locator('.admin-editor__preview table').count() >= 1 && await page.locator('.admin-editor__preview blockquote').count() >= 1 && await page.locator('.admin-editor__preview a').count() >= 1 && await page.locator('.admin-editor__preview code').count() >= 2);
-  await page.getByRole('tab', { name: 'Editor' }).click();
+  await page.getByRole('tab', { name: '编辑', exact: true }).click();
 
   const uploadResponsePromise = page.waitForResponse((response) => response.url().includes('/api/admin/files/upload') && response.request().method() === 'POST');
   await page.locator('.admin-editor input[type="file"]').setInputFiles({
@@ -223,17 +223,17 @@ try {
   check('discarded local draft did not overwrite server content', articleServer.content === initialArticleSnapshot.content);
 
   await ready(`/admin/articles/${qa.articleId}/edit`);
-  await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
+  await page.getByRole('link', { name: '控制台', exact: true }).click();
   await page.waitForURL(/\/admin$/);
   check('clean article navigation has no meaningless guard', await page.getByRole('dialog').count() === 0);
   await ready(`/admin/articles/${qa.articleId}/edit`);
   await articleEditor.fill(articleBodyEdited);
   await page.waitForTimeout(350);
-  await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
+  await page.getByRole('link', { name: '控制台', exact: true }).click();
   check('unsaved internal navigation opens guard dialog', await page.getByRole('dialog').count() === 1 && await page.getByText('放弃未保存修改？').count() === 1);
   await page.getByRole('button', { name: '取消' }).click();
   check('guard cancel keeps article editor open', page.url().endsWith(`/admin/articles/${qa.articleId}/edit`));
-  await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
+  await page.getByRole('link', { name: '控制台', exact: true }).click();
   await page.getByRole('button', { name: '离开页面' }).click();
   await page.waitForURL(/\/admin$/);
   check('guard confirm completes internal navigation', page.url().endsWith('/admin'));
@@ -369,7 +369,7 @@ try {
 
   await ready('/admin/site-settings');
   check('site settings loads structured form without write', await page.getByText('关于我资料').count() === 1);
-  const advancedCard = page.locator('.admin-setting-card').filter({ has: page.getByText('Advanced JSON') }).first();
+  const advancedCard = page.locator('.admin-setting-card').filter({ has: page.getByText('高级 JSON') }).first();
   check('site settings exposes scoped JSON validation field', await advancedCard.count() === 1);
   await advancedCard.locator('textarea').fill('{ invalid QA JSON');
   await advancedCard.getByRole('button', { name: '保存', exact: true }).click();

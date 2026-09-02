@@ -11,8 +11,8 @@ const activeNodeLabel = computed(() => props.nodes.find((node) => node.id === pr
 <template>
   <section v-if="nodes.length" class="project-architecture" aria-labelledby="project-architecture-title">
     <div class="project-section-heading">
-      <p class="font-mono text-[0.63rem] uppercase tracking-[0.15em] text-brand">Architecture</p>
-      <h2 id="project-architecture-title">How the system is shaped</h2>
+      <p class="font-mono text-[0.63rem] uppercase tracking-[0.15em] text-brand">架构 // ARCHITECTURE</p>
+      <h2 id="project-architecture-title">系统如何连接</h2>
       <p>一张只保留项目真实组成部分的系统地图。</p>
     </div>
     <div class="project-architecture__flow" aria-label="项目架构流程">
@@ -25,7 +25,7 @@ const activeNodeLabel = computed(() => props.nodes.find((node) => node.id === pr
         <span v-if="index < nodes.length - 1" class="project-architecture__connection" :class="{ 'is-active': activeNode === node.id || activeNode === nodes[index + 1]?.id }" aria-hidden="true">→</span>
       </template>
     </div>
-    <p v-if="activeNodeLabel" class="project-architecture__signal" aria-live="polite">Signal focus // {{ activeNodeLabel }}</p>
+    <p v-if="activeNodeLabel" class="project-architecture__signal" aria-live="polite">当前选择：{{ activeNodeLabel }}</p>
   </section>
 </template>
 

@@ -143,9 +143,9 @@ markdown.renderer.rules.fence = (tokens, index) => {
   const token = tokens[index];
   if (!token) return '';
   const language = normalizeLanguage(token.info || '');
-  const label = language === 'text' ? 'Plain text' : language;
+  const label = language === 'text' ? '纯文本' : language;
   const highlighted = highlightCode(token.content, language);
-  return `<div class="article-code-frame" data-code-block><div class="article-code-toolbar"><span class="article-code-language">${escapeAttribute(label)}</span><button class="article-code-copy" type="button" data-copy-code aria-label="复制 ${escapeAttribute(label)} 代码">Copy</button></div><pre class="article-code-block"><code class="hljs language-${escapeAttribute(language)}">${highlighted}</code></pre></div>`;
+  return `<div class="article-code-frame" data-code-block><div class="article-code-toolbar"><span class="article-code-language">${escapeAttribute(label)}</span><button class="article-code-copy" type="button" data-copy-code aria-label="复制 ${escapeAttribute(label)} 代码">复制</button></div><pre class="article-code-block"><code class="hljs language-${escapeAttribute(language)}">${highlighted}</code></pre></div>`;
 };
 
 markdown.renderer.rules.heading_open = (tokens, index, _options, environment) => {
@@ -153,7 +153,7 @@ markdown.renderer.rules.heading_open = (tokens, index, _options, environment) =>
   if (!token) return '';
   const env = environment as unknown as MarkdownEnvironment;
   const sourceLevel = Number(token.tag.slice(1));
-  const headingText = tokens[index + 1]?.content?.trim() || 'Section';
+  const headingText = tokens[index + 1]?.content?.trim() || '小节';
   const headingId = uniqueHeadingId(headingText, env.slugCounts);
   const outputTag = sourceLevel === 1 ? 'h2' : token.tag;
   token.meta = { ...(token.meta || {}), headingId, outputTag };

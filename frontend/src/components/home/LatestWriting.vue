@@ -9,8 +9,8 @@ defineProps<{ articles: ArticleListItem[] }>();
   <section class="mx-auto max-w-5xl py-16 sm:py-20 lg:py-28" aria-labelledby="latest-writing-title">
     <div class="grid gap-8 lg:grid-cols-[0.42fr_1fr] lg:gap-14">
       <div>
-        <p class="terminal-label text-xs uppercase tracking-[0.14em]">03 // technical journal</p>
-        <h2 id="latest-writing-title" class="mt-3 font-display text-h2">Latest Writing</h2>
+        <p class="terminal-label text-xs uppercase tracking-[0.14em]">03 // TECHNICAL JOURNAL</p>
+        <h2 id="latest-writing-title" class="mt-3 font-display text-h2">最近在写</h2>
         <p class="mt-4 max-w-sm text-sm leading-7 text-text-secondary">关于系统、工具与实践的阶段性理解。写下来，是为了让知识可以再次被调用。</p>
         <RouterLink class="mt-6 inline-flex font-mono text-xs text-brand transition hover:text-brand-strong" to="/articles">浏览全部文章 →</RouterLink>
       </div>
@@ -20,9 +20,9 @@ defineProps<{ articles: ArticleListItem[] }>();
           <div class="writing-row__number">{{ String(index + 1).padStart(2, '0') }}</div>
           <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[0.625rem] uppercase tracking-[0.1em] text-text-muted">
-              <span class="text-brand">{{ article.categoryName || 'Journal' }}</span>
+              <span class="text-brand">{{ article.categoryName || '日志' }}</span>
               <span>{{ formatDate(article.publishedAt) }}</span>
-              <span>{{ article.readingTime }} min read</span>
+              <span>预计阅读 {{ article.readingTime }} 分钟</span>
             </div>
             <h3 class="mt-2 font-display text-xl font-semibold leading-snug tracking-tight text-text-primary transition group-hover:text-brand sm:text-2xl">{{ article.title }}</h3>
             <p v-if="article.summary" class="mt-2 line-clamp-2 text-sm leading-6 text-text-secondary">{{ article.summary }}</p>

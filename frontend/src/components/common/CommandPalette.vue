@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router';
 import { fetchArticles } from '@/api/articles';
 import { fetchNotes } from '@/api/notes';
 import { fetchProjects } from '@/api/projects';
+import { uiCopy } from '@/config/ui-copy';
 import { useThemeStore, type ThemePreference } from '@/stores/theme';
 import type { ArticleListItem } from '@/types/content';
 import type { NoteItem } from '@/types/note';
@@ -35,19 +36,19 @@ let searchSequence = 0;
 let previousBodyOverflow = '';
 
 const navigationItems: PaletteItem[] = [
-  { id: 'nav-home', group: 'Navigate', label: 'Home', description: 'Open the garden entrance', to: '/' },
-  { id: 'nav-articles', group: 'Navigate', label: 'Articles', description: 'Browse engineering writing', to: '/articles' },
-  { id: 'nav-projects', group: 'Navigate', label: 'Projects', description: 'Explore systems and case studies', to: '/projects' },
-  { id: 'nav-notes', group: 'Navigate', label: 'Notes', description: 'Enter the digital garden', to: '/notes' },
-  { id: 'nav-timeline', group: 'Navigate', label: 'Timeline', description: 'Follow the growth archive', to: '/timeline' },
-  { id: 'nav-about', group: 'Navigate', label: 'About', description: 'Read the personal engineering profile', to: '/about' },
-  { id: 'nav-messages', group: 'Navigate', label: 'Messages', description: 'Leave a note for Yu', to: '/messages' },
+  { id: 'nav-home', group: uiCopy.groups.navigate, label: '首页', description: '回到数字花园入口', to: '/' },
+  { id: 'nav-articles', group: uiCopy.groups.navigate, label: '文章', description: '浏览工程文章', to: '/articles' },
+  { id: 'nav-projects', group: uiCopy.groups.navigate, label: '项目', description: '查看项目与案例', to: '/projects' },
+  { id: 'nav-notes', group: uiCopy.groups.navigate, label: '笔记', description: '进入数字花园', to: '/notes' },
+  { id: 'nav-timeline', group: uiCopy.groups.navigate, label: '成长', description: '查看一路留下的节点', to: '/timeline' },
+  { id: 'nav-about', group: uiCopy.groups.navigate, label: '关于', description: '了解 Yu 的工程档案', to: '/about' },
+  { id: 'nav-messages', group: uiCopy.groups.navigate, label: '留言', description: '给 Yu 留一句话', to: '/messages' },
 ];
 
 const themeItems: PaletteItem[] = [
-  { id: 'theme-dark', group: 'Theme', label: 'Dark mode', description: 'Deep garden signal', theme: 'dark' },
-  { id: 'theme-light', group: 'Theme', label: 'Light mode', description: 'Clear daylight surface', theme: 'light' },
-  { id: 'theme-system', group: 'Theme', label: 'System mode', description: 'Follow your device preference', theme: 'system' },
+  { id: 'theme-dark', group: uiCopy.groups.theme, label: uiCopy.theme.dark, description: '进入深色界面', theme: 'dark' },
+  { id: 'theme-light', group: uiCopy.groups.theme, label: uiCopy.theme.light, description: '进入浅色界面', theme: 'light' },
+  { id: 'theme-system', group: uiCopy.groups.theme, label: uiCopy.theme.system, description: '跟随设备偏好', theme: 'system' },
 ];
 
 const staticItems = computed(() => {
@@ -62,23 +63,23 @@ const resultItems = computed<PaletteItem[]>(() => {
   return [
     ...articles.value.map((article) => ({
       id: `article-${article.id}`,
-      group: 'Articles',
+      group: uiCopy.groups.articles,
       label: article.title,
-      description: article.summary || article.tags.map((tag) => tag.name).join(' · ') || 'Open article',
+      description: article.summary || article.tags.map((tag) => tag.name).join(' · ') || '打开文章',
       to: `/articles/${article.id}`,
     })),
     ...notes.value.map((note) => ({
       id: `note-${note.id}`,
-      group: 'Notes',
+      group: uiCopy.groups.notes,
       label: note.title,
-      description: note.summary || note.topic || 'Open garden note',
+      description: note.summary || note.topic || '打开数字花园笔记',
       to: `/notes/${note.id}`,
     })),
     ...projects.value.map((project) => ({
       id: `project-${project.id}`,
-      group: 'Projects',
+      group: uiCopy.groups.projects,
       label: project.name,
-      description: project.description || project.techStack.join(' · ') || 'Open project case study',
+      description: project.description || project.techStack.join(' · ') || '打开项目详情',
       to: `/projects/${project.id}`,
     })),
   ].filter((item) => `${item.label} ${item.description}`.toLowerCase().includes(term));
@@ -221,33 +222,33 @@ defineExpose({ open, close });
       <div v-if="isOpen" class="command-palette" @mousedown.self="close">
         <section ref="dialogRef" aria-labelledby="command-palette-title" aria-modal="true" class="command-palette__dialog" role="dialog">
           <div class="command-palette__topline">
-            <p id="command-palette-title">Search the garden</p>
+            <p id="command-palette-title">搜索这片数字花园 <small>SEARCH THE GARDEN</small></p>
             <button aria-label="关闭搜索面板" class="command-palette__close" type="button" @click="close">ESC</button>
           </div>
 
           <div class="command-palette__input-wrap">
             <svg aria-hidden="true" class="command-palette__icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="10.8" cy="10.8" r="6.8" stroke-width="1.7" /><path d="m16 16 5 5" stroke-linecap="round" stroke-width="1.7" /></svg>
-            <input ref="inputRef" v-model="query" aria-controls="command-palette-results" aria-label="搜索数字花园" :aria-activedescendant="items[selectedIndex] ? `palette-item-${items[selectedIndex].id}` : undefined" autocomplete="off" placeholder="Search articles, notes, projects…" spellcheck="false" type="search" />
+            <input ref="inputRef" v-model="query" aria-controls="command-palette-results" aria-label="搜索数字花园" :aria-activedescendant="items[selectedIndex] ? `palette-item-${items[selectedIndex].id}` : undefined" autocomplete="off" :placeholder="uiCopy.searchPlaceholder" spellcheck="false" type="search" />
             <kbd>⌘ K</kbd>
           </div>
 
-          <p class="command-palette__hint"><span>↑↓ navigate</span><span>↵ open</span><span>ESC close</span><span class="hidden sm:inline">/ quick search</span></p>
+          <p class="command-palette__hint"><span>↑ ↓ 选择</span><span>Enter 打开</span><span>Esc 关闭</span><span class="hidden sm:inline">/ 快速搜索</span></p>
 
-          <div v-if="loading" class="command-palette__status" aria-live="polite"><span class="command-palette__pulse"></span> Searching the garden…</div>
-          <div v-else-if="query.trim() && !items.length" class="command-palette__status" aria-live="polite">No signal found for “{{ query.trim() }}”.</div>
+          <div v-if="loading" class="command-palette__status" aria-live="polite"><span class="command-palette__pulse"></span> 正在搜索这片数字花园……</div>
+          <div v-else-if="query.trim() && !items.length" class="command-palette__status" aria-live="polite">{{ uiCopy.noResults }}： “{{ query.trim() }}”。<small>{{ uiCopy.tryAnother }}</small></div>
           <div v-else id="command-palette-results" class="command-palette__results" role="listbox" aria-label="搜索结果">
             <div v-for="group in groupedItems" :key="group.label" class="command-palette__group">
               <p class="command-palette__group-label">{{ group.label }}</p>
               <button v-for="item in group.items" :id="`palette-item-${item.id}`" :key="item.id" :aria-selected="items[selectedIndex]?.id === item.id" class="command-palette__item" role="option" type="button" @click="activate(item)" @mouseenter="selectedIndex = items.findIndex((candidate) => candidate.id === item.id)">
-                <span class="command-palette__item-mark" aria-hidden="true">{{ item.theme ? '◌' : item.group === 'Navigate' ? '↗' : '•' }}</span>
+                <span class="command-palette__item-mark" aria-hidden="true">{{ item.theme ? '◌' : item.group === uiCopy.groups.navigate ? '↗' : '•' }}</span>
                 <span class="command-palette__item-copy"><strong>{{ item.label }}</strong><small>{{ item.description }}</small></span>
-                <span v-if="item.theme && themeStore.preference === item.theme" class="command-palette__item-state">ACTIVE</span>
+                <span v-if="item.theme && themeStore.preference === item.theme" class="command-palette__item-state">当前</span>
                 <span v-else-if="item.to" class="command-palette__item-arrow" aria-hidden="true">↗</span>
               </button>
             </div>
           </div>
 
-          <footer class="command-palette__footer"><span>YU.LOG / command palette</span><span>live query · real content</span></footer>
+          <footer class="command-palette__footer"><span>YU.LOG / 命令面板</span><span>实时搜索 · 真实内容</span></footer>
         </section>
       </div>
     </Transition>
@@ -260,6 +261,8 @@ defineExpose({ open, close });
 .command-palette__topline, .command-palette__hint, .command-palette__footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .command-palette__topline { padding: 1rem 1.1rem .75rem; }
 .command-palette__topline p, .command-palette__group-label, .command-palette__footer { font-family: 'JetBrains Mono', monospace; font-size: .6rem; letter-spacing: .13em; text-transform: uppercase; color: rgb(var(--color-brand-primary)); }
+.command-palette__topline p { display: flex; align-items: baseline; gap: .55rem; }
+.command-palette__topline p small { font-size: .48rem; font-weight: 400; letter-spacing: .18em; color: rgb(var(--color-text-muted)); }
 .command-palette__close { border: 1px solid rgb(var(--color-border-subtle) / .8); border-radius: .35rem; padding: .25rem .4rem; font-family: 'JetBrains Mono', monospace; font-size: .56rem; color: rgb(var(--color-text-muted)); transition: border-color var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); }
 .command-palette__close:hover { border-color: rgb(var(--color-border-active) / .7); color: rgb(var(--color-text-primary)); }
 .command-palette__input-wrap { display: flex; align-items: center; gap: .75rem; margin: 0 .75rem; border: 1px solid rgb(var(--color-border-subtle) / .86); border-radius: .75rem; padding: 0 .85rem; background: rgb(var(--color-bg-primary) / .68); transition: border-color var(--motion-fast) var(--ease-standard), box-shadow var(--motion-fast) var(--ease-standard); }
@@ -281,6 +284,7 @@ defineExpose({ open, close });
 .command-palette__item-copy small { margin-top: .13rem; font-size: .68rem; color: rgb(var(--color-text-muted)); }
 .command-palette__item-arrow, .command-palette__item-state { font-family: 'JetBrains Mono', monospace; font-size: .58rem; color: rgb(var(--color-brand-primary)); }
 .command-palette__status { border-top: 1px solid rgb(var(--color-border-subtle) / .55); padding: 1.5rem 1.1rem; font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: rgb(var(--color-text-muted)); }
+.command-palette__status small { display: block; margin: .45rem 0 0 1rem; color: rgb(var(--color-brand-primary)); }
 .command-palette__pulse { display: inline-block; width: .4rem; height: .4rem; margin-right: .45rem; border-radius: 50%; background: rgb(var(--color-brand-primary)); box-shadow: 0 0 12px rgb(var(--color-brand-primary) / .75); animation: palette-pulse 1.2s ease-in-out infinite; }
 .command-palette__footer { border-top: 1px solid rgb(var(--color-border-subtle) / .55); padding: .7rem 1.1rem .8rem; font-size: .53rem; letter-spacing: .06em; color: rgb(var(--color-text-muted)); }
 .palette-enter-active, .palette-leave-active { transition: opacity var(--motion-normal) var(--ease-standard); }

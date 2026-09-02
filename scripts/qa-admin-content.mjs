@@ -51,7 +51,7 @@ async function login() {
 
 try {
   await login();
-  check('admin login reaches dashboard', await page.locator('.admin-header__title').textContent() === 'Dashboard');
+  check('admin login reaches dashboard', await page.locator('.admin-header__title').textContent() === '控制台');
   check('dashboard renders real stat cards', await page.locator('.admin-queue-card').count() === 2 && await page.locator('.admin-shortcut').count() === 4);
   check('dashboard uses real pending queues', (await page.locator('.admin-queue-card').allTextContents()).every((text) => /待审核评论|待处理留言/.test(text)));
   await setTheme(page, 'dark');
@@ -59,14 +59,14 @@ try {
 
   await ready('/admin/articles/new');
   check('article editor renders shared markdown workspace', await page.locator('.admin-editor').count() === 1 && await page.locator('.admin-editor__tools button').count() >= 5);
-  check('article editor exposes publish settings', await page.getByText('发布设置').count() === 1 && await page.getByText('标签').count() >= 1);
+  check('article editor exposes publish settings', await page.getByRole('heading', { name: '发布设置', exact: true }).count() === 1 && await page.getByRole('heading', { name: '标签', exact: true }).count() === 1);
   await page.locator('select').first().selectOption({ index: 1 });
   await page.getByLabel('标题 *').fill('Local Draft QA');
   await page.getByLabel('访问标识 slug *').fill('local-draft-qa');
   await page.locator('.admin-editor__input-wrap textarea').fill('## Draft\n\nThis is a local draft preview.');
-  await page.getByRole('tab', { name: 'Preview' }).click();
+  await page.getByRole('tab', { name: '预览' }).click();
   check('article editor preview uses public renderer', await page.locator('.admin-editor__preview .article-prose h2').count() === 1);
-  await page.getByRole('tab', { name: 'Editor' }).click();
+  await page.getByRole('tab', { name: '编辑', exact: true }).click();
   await page.waitForTimeout(450);
   check('article form autosaves a local draft', await page.evaluate(() => Boolean(localStorage.getItem('yu-log-admin-draft:article-new'))));
   await page.reload({ waitUntil: 'domcontentloaded' });
@@ -74,7 +74,7 @@ try {
   check('article editor detects newer local draft', await page.getByText('发现较新的本地草稿').count() === 1);
   await page.getByRole('button', { name: '恢复' }).click();
   check('article editor restores local draft content', await page.locator('.admin-editor__input-wrap textarea').inputValue() === '## Draft\n\nThis is a local draft preview.');
-  await page.getByRole('link', { name: 'Dashboard', exact: true }).click();
+  await page.getByRole('link', { name: '控制台', exact: true }).click();
   check('unsaved changes guard opens custom dialog', await page.getByRole('dialog').count() === 1 && await page.getByText('放弃未保存修改？').count() === 1);
   await page.getByRole('button', { name: '取消' }).click();
   check('unsaved changes guard can cancel navigation', page.url().endsWith('/admin/articles/new'));
@@ -86,17 +86,19 @@ try {
   cleanPage.on('requestfailed', (request) => failedRequests.push(`${request.method()} ${request.url()} ${request.failure()?.errorText || ''}`));
   await cleanPage.goto(`${baseUrl}/admin/notes/new`, { waitUntil: 'networkidle' });
   await cleanPage.waitForTimeout(250);
-  check('note editor reuses markdown workspace', await cleanPage.locator('.admin-editor').count() === 1 && await cleanPage.getByText('记录设置').count() === 1);
+  await cleanPage.locator('.admin-editor').waitFor({ state: 'attached' });
+  check('note editor reuses markdown workspace', await cleanPage.locator('.admin-editor').count() === 1 && await cleanPage.getByRole('heading', { name: '记录设置', exact: true }).count() === 1);
   await cleanPage.goto(`${baseUrl}/admin/projects/new`, { waitUntil: 'networkidle' });
   await cleanPage.waitForTimeout(250);
-  check('project editor reuses markdown workspace', await cleanPage.locator('.admin-editor').count() === 1 && await cleanPage.getByText('项目设置').count() === 1);
+  await cleanPage.locator('.admin-editor').waitFor({ state: 'attached' });
+  check('project editor reuses markdown workspace', await cleanPage.locator('.admin-editor').count() === 1 && await cleanPage.getByRole('heading', { name: '项目设置', exact: true }).count() === 1);
   await cleanPage.goto(`${baseUrl}/admin/timeline/new`, { waitUntil: 'networkidle' });
   await cleanPage.waitForTimeout(250);
   check('timeline type is a real select', await cleanPage.locator('select').count() >= 1 && await cleanPage.locator('select').first().locator('option').count() >= 2);
   await cleanPage.goto(`${baseUrl}/admin/site-settings`, { waitUntil: 'networkidle' });
   await cleanPage.waitForTimeout(350);
   check('site settings exposes structured profile form', await cleanPage.getByText('关于我资料').count() === 1 && await cleanPage.locator('.admin-structured-input').count() >= 1);
-  check('site settings keeps advanced JSON scoped', await cleanPage.getByText('Advanced JSON').count() <= 3 && (await cleanPage.locator('.admin-setting-card').allTextContents()).filter((text) => text.includes('Advanced JSON')).length <= 1);
+  check('site settings keeps advanced JSON scoped', await cleanPage.getByText('高级 JSON').count() <= 3 && (await cleanPage.locator('.admin-setting-card').allTextContents()).filter((text) => text.includes('高级 JSON')).length <= 1);
   await cleanPage.screenshot({ path: `${outputDir}/wu6-admin-site-settings-dark-1440.png`, fullPage: true });
   await cleanPage.goto(`${baseUrl}/admin/comments`, { waitUntil: 'networkidle' });
   await cleanPage.waitForTimeout(250);

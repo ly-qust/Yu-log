@@ -128,7 +128,7 @@ async function clearFilters() {
 onMounted(() => {
   void loadAllProjects();
   cleanupSeo = applySeo({
-    title: 'Projects — Selected Systems | YU.LOG',
+    title: '项目｜YU.LOG · Yu 的工程实践',
     description: 'YU.LOG 的公开项目索引：记录真实项目、技术栈、状态与工程上下文。',
     canonicalPath: '/projects',
   });
@@ -143,37 +143,37 @@ onUnmounted(() => cleanupSeo());
   <PublicLayout>
     <div class="projects-page">
       <header class="projects-intro">
-        <p class="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-brand">Selected engineering work</p>
+        <p class="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-brand">精选项目 // SELECTED WORK</p>
         <div class="mt-5 grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div>
-            <h1>Projects / Systems</h1>
+            <h1>项目</h1>
             <p class="projects-lede">把正在构建、已经完成和仍在学习中的系统，放回它们真实的上下文里。</p>
           </div>
           <p class="projects-result" aria-live="polite">{{ resultDescription }}</p>
         </div>
         <dl class="projects-stats" aria-label="项目统计">
-          <div><dt>Total</dt><dd>{{ allProjects.length }}</dd></div>
-          <div><dt>Planning</dt><dd>{{ statusCounts.planning }}</dd></div>
-          <div><dt>Developing</dt><dd>{{ statusCounts.developing }}</dd></div>
-          <div><dt>Completed</dt><dd>{{ statusCounts.completed }}</dd></div>
+          <div><dt>全部项目</dt><dd>{{ allProjects.length }}</dd></div>
+          <div><dt>规划中</dt><dd>{{ statusCounts.planning }}</dd></div>
+          <div><dt>开发中</dt><dd>{{ statusCounts.developing }}</dd></div>
+          <div><dt>已完成</dt><dd>{{ statusCounts.completed }}</dd></div>
         </dl>
       </header>
 
       <section class="projects-controls" aria-label="项目筛选">
         <form class="grid gap-3 lg:grid-cols-[minmax(13rem,1.6fr)_repeat(2,minmax(10rem,1fr))_auto]" @submit.prevent="updateRoute(1)">
           <label class="projects-field">
-            <span>Search</span>
+            <span>搜索</span>
             <input v-model="filters.keyword" type="search" placeholder="项目名称或描述" />
           </label>
           <label class="projects-field">
-            <span>Tech stack</span>
+            <span>技术栈</span>
             <select v-model="filters.techStack" :disabled="optionsLoading" @change="updateRoute(1)">
               <option value="">全部技术栈</option>
               <option v-for="tech in techOptions" :key="tech" :value="tech">{{ tech }}</option>
             </select>
           </label>
           <label class="projects-field">
-            <span>Status</span>
+            <span>状态</span>
             <select v-model="filters.status" @change="updateRoute(1)">
               <option value="">全部状态</option>
               <option value="PLANNING">规划中</option>
@@ -181,9 +181,9 @@ onUnmounted(() => cleanupSeo());
               <option value="COMPLETED">已完成</option>
             </select>
           </label>
-          <button class="projects-submit" :disabled="loading" type="submit">Search</button>
+          <button class="projects-submit" :disabled="loading" type="submit">搜索</button>
         </form>
-        <button v-if="hasActiveFilters" class="projects-clear" type="button" @click="clearFilters">Reset all filters</button>
+        <button v-if="hasActiveFilters" class="projects-clear" type="button" @click="clearFilters">重置筛选</button>
       </section>
 
       <p v-if="errorMessage" class="projects-error" role="alert">{{ errorMessage }}</p>
@@ -207,26 +207,26 @@ onUnmounted(() => cleanupSeo());
             <div class="min-w-0">
               <div class="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[0.64rem] uppercase tracking-[0.1em] text-text-muted">
                 <BaseBadge :variant="statusVariant(project.status)" dot>{{ formatProjectStatus(project.status) }}</BaseBadge>
-                <span>Project // {{ String((projectPage.pageNum - 1) * pageSize + index + 1).padStart(2, '0') }}</span>
+                <span>项目 // {{ String((projectPage.pageNum - 1) * pageSize + index + 1).padStart(2, '0') }}</span>
               </div>
               <h2>{{ project.name }}</h2>
               <p class="project-row__summary">{{ project.description || '项目说明正在整理中。' }}</p>
-              <div v-if="project.techStack.length" class="project-row__tags"><span v-for="tech in project.techStack.slice(0, 6)" :key="tech">+ {{ tech }}</span><span v-if="project.techStack.length > 6">+ {{ project.techStack.length - 6 }} more</span></div>
+              <div v-if="project.techStack.length" class="project-row__tags"><span v-for="tech in project.techStack.slice(0, 6)" :key="tech">+ {{ tech }}</span><span v-if="project.techStack.length > 6">还有 {{ project.techStack.length - 6 }} 项</span></div>
             </div>
             <ProjectVisual v-if="index === 0 && !hasActiveFilters" class="project-row__visual" :project="project" />
             <div class="project-row__meta">
-              <time>Updated {{ formatDate(project.updatedAt || project.createdAt) }}</time>
-              <span v-if="safeExternalUrl(project.githubUrl) || safeExternalUrl(project.demoUrl)" class="project-row__external">External links available</span>
-              <strong>Open case study <span aria-hidden="true">↗</span></strong>
+              <time>更新于 {{ formatDate(project.updatedAt || project.createdAt) }}</time>
+              <span v-if="safeExternalUrl(project.githubUrl) || safeExternalUrl(project.demoUrl)" class="project-row__external">有外部链接</span>
+              <strong>查看项目 <span aria-hidden="true">↗</span></strong>
             </div>
           </RouterLink>
         </article>
       </section>
 
       <nav v-if="!loading && projectPage.totalPages > 1" class="projects-pagination" aria-label="项目分页">
-        <button :disabled="!projectPage.hasPrevious" type="button" @click="updateRoute(projectPage.pageNum - 1)">← Previous</button>
-        <span>Page {{ projectPage.pageNum }} / {{ projectPage.totalPages }}</span>
-        <button :disabled="!projectPage.hasNext" type="button" @click="updateRoute(projectPage.pageNum + 1)">Next →</button>
+        <button :disabled="!projectPage.hasPrevious" type="button" @click="updateRoute(projectPage.pageNum - 1)">← 上一页</button>
+        <span>第 {{ projectPage.pageNum }} / {{ projectPage.totalPages }} 页</span>
+        <button :disabled="!projectPage.hasNext" type="button" @click="updateRoute(projectPage.pageNum + 1)">下一页 →</button>
       </nav>
     </div>
   </PublicLayout>

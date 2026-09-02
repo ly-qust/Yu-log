@@ -9,8 +9,8 @@ const emit = defineEmits<{ navigate: [id: string] }>();
   <nav v-if="headings.length" class="article-toc" aria-label="文章目录">
     <div class="hidden lg:block">
       <div class="mb-4 flex items-center justify-between gap-3">
-        <p class="font-mono text-[0.625rem] uppercase tracking-[0.15em] text-text-muted">Contents</p>
-        <span class="font-mono text-[0.6rem] text-brand">{{ headings.length }} sections</span>
+        <p class="font-mono text-[0.625rem] uppercase tracking-[0.15em] text-text-muted">目录 // CONTENTS</p>
+        <span class="font-mono text-[0.6rem] text-brand">{{ headings.length }} 个章节</span>
       </div>
       <ol class="article-toc__list">
         <li v-for="heading in headings" :key="heading.id" :class="`toc-level-${heading.level}`">
@@ -20,7 +20,7 @@ const emit = defineEmits<{ navigate: [id: string] }>();
     </div>
 
     <details class="article-toc__mobile lg:hidden">
-      <summary><span>Article outline</span><span>{{ headings.length }} sections</span></summary>
+      <summary><span>文章目录</span><span>{{ headings.length }} 个章节</span></summary>
       <ol>
         <li v-for="heading in headings" :key="heading.id" :class="`toc-level-${heading.level}`">
           <a :href="`#${heading.id}`" @click.prevent="emit('navigate', heading.id)">{{ heading.text }}</a>

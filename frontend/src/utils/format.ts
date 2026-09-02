@@ -76,3 +76,18 @@ export function formatProjectStatus(value?: string | null): string {
 export function formatBoolean(value?: boolean | null): string {
   return value ? '是' : '否';
 }
+
+export function formatTimelineType(value?: string | null): string {
+  const typeMap: Record<string, string> = {
+    PROJECT: '项目',
+    STUDY: '学习',
+    COMPETITION: '竞赛',
+    CERTIFICATE: '证书',
+    EXPERIENCE: '经历',
+    DATABASE: '数据库',
+    AWARD: '竞赛',
+    MILESTONE: '里程碑',
+  };
+
+  return value ? typeMap[value.toUpperCase()] ?? value : '里程碑';
+}

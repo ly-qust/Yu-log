@@ -84,22 +84,22 @@ onMounted(() => loadMessages(1));
       <GlassPanel>
         <div class="grid gap-6 lg:grid-cols-[1fr_0.85fr] lg:items-start">
           <div>
-            <p class="terminal-label text-sm">guest_terminal // message_board</p>
+            <p class="terminal-label text-sm">访客终端 // 留言板</p>
             <h1 class="mt-4 font-display text-4xl font-semibold">留言板</h1>
             <p class="mt-3 max-w-2xl text-cyber-muted">
               可以在这里留下问题、建议或学习交流。留言默认进入审核队列，通过后会公开展示。
             </p>
             <div class="mt-6 grid gap-3 sm:grid-cols-3">
               <div class="rounded-lg border border-cyber-border bg-cyber-base/45 p-4">
-                <p class="font-mono text-[11px] uppercase text-cyber-outline">review</p>
+                <p class="font-mono text-[11px] uppercase text-cyber-outline">审核</p>
                 <p class="mt-2 text-sm text-cyber-text">先审核后展示</p>
               </div>
               <div class="rounded-lg border border-cyber-border bg-cyber-base/45 p-4">
-                <p class="font-mono text-[11px] uppercase text-cyber-outline">reply</p>
+                <p class="font-mono text-[11px] uppercase text-cyber-outline">回复</p>
                 <p class="mt-2 text-sm text-cyber-text">支持管理员回复</p>
               </div>
               <div class="rounded-lg border border-cyber-border bg-cyber-base/45 p-4">
-                <p class="font-mono text-[11px] uppercase text-cyber-outline">signal</p>
+                <p class="font-mono text-[11px] uppercase text-cyber-outline">交流</p>
                 <p class="mt-2 text-sm text-cyber-text">友好交流</p>
               </div>
             </div>
@@ -153,7 +153,7 @@ onMounted(() => loadMessages(1));
       <GlassPanel>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p class="terminal-label text-sm">approved_messages // live</p>
+            <p class="terminal-label text-sm">公开留言 // 实时</p>
             <h2 class="mt-3 font-display text-2xl font-semibold">公开留言</h2>
           </div>
           <button

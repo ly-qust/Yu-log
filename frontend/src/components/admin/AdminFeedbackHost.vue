@@ -56,7 +56,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown));
 
   <div v-if="feedback.confirmRequest || feedback.promptRequest" class="admin-dialog-backdrop" @click.self="feedback.promptRequest ? feedback.resolvePrompt(null) : feedback.resolveConfirm(false)">
     <section v-if="feedback.confirmRequest" class="admin-dialog" role="dialog" aria-modal="true" :aria-labelledby="`confirm-title-${feedback.confirmRequest.id}`">
-      <p class="admin-eyebrow">confirm // action required</p>
+      <p class="admin-eyebrow">确认 // 需要操作</p>
       <h2 :id="`confirm-title-${feedback.confirmRequest.id}`" class="admin-dialog__title">{{ feedback.confirmRequest.title }}</h2>
       <p class="admin-dialog__message">{{ feedback.confirmRequest.message }}</p>
       <div class="admin-dialog__actions">
@@ -68,7 +68,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown));
     </section>
 
     <section v-else-if="feedback.promptRequest" class="admin-dialog" role="dialog" aria-modal="true" :aria-labelledby="`prompt-title-${feedback.promptRequest.id}`">
-      <p class="admin-eyebrow">interaction // reply</p>
+      <p class="admin-eyebrow">互动 // 回复</p>
       <h2 :id="`prompt-title-${feedback.promptRequest.id}`" class="admin-dialog__title">{{ feedback.promptRequest.title }}</h2>
       <label class="admin-dialog__label">
         <span>{{ feedback.promptRequest.label }}</span>

@@ -50,7 +50,7 @@ function plainDescription(value: NoteItem): string {
 function applyNoteSeo(value: NoteItem) {
   cleanupSeo();
   applySeo({
-    title: `${value.title} | Notes | YU.LOG`,
+    title: `${value.title}｜笔记｜YU.LOG`,
     description: plainDescription(value),
     canonicalPath: route.path,
     type: 'website',
@@ -141,7 +141,7 @@ onUnmounted(() => {
       <div v-if="loading" class="note-detail-loading" aria-label="笔记加载中"><LoadingSkeleton :lines="4" /><div class="mt-10"><LoadingSkeleton :lines="8" /></div></div>
 
       <section v-else-if="errorMessage" class="note-unavailable">
-        <p class="note-kicker">Knowledge record unavailable</p>
+        <p class="note-kicker">笔记暂不可用 // NOTE</p>
         <h1>这条笔记暂时读不到</h1>
         <p>{{ errorMessage }}</p>
         <div class="note-unavailable__actions"><button type="button" @click="loadNote">重新加载</button><RouterLink to="/notes">返回数字花园</RouterLink></div>
@@ -151,13 +151,13 @@ onUnmounted(() => {
 
       <article v-else class="note-record">
         <header class="note-record__header">
-          <RouterLink class="note-back" :to="backTo">← Back to the garden</RouterLink>
-          <div class="note-record__eyebrow"><span class="note-kicker">NOTE // {{ note.topic || 'KNOWLEDGE' }}</span><span class="note-record__state">Knowledge record</span></div>
+          <RouterLink class="note-back" :to="backTo">← 返回数字花园</RouterLink>
+          <div class="note-record__eyebrow"><span class="note-kicker">笔记 // {{ note.topic || '知识记录' }}</span><span class="note-record__state">知识记录</span></div>
           <h1>{{ note.title }}</h1>
           <p v-if="note.summary" class="note-record__summary">{{ note.summary }}</p>
           <div class="note-record__meta">
-            <span v-if="note.updatedAt">Updated <strong>{{ formatDateTime(note.updatedAt) }}</strong></span>
-            <span v-if="note.createdAt">Created <strong>{{ formatDateTime(note.createdAt) }}</strong></span>
+            <span v-if="note.updatedAt">更新于 <strong>{{ formatDateTime(note.updatedAt) }}</strong></span>
+            <span v-if="note.createdAt">创建于 <strong>{{ formatDateTime(note.createdAt) }}</strong></span>
             <span v-if="note.slug">/{{ note.slug }}</span>
           </div>
           <div v-if="note.tags.length" class="note-record__tags"><span v-for="tag in note.tags" :key="tag">#{{ tag }}</span></div>
@@ -168,7 +168,7 @@ onUnmounted(() => {
           <div ref="noteContent" class="note-content">
             <MarkdownRenderer v-if="content" :content="content" @toc="updateToc" />
             <p v-else class="note-empty-body">这条笔记暂时没有正文内容。</p>
-            <footer class="note-record__end"><span aria-hidden="true">◆</span><p>Knowledge stays in motion.</p></footer>
+            <footer class="note-record__end"><span aria-hidden="true">◆</span><p>知识仍在流动。</p></footer>
           </div>
           <aside class="note-toc-rail"><ArticleToc :headings="tocHeadings" :active-id="activeHeadingId" @navigate="navigateHeading" /></aside>
         </div>

@@ -8,12 +8,12 @@ defineProps<{ note: NoteItem; index: number }>();
 <template>
   <article class="note-node">
     <RouterLink :to="`/notes/${note.id}`" class="note-node__link">
-      <div class="note-node__head"><span class="note-node__signal" aria-hidden="true"></span><span class="note-node__topic">{{ note.topic || 'NOTE' }}</span><time :datetime="note.updatedAt || note.createdAt || undefined">Updated {{ formatDate(note.updatedAt || note.createdAt) }}</time></div>
+      <div class="note-node__head"><span class="note-node__signal" aria-hidden="true"></span><span class="note-node__topic">{{ note.topic || '笔记' }}</span><time :datetime="note.updatedAt || note.createdAt || undefined">更新于 {{ formatDate(note.updatedAt || note.createdAt) }}</time></div>
       <p class="note-node__index">NODE / {{ String(index + 1).padStart(2, '0') }}</p>
       <h2>{{ note.title }}</h2>
       <p v-if="note.summary" class="note-node__summary">{{ note.summary }}</p>
-      <div v-if="note.tags.length" class="note-node__tags"><span v-for="tag in note.tags.slice(0, 5)" :key="tag">#{{ tag }}</span><span v-if="note.tags.length > 5">+ {{ note.tags.length - 5 }} more</span></div>
-      <span class="note-node__open">Open knowledge note <span aria-hidden="true">↗</span></span>
+      <div v-if="note.tags.length" class="note-node__tags"><span v-for="tag in note.tags.slice(0, 5)" :key="tag">#{{ tag }}</span><span v-if="note.tags.length > 5">还有 {{ note.tags.length - 5 }} 项</span></div>
+      <span class="note-node__open">打开笔记 <span aria-hidden="true">↗</span></span>
     </RouterLink>
   </article>
 </template>

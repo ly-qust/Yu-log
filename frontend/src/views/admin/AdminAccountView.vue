@@ -46,7 +46,7 @@ async function submit() {
 
 <template>
   <section class="space-y-5">
-    <AdminPageHeader eyebrow="system // account security" title="账号安全" description="修改管理员密码需要验证当前密码；密码仅以 BCrypt 哈希形式保存。" />
+    <AdminPageHeader eyebrow="账号安全 // SECURITY" title="账号安全" description="修改管理员密码需要验证当前密码；密码仅以 BCrypt 哈希形式保存。" />
     <form class="surface-muted max-w-2xl rounded-panel p-5 md:p-6" @submit.prevent="submit">
       <div v-if="errorMessage" class="admin-form-error" role="alert">{{ errorMessage }}</div>
       <div v-if="successMessage" class="admin-form-success" role="status">{{ successMessage }}</div>
